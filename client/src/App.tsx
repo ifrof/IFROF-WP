@@ -1,39 +1,70 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
+import Home from "@/pages/Home";
+import Blog from "@/pages/Blog";
+import AISearch from "@/pages/AISearch";
+import ImportRequest from "@/pages/ImportRequest";
+import Marketplace from "@/pages/Marketplace";
+import ProductDetail from "@/pages/ProductDetail";
+import Services from "@/pages/Services";
+import Cart from "@/pages/Cart";
+import Checkout from "@/pages/Checkout";
+import Orders from "@/pages/Orders";
+import FactoryDashboard from "@/pages/FactoryDashboard";
+import BuyerDashboard from "@/pages/BuyerDashboard";
+import AdminDashboard from "@/pages/AdminDashboard";
+import Support from "@/pages/Support";
+import Maps from "@/pages/Maps";
+import HowItWorks from "@/pages/HowItWorks";
+import Pricing from "@/pages/Pricing";
+import About from "@/pages/About";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import Terms from "@/pages/Terms";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/blog"} component={Blog} />
+      <Route path={"/ai-search"} component={AISearch} />
+      <Route path={"/import-request"} component={ImportRequest} />
+      <Route path={"/marketplace"} component={Marketplace} />
+      <Route path={"/products/:id"} component={ProductDetail} />
+      <Route path={"/services"} component={Services} />
+      <Route path={"/cart"} component={Cart} />
+      <Route path={"/checkout"} component={Checkout} />
+      <Route path={"/orders"} component={Orders} />
+      <Route path={"/dashboard/factory"} component={FactoryDashboard} />
+      <Route path={"/dashboard/buyer"} component={BuyerDashboard} />
+      <Route path={"/dashboard/admin"} component={AdminDashboard} />
+      <Route path={"/support"} component={Support} />
+      <Route path={"/maps"} component={Maps} />
+      <Route path={"/how-it-works"} component={HowItWorks} />
+      <Route path={"/pricing"} component={Pricing} />
+      <Route path={"/about"} component={About} />
+      <Route path={"/privacy"} component={PrivacyPolicy} />
+      <Route path={"/terms"} component={Terms} />
       <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+      <ThemeProvider defaultTheme="light">
+        <LanguageProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

@@ -90,3 +90,57 @@ export async function getUserByOpenId(openId: string) {
 }
 
 // TODO: add feature queries here as your schema grows.
+
+// Inquiry queries
+export async function getInquiriesByBuyer(buyerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { inquiries } = await import('../drizzle/schema');
+  return db.select().from(inquiries).where(eq(inquiries.buyerId, buyerId));
+}
+
+export async function createInquiry(inquiry: any) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  const { inquiries } = await import('../drizzle/schema');
+  return db.insert(inquiries).values(inquiry);
+}
+
+export async function updateInquiry(inquiryId: number, updates: any) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  const { inquiries } = await import('../drizzle/schema');
+  return db.update(inquiries).set(updates).where(eq(inquiries.id, inquiryId));
+}
+
+// Factory queries
+export async function getFactories() {
+  const db = await getDb();
+  if (!db) return [];
+  const { factories } = await import('../drizzle/schema');
+  return db.select().from(factories);
+}
+
+export async function getFactoryById(factoryId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const { factories } = await import('../drizzle/schema');
+  const result = await db.select().from(factories).where(eq(factories.id, factoryId)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+// Product queries
+export async function getProductsByFactory(factoryId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { products } = await import('../drizzle/schema');
+  return db.select().from(products).where(eq(products.factoryId, factoryId));
+}
+
+// Order queries
+export async function getOrdersByBuyer(buyerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const { orders } = await import('../drizzle/schema');
+  return db.select().from(orders).where(eq(orders.buyerId, buyerId));
+}
