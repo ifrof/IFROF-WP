@@ -12,6 +12,12 @@ import { paymentsRouter } from "./routers/payments";
 import { notificationsRouter } from "./routers/notifications";
 import { blogRouter } from "./routers/blog";
 import { aiAgentRouter } from "./routers/aiAgent";
+import { cartRouter } from "./routers/cart";
+import { reviewsRouter } from "./routers/reviews";
+import { servicesRouter } from "./routers/services";
+import { supportRouter } from "./routers/support";
+import { dashboardRouter } from "./routers/dashboard";
+import { mapsRouter } from "./routers/maps";
 
 export const appRouter = router({
   system: systemRouter,
@@ -44,6 +50,36 @@ export const appRouter = router({
   
   // Notifications
   notifications: notificationsRouter,
+  
+  // Shopping features
+  cart: cartRouter,
+  reviews: reviewsRouter,
+  
+  // Additional features
+  services: servicesRouter,
+  support: supportRouter,
+  dashboard: dashboardRouter,
+  maps: mapsRouter,
 });
 
 export type AppRouter = typeof appRouter;
+
+// Export all routers for testing
+export {
+  factoriesRouter,
+  productsRouter,
+  inquiriesRouter,
+  messagesRouter,
+  forumRouter,
+  chatbotRouter,
+  paymentsRouter,
+  notificationsRouter,
+  blogRouter,
+  aiAgentRouter,
+  cartRouter,
+  reviewsRouter,
+  servicesRouter,
+  supportRouter,
+  dashboardRouter,
+  mapsRouter,
+};

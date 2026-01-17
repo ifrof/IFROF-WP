@@ -140,6 +140,91 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Press release prepared
 - [ ] Post-launch monitoring plan ready
 
+## Bug Fixes & Quality Assurance - PRIORITY
+
+### Phase 1: Fix Critical Database and Router Errors (59 TypeScript Errors)
+
+#### Database Functions Missing in server/db.ts
+- [x] Add `getAllFactories()` function (rename from getFactories)
+- [x] Add `searchFactories(query: string)` function
+- [x] Add `createFactory(data)` function
+- [x] Add `updateFactory(id, data)` function
+- [x] Add `getProductById(id)` function
+- [x] Add `searchProducts(query: string)` function
+- [x] Add `createProduct(data)` function
+- [x] Add `updateProduct(id, data)` function
+- [x] Add `getInquiriesByFactory(factoryId)` function
+- [x] Add `getForumPosts(limit, offset)` function
+- [x] Add `getForumPostById(id)` function
+- [x] Add `updateForumPost(id, data)` function
+- [x] Add `getForumAnswersByPost(postId)` function
+- [x] Add `createForumPost(data)` function
+- [x] Add `createForumAnswer(data)` function
+- [x] Add `updateForumAnswer(id, data)` function
+- [x] Add `getBlogPosts(limit, offset)` function
+- [x] Add `getBlogPostBySlug(slug)` function
+- [x] Add `createBlogPost(data)` function
+- [x] Add `updateBlogPost(id, data)` function
+
+#### Router Fixes
+- [x] Fix inquiries.ts - replace dynamic require with proper imports
+- [x] Fix forum.ts - replace dynamic require with proper imports
+- [x] Fix factories.ts - fix function name from `getAllFactories` to `getFactories`
+- [x] Create stub routers for cart, reviews, services, support, dashboard, maps
+- [x] Update routers.ts to import all new routers
+
+#### Missing Pages/Components
+- [ ] Remove or implement ProductDetail.tsx (references missing 'reviews' and 'cart')
+- [ ] Remove or implement Services.tsx (references missing 'services' and 'cart')
+- [ ] Remove or implement Support.tsx (references missing 'support')
+
+#### TypeScript Errors to Fix
+- [ ] Fix forum.ts database helper functions (getForumPostById, updateForumAnswer, updateForumPost)
+- [ ] Fix inquiries.ts database helper functions
+- [ ] Fix all missing type definitions in routers
+- [ ] Validate all imports and exports
+- [ ] Run TypeScript compiler check: pnpm check
+
+### Testing - REQUIRED BEFORE LAUNCH
+- [ ] Write unit tests for authentication flow (useAuth hook)
+- [ ] Write unit tests for import request submission
+- [ ] Write unit tests for AI chat responses
+- [ ] Write unit tests for blog functionality
+- [ ] Write integration tests for database operations
+- [ ] Write integration tests for payment flow
+- [ ] Run all tests: pnpm test
+- [ ] Ensure 100% pass rate on all tests
+- [ ] Achieve minimum 80% code coverage
+
+### Performance & SEO Optimization
+- [ ] Add meta tags and Open Graph tags to all pages
+- [ ] Implement dynamic meta tags based on content
+- [ ] Optimize images and implement lazy loading
+- [ ] Implement code splitting for routes
+- [ ] Create sitemap.xml
+- [ ] Create robots.txt
+- [ ] Optimize bundle size (target: <300KB)
+- [ ] Add performance monitoring
+- [ ] Implement caching strategies (HTTP cache headers)
+- [ ] Add structured data (Schema.org JSON-LD)
+- [ ] Optimize database queries
+- [ ] Implement database indexes
+- [ ] Add CDN for static assets
+- [ ] Minify and compress assets
+- [ ] Enable gzip compression
+
+### Security Hardening
+- [ ] Validate all user inputs (server-side)
+- [ ] Implement CSRF protection
+- [ ] Add rate limiting on API endpoints
+- [ ] Implement proper error handling (no stack traces in production)
+- [ ] Add security headers (CSP, X-Frame-Options, etc.)
+- [ ] Audit database permissions
+- [ ] Implement proper authentication checks on all protected routes
+- [ ] Sanitize all user-generated content
+- [ ] Implement SQL injection prevention
+- [ ] Add XSS protection
+
 ## Maintenance & Support
 - [ ] Daily uptime monitoring
 - [ ] Weekly performance review

@@ -2,6 +2,8 @@ import { z } from "zod";
 import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { TRPCError } from "@trpc/server";
+import { messages } from "../../drizzle/schema";
+import { eq, and } from "drizzle-orm";
 
 const inquirySchema = z.object({
   buyerId: z.number(),
@@ -75,14 +77,13 @@ export const messagesRouter = router({
     .input(z.object({ inquiryId: z.number() }))
     .query(async ({ ctx, input }) => {
       // In a real app, verify the user is part of this conversation
-      const messages = await db.getDb().then(db => {
-        if (!db) return [];
-        const { messages: messagesTable } = require("../../drizzle/schema");
-        return db.select().from(messagesTable).where(
-          require("drizzle-orm").eq(messagesTable.inquiryId, input.inquiryId)
-        );
-      });
-      return messages || [];
+      const db_instance = await db.getDb();
+      if (!db_instance) return [];
+      
+      return db_instance
+        .select()
+        .from(messages)
+        .where(eq(messages.inquiryId, input.inquiryId));
     }),
 
   // Send message in an inquiry
@@ -94,53 +95,49 @@ export const messagesRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "Cannot send message as another user" });
       }
 
-      const result = await db.getDb().then(async db => {
-        if (!db) throw new Error("Database not available");
-        const { messages: messagesTable } = require("../../drizzle/schema");
-        return db.insert(messagesTable).values({
-          inquiryId: input.inquiryId,
-          senderId: input.senderId,
-          receiverId: input.receiverId,
-          content: input.content,
-          attachments: input.attachments,
-          read: 0,
-          createdAt: new Date(),
-        });
-      });
+      const db_instance = await db.getDb();
+      if (!db_instance) throw new Error("Database not available");
 
-      return result;
+      return db_instance.insert(messages).values({
+        inquiryId: input.inquiryId,
+        senderId: input.senderId,
+        receiverId: input.receiverId,
+        content: input.content,
+        attachments: input.attachments,
+        read: 0,
+        createdAt: new Date(),
+      });
     }),
 
   // Mark message as read
   markAsRead: protectedProcedure
     .input(z.object({ messageId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const result = await db.getDb().then(async db => {
-        if (!db) throw new Error("Database not available");
-        const { messages: messagesTable } = require("../../drizzle/schema");
-        return db.update(messagesTable).set({ read: 1 }).where(
-          require("drizzle-orm").eq(messagesTable.id, input.messageId)
-        );
-      });
+      const db_instance = await db.getDb();
+      if (!db_instance) throw new Error("Database not available");
 
-      return result;
+      return db_instance
+        .update(messages)
+        .set({ read: 1 })
+        .where(eq(messages.id, input.messageId));
     }),
 
   // Get unread message count for a user
   getUnreadCount: protectedProcedure
     .query(async ({ ctx }) => {
-      const result = await db.getDb().then(async db => {
-        if (!db) return 0;
-        const { messages: messagesTable } = require("../../drizzle/schema");
-        const unread = await db.select().from(messagesTable).where(
-          require("drizzle-orm").and(
-            require("drizzle-orm").eq(messagesTable.receiverId, ctx.user.id),
-            require("drizzle-orm").eq(messagesTable.read, 0)
+      const db_instance = await db.getDb();
+      if (!db_instance) return 0;
+
+      const unread = await db_instance
+        .select()
+        .from(messages)
+        .where(
+          and(
+            eq(messages.receiverId, ctx.user.id),
+            eq(messages.read, 0)
           )
         );
-        return unread?.length || 0;
-      });
 
-      return result || 0;
+      return unread?.length || 0;
     }),
 });
