@@ -106,12 +106,6 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#1e3a5f] via-[#2a4a6f] to-[#1e3a5f] text-white">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }} />
-        </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative">
           <div className="text-center max-w-4xl mx-auto">
@@ -165,12 +159,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Wave Divider */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white"/>
-          </svg>
-        </div>
+        {/* Clean Divider */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
       </section>
 
       {/* Trust Badges */}
@@ -226,7 +216,7 @@ export default function Home() {
               { step: '4', icon: Truck, ...t('howItWorks.steps.step4') as any },
             ].map((item, index) => (
               <div key={index} className="relative">
-                <Card className="text-center p-6 h-full border-2 hover:border-[#ff8c42] transition-colors">
+                <Card className="text-center p-6 h-full hover:shadow-lg transition-shadow">
                   <CardContent className="pt-6">
                     <div className="w-16 h-16 bg-gradient-to-br from-[#1e3a5f] to-[#2a4a6f] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                       <item.icon className="w-8 h-8 text-white" />
@@ -364,7 +354,7 @@ export default function Home() {
                 highlight: false,
               },
             ].map((item, index) => (
-              <Card key={index} className={`text-center p-6 ${item.highlight ? 'border-2 border-[#ff8c42] shadow-xl' : ''}`}>
+              <Card key={index} className={`text-center p-6 ${item.highlight ? 'shadow-xl' : ''}`}>
                 <CardContent className="pt-6">
                   <div className={`w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 ${item.highlight ? 'bg-[#ff8c42]' : 'bg-gray-100'}`}>
                     <item.icon className={`w-7 h-7 ${item.highlight ? 'text-white' : 'text-[#1e3a5f]'}`} />

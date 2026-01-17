@@ -3,6 +3,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import Home from "@/pages/Home";
 import Blog from "@/pages/Blog";
+import BlogPostDetail from "@/pages/BlogPostDetail";
+import BlogEditor from "@/pages/BlogEditor";
 import AISearch from "@/pages/AISearch";
 import ImportRequest from "@/pages/ImportRequest";
 import Marketplace from "@/pages/Marketplace";
@@ -31,6 +33,8 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/blog"} component={Blog} />
+      <Route path={"/blog/:slug"} component={BlogPostDetail} />
+      <Route path={"/blog-editor"} component={BlogEditor} />
       <Route path={"/ai-search"} component={AISearch} />
       <Route path={"/import-request"} component={ImportRequest} />
       <Route path={"/marketplace"} component={Marketplace} />

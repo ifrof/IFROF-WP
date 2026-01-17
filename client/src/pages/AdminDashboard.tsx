@@ -3,25 +3,92 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Users, Building2, Package, ShoppingBag, AlertTriangle, CheckCircle } from "lucide-react";
+import { Loader2, Users, Building2, Package, ShoppingBag, AlertTriangle, CheckCircle, Plus, Edit, Trash2, Eye, Download, FileText, BarChart3, LogOut, Menu, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
+import { useState } from "react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 export default function AdminDashboard() {
-  const { t } = useLanguage();
-  const { data: user } = trpc.auth.me.useQuery();
+  const { t, language, setLanguage, dir } = useLanguage();
+  const { user, logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
   
   const { data: factories, isLoading: factoriesLoading } = trpc.factories.list.useQuery();
   const { data: products } = trpc.products.getByFactory.useQuery({ factoryId: 0 });
 
+  // بيانات وهمية للرسوم البيانية
+  const supplierData = [
+    { name: "Jan", factories: 45, trading: 12, mixed: 8 },
+    { name: "Feb", factories: 52, trading: 15, mixed: 10 },
+    { name: "Mar", factories: 48, trading: 14, mixed: 9 },
+    { name: "Apr", factories: 61, trading: 18, mixed: 12 },
+    { name: "May", factories: 55, trading: 16, mixed: 11 },
+    { name: "Jun", factories: 67, trading: 20, mixed: 14 },
+  ];
+
+  const riskDistribution = [
+    { name: language === "ar" ? "مخاطر منخفضة" : "Low Risk", value: 45, color: "#10b981" },
+    { name: language === "ar" ? "مخاطر متوسطة" : "Medium Risk", value: 30, color: "#f59e0b" },
+    { name: language === "ar" ? "مخاطر عالية" : "High Risk", value: 20, color: "#ef4444" },
+    { name: language === "ar" ? "حرج" : "Critical", value: 5, color: "#7c2d12" },
+  ];
+
+  const blogPosts = [
+    {
+      id: 1,
+      title: "How to Identify Real Factories in China",
+      titleAr: "كيفية تحديد المصانع الحقيقية في الصين",
+      author: "Admin",
+      date: "2026-01-15",
+      views: 1250,
+      status: "published",
+    },
+    {
+      id: 2,
+      title: "Top 10 Supplier Verification Tips",
+      titleAr: "أفضل 10 نصائح للتحقق من المورّدين",
+      author: "Admin",
+      date: "2026-01-10",
+      views: 890,
+      status: "published",
+    },
+    {
+      id: 3,
+      title: "Understanding Supply Chain Risks",
+      titleAr: "فهم مخاطر سلسلة التوريد",
+      author: "Admin",
+      date: "2026-01-05",
+      views: 450,
+      status: "draft",
+    },
+  ];
+
+  const menuItems = [
+    { id: "overview", label: language === "ar" ? "نظرة عامة" : "Overview", icon: BarChart3 },
+    { id: "factories", label: language === "ar" ? "المصانع" : "Factories", icon: Building2 },
+    { id: "blog", label: language === "ar" ? "المدونة" : "Blog", icon: FileText },
+    { id: "users", label: language === "ar" ? "المستخدمون" : "Users", icon: Users },
+  ];
+
   if (!user || user.role !== "admin") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">
-              {t("dashboard.accessDenied")}
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6 text-center">
+            <p className="text-red-600 font-semibold mb-4">
+              {language === "ar" ? "ممنوع الوصول" : "Access Denied"}
             </p>
+            <p className="text-gray-600 mb-6">
+              {language === "ar"
+                ? "أنت لا تملك صلاحيات الوصول إلى لوحة التحكم"
+                : "You do not have permission to access this dashboard"}
+            </p>
+            <Link href="/">
+              <Button>{language === "ar" ? "العودة للرئيسية" : "Go Home"}</Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
@@ -32,7 +99,7 @@ export default function AdminDashboard() {
   const pendingFactories = factories?.filter((f: any) => f.verificationStatus === "pending").length || 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50" dir={dir}>
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white py-8 px-4">
         <div className="max-w-7xl mx-auto">

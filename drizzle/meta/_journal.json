@@ -15,6 +15,13 @@
       "when": 1768632357570,
       "tag": "0001_absurd_zombie",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1768637785859,
+      "tag": "0002_common_whirlwind",
+      "breakpoints": true
     }
   ]
 }

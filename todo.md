@@ -148,3 +148,116 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] User support ticket system
 - [ ] Bug tracking and prioritization
 - [ ] Performance optimization cycles
+
+
+## Blog System - Complete ✅
+
+### Blog Pages
+- [x] Blog listing page with search and categories
+- [x] Blog post detail page with comments section
+- [x] Blog editor for Admin with markdown support
+- [x] 8 professional articles added to database
+- [x] Markdown support for content rendering
+- [x] Featured articles system
+- [x] Tags and categories filtering
+- [x] Related articles sidebar
+- [x] Newsletter subscription form
+- [x] Share and bookmark functionality
+
+### Blog Articles Published
+- [x] How to Identify Real Factories vs Trading Companies
+- [x] Top 10 Supplier Verification Tips That Save Money
+- [x] Red Flags That Indicate a Scam Supplier
+- [x] Secure Payment Methods for Importing from China
+- [x] Complete Guide to Shipping from China
+- [x] Quality Control Checklist for Factory Inspections
+- [x] How to Negotiate Better Prices with Chinese Suppliers
+- [x] Building Long-Term Relationships with Suppliers
+
+## Critical Features - User Requested (Priority)
+
+### 1. Shipment Tracking System
+- [ ] Create shipments table in database
+- [ ] Add tracking number field
+- [ ] Implement real-time tracking updates
+- [ ] Create tracking page UI
+- [ ] Add SMS/Email notifications for shipment status
+- [ ] Integrate with shipping providers API (DHL, FedEx, etc.)
+- [ ] Display tracking timeline on order details
+
+### 2. Phone Number Registration & Activity Tracking
+- [ ] Add phone number field to users table
+- [ ] Implement phone number verification (OTP)
+- [ ] Create phone-based login option
+- [ ] Add activity logging system
+- [ ] Track user actions (searches, views, orders, messages)
+- [ ] Create activity history page
+- [ ] Export activity reports
+- [ ] GDPR compliance for data storage
+
+### 3. Direct Messaging System (Customer-Manufacturer)
+- [ ] Create messages table in database
+- [ ] Build real-time messaging UI
+- [ ] Add message notifications
+- [ ] Implement message history
+- [ ] Add file/image sharing in messages
+- [ ] Create messaging dashboard
+- [ ] Add message search functionality
+- [ ] Implement message read/unread status
+
+### 4. Product Portfolio & History Gallery
+- [ ] Create product portfolio table
+- [ ] Add image upload functionality (S3)
+- [ ] Create gallery UI component
+- [ ] Add product details (specifications, materials, etc.)
+- [ ] Implement filtering by category/date
+- [ ] Add product comparison feature
+- [ ] Create manufacturer portfolio page
+- [ ] Add image optimization for web
+
+## New Features - Paid Subscription & Premium Services
+
+### Naming Suggestions for Premium Service (اقتراحات الأسماء)
+- [ ] Implement one of these premium service names:
+  - **"IFROF Pro" / "IFROF Professional"** - للمشترين المحترفين
+  - **"IFROF Elite" / "IFROF Premium"** - للخدمات المتقدمة
+  - **"IFROF Direct+" / "IFROF Plus"** - للوصول المباشر المحسّن
+  - **"IFROF VIP" / "IFROF Business"** - للعملاء الكبار
+  - **"IFROF Smart Search Pro"** - للبحث الذكي المتقدم
+
+### Paid Subscription System ($91.19)
+- [ ] Create subscription plans table in database
+- [ ] Implement payment processing for $91.19 monthly/annual subscription
+- [ ] Add subscription status tracking (active, expired, cancelled)
+- [ ] Create paywall for premium features
+- [ ] Implement subscription management dashboard
+- [ ] Add recurring billing with Stripe
+- [ ] Create invoice generation system
+- [ ] Implement subscription cancellation flow
+
+### China-Only Factories Feature
+- [ ] Add country field to factories table (default: China)
+- [ ] Filter factories to show only China by default
+- [ ] Add country selector dropdown in search interface
+- [ ] Create country list: China, Vietnam, Thailand, India, Turkey, etc.
+- [ ] Implement country-based filtering in AI Agent
+- [ ] Add country badges to factory listings
+- [ ] Update factory verification to include country validation
+
+### Premium Features Behind Paywall
+- [ ] Advanced AI search (unlimited queries)
+- [ ] Direct factory contact information
+- [ ] Factory verification reports
+- [ ] Price negotiation tools
+- [ ] Bulk order management
+- [ ] Priority customer support
+- [ ] Export capabilities (PDF, Excel)
+- [ ] Advanced analytics dashboard
+
+### UI/UX Updates
+- [ ] Create subscription pricing page
+- [ ] Add "Upgrade to Pro" buttons throughout the platform
+- [ ] Create premium feature badges
+- [ ] Implement paywall modal for non-subscribers
+- [ ] Add subscription status indicator in user profile
+- [ ] Create onboarding flow for new subscribers
