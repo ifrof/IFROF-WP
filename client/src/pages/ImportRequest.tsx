@@ -18,7 +18,10 @@ import {
   DollarSign,
   Calendar,
   FileText,
-  Shield
+  Shield,
+  Upload,
+  X,
+  Image as ImageIcon
 } from 'lucide-react';
 import { Link } from 'wouter';
 import { toast } from 'sonner';
@@ -39,6 +42,8 @@ export default function ImportRequest() {
     destination: '',
     shippingMethod: 'sea',
     notes: '',
+    attachments: [] as File[],
+    attachmentUrls: [] as string[],
   });
 
   const Arrow = language === 'ar' ? ArrowLeft : ArrowRight;
@@ -53,6 +58,11 @@ export default function ImportRequest() {
 
     if (!formData.productName || !formData.quantity || !formData.destination) {
       toast.error(language === 'ar' ? 'يرجى ملء الحقول المطلوبة' : 'Please fill required fields');
+      return;
+    }
+
+    if (formData.attachments.length === 0 && formData.attachmentUrls.length === 0) {
+      toast.error(language === 'ar' ? 'يرجى إضافة صور أو ملفات' : 'Please add images or files');
       return;
     }
 
@@ -249,6 +259,89 @@ export default function ImportRequest() {
                         value={formData.deadline}
                         onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
                         className="mt-2"
+                      />
+                    </div>
+
+                    {/* File Attachments */}
+                    <div>
+                      <Label className="flex items-center gap-2">
+                        <Upload className="w-4 h-4" />
+                        {language === 'ar' ? 'صور/ملفات المنتج' : 'Product Images/Files'} *
+                      </Label>
+                      <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#ff8c42] transition">
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*,.pdf,.doc,.docx"
+                          onChange={(e) => {
+                            if (e.target.files) {
+                              setFormData({ 
+                                ...formData, 
+                                attachments: Array.from(e.target.files) 
+                              });
+                            }
+                          }}
+                          className="hidden"
+                          id="fileInput"
+                        />
+                        <label htmlFor="fileInput" className="cursor-pointer">
+                          <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-sm text-gray-600">
+                            {language === 'ar' 
+                              ? 'اسحب الملفات هنا أو انقر للاختيار' 
+                              : 'Drag files here or click to select'
+                            }
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {language === 'ar' 
+                              ? 'صور، PDF، مستندات Word' 
+                              : 'Images, PDF, Word documents'
+                            }
+                          </p>
+                        </label>
+                      </div>
+                      {formData.attachments.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                          {formData.attachments.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between bg-gray-100 p-2 rounded">
+                              <span className="text-sm text-gray-700">{file.name}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData({
+                                    ...formData,
+                                    attachments: formData.attachments.filter((_, i) => i !== index)
+                                  });
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* External Links */}
+                    <div>
+                      <Label htmlFor="attachmentUrls" className="flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
+                        {language === 'ar' ? 'روابط خارجية (اختياري)' : 'External Links (Optional)'}
+                      </Label>
+                      <Textarea
+                        id="attachmentUrls"
+                        placeholder={language === 'ar' 
+                          ? 'أضف روابط للصور أو المستندات (رابط واحد في كل سطر)' 
+                          : 'Add links to images or documents (one link per line)'
+                        }
+                        value={formData.attachmentUrls.join('\n')}
+                        onChange={(e) => setFormData({ 
+                          ...formData, 
+                          attachmentUrls: e.target.value.split('\n').filter(url => url.trim()) 
+                        })}
+                        className="mt-2"
+                        rows={3}
                       />
                     </div>
 

@@ -73,6 +73,9 @@ export default function Home() {
               <a href="#pricing" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
                 {t('nav.pricing')}
               </a>
+              <Link href="/blog" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
+                {language === 'ar' ? 'المدونة' : 'Blog'}
+              </Link>
               <a href="#support" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
                 {t('nav.support')}
               </a>

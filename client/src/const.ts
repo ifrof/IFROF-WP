@@ -3,12 +3,18 @@ export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 // Generate login URL at runtime so redirect URI reflects the current origin.
 export const getLoginUrl = () => {
   try {
-    const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
-    const appId = import.meta.env.VITE_APP_ID;
+    const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL?.trim();
+    const appId = import.meta.env.VITE_APP_ID?.trim();
     
     // Validate required environment variables
     if (!oauthPortalUrl || !appId) {
       console.warn("Missing OAuth configuration. VITE_OAUTH_PORTAL_URL or VITE_APP_ID not set.");
+      return "#";
+    }
+    
+    // Ensure oauthPortalUrl is a valid URL
+    if (!oauthPortalUrl.startsWith('http://') && !oauthPortalUrl.startsWith('https://')) {
+      console.warn("Invalid OAuth portal URL format");
       return "#";
     }
     

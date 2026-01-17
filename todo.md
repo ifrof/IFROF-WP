@@ -261,3 +261,34 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Implement paywall modal for non-subscribers
 - [ ] Add subscription status indicator in user profile
 - [ ] Create onboarding flow for new subscribers
+
+
+## New Features - User Requested (Latest)
+
+### 1. Image/File Upload in Import Requests
+- [x] Add file upload field to ImportRequest form
+- [x] Support multiple file types (images, PDFs, documents)
+- [x] Integrate with S3 storage (ready)
+- [x] Display uploaded files in request details
+- [x] Add file preview functionality
+- [x] Implement file size validation
+- [x] Add drag-and-drop support
+
+### 2. AI-Powered Smart Chat
+- [x] Create intelligent chatbot component (AIChat.tsx)
+- [x] Integrate with LLM for AI responses (ready)
+- [x] Support multi-language (Arabic/English)
+- [x] Real-time message streaming (implemented)
+- [x] Chat history management (in component state)
+- [x] Context-aware responses based on user data
+- [x] Add chat suggestions/quick replies
+- [x] Implement chat export functionality (ready)
+
+### 3. Fix Blog Display & Navigation
+- [x] Add Blog link to main navigation
+- [x] Fix blog page rendering
+- [x] Ensure all 8 articles display correctly
+- [x] Add blog category filtering
+- [x] Add search functionality to blog
+- [x] Display featured articles prominently
+- [x] Add related articles section

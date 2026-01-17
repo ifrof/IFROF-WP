@@ -25,6 +25,7 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Terms from "@/pages/Terms";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
+import AIChat from "./components/AIChat";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
@@ -67,6 +68,7 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <Router />
+            <AIChat />
           </TooltipProvider>
         </LanguageProvider>
       </ThemeProvider>
