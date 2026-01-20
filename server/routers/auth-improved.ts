@@ -56,29 +56,20 @@ export const authImprovedRouter = router({
 
       // Fallback to JSON
       if (!user) {
-        const data = JSON.parse(fs.readFileSync(path.join(process.cwd(), "local_db.json"), 'utf-8'));
-        user = data.users.find(u => u.email === input.email);
-        
-        if (user) {
-          user.lastSignedIn = new Date().toISOString();
-          fs.writeFileSync(path.join(process.cwd(), "local_db.json"), JSON.stringify(data, null, 2));
+        const localDbPath = path.join(process.cwd(), "local_db.json");
+        if (fs.existsSync(localDbPath)) {
+          const data = JSON.parse(fs.readFileSync(localDbPath, 'utf-8'));
+          user = data.users.find(u => u.email === input.email);
+          
+          if (user) {
+            user.lastSignedIn = new Date().toISOString();
+            fs.writeFileSync(localDbPath, JSON.stringify(data, null, 2));
+          }
         }
       }
 
       if (!user) {
-        // Auto-create demo user if it doesn't exist
-        if (input.email === "demo@ifrof.com") {
-          const openId = crypto.randomBytes(16).toString("hex");
-          user = await upsertUser({
-            email: input.email,
-            name: "Demo User",
-            role: input.role,
-            openId: openId,
-            loginMethod: "email",
-          });
-        } else {
-          throw new Error("User not found / المستخدم غير موجود");
-        }
+        throw new Error("User not found or incorrect credentials / المستخدم غير موجود أو بيانات الدخول خاطئة");
       }
 
       // Set session cookie

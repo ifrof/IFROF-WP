@@ -9,8 +9,6 @@ import { useLocation } from "wouter";
 
 export default function Login() {
   const { language, t } = useLanguage();
-  // Ensure t is defined even if context fails for some reason
-  const safeT = t || ((key: string) => key);
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,118 +62,96 @@ export default function Login() {
   const isLoading = loginMutation.isPending || signUpMutation.isPending;
 
   return (
-    <div className={`min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 ${language === "ar" ? "rtl" : "ltr"}`}>
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-blue-600">IFROF</CardTitle>
-          <CardDescription>
+    <div className={`min-h-screen flex items-center justify-center bg-gray-50 ${language === "ar" ? "rtl" : "ltr"}`}>
+      <Card className="w-full max-w-md shadow-xl border-gray-200">
+        <CardHeader className="text-center pb-2">
+          <div className="flex justify-center mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#1e3a5f] to-[#ff8c42] rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-xl">IF</span>
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-[#1e3a5f]">IFROF</CardTitle>
+          <CardDescription className="text-gray-500">
             {language === "ar" ? "منصة الاستيراد المباشر من المصانع الصينية" : "Direct Import from Chinese Manufacturers"}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">
+            <TabsList className="grid w-full grid-cols-2 mb-8 bg-gray-100 p-1 rounded-lg">
+              <TabsTrigger value="login" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 {language === "ar" ? "تسجيل الدخول" : "Login"}
               </TabsTrigger>
-              <TabsTrigger value="register">
+              <TabsTrigger value="register" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 {language === "ar" ? "إنشاء حساب" : "Register"}
               </TabsTrigger>
             </TabsList>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm text-center">
+              <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm text-center font-medium">
                 {error}
               </div>
             )}
 
-            {/* Login Tab */}
             <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
                     {language === "ar" ? "البريد الإلكتروني" : "Email"}
                   </label>
                   <Input
                     type="email"
-                    placeholder={language === "ar" ? "أدخل بريدك الإلكتروني" : "Enter your email"}
+                    placeholder="email@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="h-11 border-gray-300 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
                     dir="ltr"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
                     {language === "ar" ? "كلمة المرور" : "Password"}
                   </label>
                   <Input
                     type="password"
-                    placeholder={language === "ar" ? "أدخل كلمة المرور" : "Enter your password"}
+                    placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    className="h-11 border-gray-300 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
                     dir="ltr"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
                     {language === "ar" ? "نوع الحساب" : "Account Type"}
                   </label>
                   <select
                     value={userType}
                     onChange={(e) => setUserType(e.target.value as "buyer" | "factory")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full h-11 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f] focus:border-transparent transition-all"
                   >
-                    <option value="buyer">
-                      {language === "ar" ? "مشتري" : "Buyer"}
-                    </option>
-                    <option value="factory">
-                      {language === "ar" ? "مصنع" : "Factory"}
-                    </option>
+                    <option value="buyer">{language === "ar" ? "مشتري" : "Buyer"}</option>
+                    <option value="factory">{language === "ar" ? "مصنع" : "Factory"}</option>
                   </select>
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full h-11 bg-[#1e3a5f] hover:bg-[#152944] text-white font-bold transition-all shadow-md"
                   disabled={isLoading}
                 >
                   {isLoading ? (language === "ar" ? "جاري التحميل..." : "Loading...") : (language === "ar" ? "دخول" : "Login")}
                 </Button>
-
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-gray-300"></span>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">
-                      {language === "ar" ? "أو" : "OR"}
-                    </span>
-                  </div>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
-                  onClick={() => {
-                    // Bypass login for demo purposes
-                    loginMutation.mutate({ email: "demo@ifrof.com", password: "password123", role: userType });
-                  }}
-                >
-                  {language === "ar" ? "دخول تجريبي سريع" : "Quick Demo Login"}
-                </Button>
               </form>
             </TabsContent>
 
-            {/* Register Tab */}
             <TabsContent value="register">
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
+              <form onSubmit={handleRegister} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
                     {language === "ar" ? "الاسم الكامل" : "Full Name"}
                   </label>
                   <Input
@@ -184,58 +160,57 @@ export default function Login() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
+                    className="h-11 border-gray-300 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
                     {language === "ar" ? "البريد الإلكتروني" : "Email"}
                   </label>
                   <Input
                     type="email"
-                    placeholder={language === "ar" ? "أدخل بريدك الإلكتروني" : "Enter your email"}
+                    placeholder="email@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="h-11 border-gray-300 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
                     dir="ltr"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
                     {language === "ar" ? "كلمة المرور" : "Password"}
                   </label>
                   <Input
                     type="password"
-                    placeholder={language === "ar" ? "أدخل كلمة المرور" : "Enter your password"}
+                    placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    className="h-11 border-gray-300 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
                     dir="ltr"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
                     {language === "ar" ? "نوع الحساب" : "Account Type"}
                   </label>
                   <select
                     value={userType}
                     onChange={(e) => setUserType(e.target.value as "buyer" | "factory")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full h-11 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f] focus:border-transparent transition-all"
                   >
-                    <option value="buyer">
-                      {language === "ar" ? "مشتري" : "Buyer"}
-                    </option>
-                    <option value="factory">
-                      {language === "ar" ? "مصنع" : "Factory"}
-                    </option>
+                    <option value="buyer">{language === "ar" ? "مشتري" : "Buyer"}</option>
+                    <option value="factory">{language === "ar" ? "مصنع" : "Factory"}</option>
                   </select>
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  className="w-full h-11 bg-[#ff8c42] hover:bg-[#e67a35] text-white font-bold transition-all shadow-md"
                   disabled={isLoading}
                 >
                   {isLoading ? (language === "ar" ? "جاري التحميل..." : "Loading...") : (language === "ar" ? "إنشاء حساب" : "Create Account")}
@@ -244,7 +219,7 @@ export default function Login() {
             </TabsContent>
           </Tabs>
 
-          <div className="mt-6 text-center text-sm text-gray-600">
+          <div className="mt-8 text-center text-xs text-gray-400">
             {language === "ar" ? "بالتسجيل، فإنك توافق على شروطنا وسياستنا" : "By registering, you agree to our terms and privacy policy"}
           </div>
         </CardContent>

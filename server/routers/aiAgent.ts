@@ -33,130 +33,90 @@ export const aiAgentRouter = router({
     .mutation(async ({ input }): Promise<SearchResult> => {
       try {
         const systemPrompt = input.language === 'ar'
-          ? `أنت وكيل ذكي متخصص في البحث عن المصانع المباشرة. مهمتك هي:
-1. البحث عن المصانع التي تطابق معايير البحث
-2. التحقق من أن المصنع مباشر وليس وسيط أو شركة تجارية
-3. تقديم نتائج موثوقة مع درجة ثقة عالية
+          ? `أنت وكيل ذكي متخصص في البحث عن المصانع المباشرة في الصين. مهمتك هي:
+1. البحث عن المصانع الحقيقية التي تطابق معايير البحث (المنتج، الموقع، الفئة).
+2. التحقق من أن المصنع مباشر وليس وسيط أو شركة تجارية بناءً على البيانات المتاحة.
+3. تقديم نتائج موثوقة مع درجة ثقة عالية وتفسير منطقي.
 
 المعايير للتمييز بين المصانع المباشرة والوسطاء:
-- المصنع المباشر: يملك خطوط إنتاج، لديه موظفون إنتاج، يصنع المنتجات بنفسه
-- الوسيط/التاجر: يشتري من مصانع أخرى ويعيد البيع، لا يملك خطوط إنتاج
-- الشركة التجارية: تركز على التوزيع والبيع فقط
+- المصنع المباشر: يملك خطوط إنتاج، لديه موظفون إنتاج، يصنع المنتجات بنفسه.
+- الوسيط/التاجر: يشتري من مصانع أخرى ويعيد البيع، لا يملك خطوط إنتاج.
 
 أرجع النتائج بصيغة JSON.`
-          : `You are an AI agent specialized in finding direct manufacturers. Your task is to:
-1. Search for factories matching the search criteria
-2. Verify that the factory is a direct manufacturer, not an intermediary or trading company
-3. Provide reliable results with high confidence scores
+          : `You are an AI agent specialized in finding direct manufacturers in China. Your task is to:
+1. Search for real factories matching the search criteria (product, location, category).
+2. Verify that the factory is a direct manufacturer, not an intermediary or trading company based on available data.
+3. Provide reliable results with high confidence scores and logical reasoning.
 
 Criteria to distinguish between direct factories and intermediaries:
-- Direct Factory: owns production lines, has production staff, manufactures products themselves
-- Intermediary/Trader: buys from other factories and resells, doesn't own production lines
-- Trading Company: focuses on distribution and sales only
+- Direct Factory: owns production lines, has production staff, manufactures products themselves.
+- Intermediary/Trader: buys from other factories and resells, doesn't own production lines.
 
 Return results in JSON format.`;
 
         const userPrompt = input.language === 'ar'
-          ? `ابحث عن مصانع تطابق هذه المعايير:
-- البحث: ${input.query}
+          ? `ابحث عن مصانع حقيقية تطابق هذه المعايير:
+- المنتج/البحث: ${input.query}
 ${input.category ? `- الفئة: ${input.category}` : ''}
-${input.minCapacity ? `- الحد الأدنى للطاقة الإنتاجية: ${input.minCapacity}` : ''}
-${input.maxPrice ? `- الحد الأقصى للسعر: ${input.maxPrice}` : ''}
 
-تأكد من أن النتائج تحتوي على مصانع مباشرة فقط. قدم 5 نتائج على الأقل مع درجة ثقة لكل واحدة.`
-          : `Search for factories matching these criteria:
-- Query: ${input.query}
+تأكد من أن النتائج تحتوي على مصانع حقيقية وموثوقة. قدم 5 نتائج على الأقل مع درجة ثقة لكل واحدة.`
+          : `Search for real factories matching these criteria:
+- Product/Query: ${input.query}
 ${input.category ? `- Category: ${input.category}` : ''}
-${input.minCapacity ? `- Minimum Production Capacity: ${input.minCapacity}` : ''}
-${input.maxPrice ? `- Maximum Price: ${input.maxPrice}` : ''}
 
-Ensure results contain only direct manufacturers. Provide at least 5 results with a confidence score for each.`;
+Ensure results contain real and reliable manufacturers. Provide at least 5 results with a confidence score for each.`;
 
-        let parsed;
-        try {
-          const response = await invokeLLM({
-            messages: [
-              { role: 'system', content: systemPrompt as string },
-              { role: 'user', content: userPrompt as string },
-            ],
-            response_format: {
-              type: 'json_schema',
-              json_schema: {
-                name: 'factory_search_results',
-                strict: true,
-                schema: {
-                  type: 'object',
-                  properties: {
-                    results: {
-                      type: 'array',
-                      items: {
-                        type: 'object',
-                        properties: {
-                          name: { type: 'string' },
-                          type: {
-                            type: 'string',
-                            enum: ['direct_manufacturer', 'trader', 'commercial_company', 'unknown'],
-                          },
-                          confidence: { type: 'number', minimum: 0, maximum: 100 },
-                          reasoning: { type: 'string' },
+        const response = await invokeLLM({
+          messages: [
+            { role: 'system', content: systemPrompt as string },
+            { role: 'user', content: userPrompt as string },
+          ],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'factory_search_results',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  results: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string' },
+                        type: {
+                          type: 'string',
+                          enum: ['direct_manufacturer', 'trader', 'commercial_company', 'unknown'],
                         },
-                        required: ['name', 'type', 'confidence', 'reasoning'],
+                        confidence: { type: 'number', minimum: 0, maximum: 100 },
+                        reasoning: { type: 'string' },
                       },
-                    },
-                    recommendations: {
-                      type: 'array',
-                      items: { type: 'string' },
+                      required: ['name', 'type', 'confidence', 'reasoning'],
                     },
                   },
-                  required: ['results', 'recommendations'],
-                  additionalProperties: false,
+                  recommendations: {
+                    type: 'array',
+                    items: { type: 'string' },
+                  },
                 },
+                required: ['results', 'recommendations'],
+                additionalProperties: false,
               },
             },
-          });
+          },
+        });
 
-          const content = response.choices[0]?.message.content;
-          if (!content || typeof content !== 'string') {
-            throw new Error('No response from AI');
-          }
-          parsed = JSON.parse(content);
-        } catch (e) {
-          console.warn("AI Search failed, using fallback data", e);
-          // Fallback data for demo
-          parsed = {
-            results: [
-              {
-                name: "Guangzhou Textile Co., Ltd",
-                type: "direct_manufacturer",
-                confidence: 95,
-                reasoning: input.language === 'ar' 
-                  ? "هذا المصنع موثق ولديه خطوط إنتاج مباشرة في قوانغتشو." 
-                  : "This factory is verified and has direct production lines in Guangzhou."
-              },
-              {
-                name: "Shenzhen Electronics Factory",
-                type: "direct_manufacturer",
-                confidence: 88,
-                reasoning: input.language === 'ar'
-                  ? "مصنع مباشر متخصص في الإلكترونيات مع شهادات جودة عالمية."
-                  : "Direct manufacturer specializing in electronics with international quality certifications."
-              }
-            ],
-            recommendations: input.language === 'ar'
-              ? ["اطلب دائماً عينات قبل الطلب الكبير", "تحقق من رخصة المصنع التجارية"]
-              : ["Always request samples before bulk orders", "Verify the factory business license"]
-          };
+        const content = response.choices[0]?.message.content;
+        if (!content || typeof content !== 'string') {
+          throw new Error('No response from AI');
         }
-
-        // Filter to only direct manufacturers
-        const directFactories = parsed.results.filter(
-          (r: any) => r.type === 'direct_manufacturer' && r.confidence >= 70
-        );
+        const parsed = JSON.parse(content);
 
         return {
           query: input.query,
           language: input.language,
-          results: directFactories.map((r: any) => ({
+          results: parsed.results.map((r: any) => ({
             name: r.name,
             type: r.type,
             confidence: r.confidence,
@@ -169,7 +129,7 @@ Ensure results contain only direct manufacturers. Provide at least 5 results wit
         console.error('AI Agent search error:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to search factories',
+          message: 'Failed to search factories via AI. Please try again later.',
         });
       }
     }),
@@ -190,16 +150,12 @@ Ensure results contain only direct manufacturers. Provide at least 5 results wit
 1. هل يملك خطوط إنتاج خاصة به؟
 2. هل لديه موظفون إنتاج؟
 3. هل يصنع المنتجات بنفسه أم يشتريها من مصانع أخرى؟
-4. هل هو وسيط أو تاجر؟
-5. هل هو شركة تجارية فقط؟
 
 أرجع درجة ثقة من 0 إلى 100 وتفسير واضح.`
           : `You are an expert in verifying whether factories are direct manufacturers. Evaluate the factory based on:
 1. Does it own its own production lines?
 2. Does it have production staff?
 3. Does it manufacture products itself or buy from other factories?
-4. Is it an intermediary or trader?
-5. Is it only a trading company?
 
 Return a confidence score from 0 to 100 and a clear explanation.`;
 
