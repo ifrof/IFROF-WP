@@ -30,7 +30,7 @@ export const translations = {
       pricing: 'الأسعار',
       blog: 'المدونة',
       support: 'الدعم',
-      smartAssistant: 'مساعد IFROF الذكي',
+      smartAssistant: 'محقق IFROF الذكي للمصانع',
       startImport: 'ابدأ طلب استيراد',
       logout: 'تسجيل الخروج',
       login: 'تسجيل الدخول',
@@ -110,7 +110,7 @@ export const translations = {
 
     // Smart Naming - AI Agent → Smart Sourcing Assistant
     smartAssistant: {
-      title: 'مساعد IFROF الذكي',
+      title: 'محقق IFROF الذكي للمصانع',
       subtitle: 'يساعدك في العثور على المصانع الصينية الموثقة والتحقق من أنها مصانع مباشرة',
       searching: 'جاري البحث عن المصانع المناسبة...',
       verifying: 'جاري التحقق من المصنع...',
@@ -285,7 +285,7 @@ export const translations = {
       pricing: 'Pricing',
       blog: 'Blog',
       support: 'Support',
-      smartAssistant: 'IFROF Smart Assistant',
+      smartAssistant: 'IFROF AI Factory Investigator',
       startImport: 'Start Import Request',
       logout: 'Logout',
       login: 'Login',
@@ -365,7 +365,7 @@ export const translations = {
 
     // Smart Naming - AI Agent → Smart Sourcing Assistant
     smartAssistant: {
-      title: 'IFROF Smart Assistant',
+      title: 'IFROF AI Factory Investigator',
       subtitle: 'Helps you find verified Chinese manufacturers and verify they are direct factories',
       searching: 'Searching for suitable manufacturers...',
       verifying: 'Verifying the manufacturer...',

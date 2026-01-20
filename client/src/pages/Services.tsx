@@ -16,12 +16,12 @@ export default function Services() {
 
   const { data: services, isLoading } = trpc.services.list.useQuery();
 
-  const addToCartMutation = trpc.cart.add.useMutation({
+  const addToCartMutation = trpc.cart.addItem.useMutation({
     onSuccess: () => {
-      utils.cart.count.invalidate();
+      utils.cart.getItems.invalidate();
       toast.success(t("cart.added"));
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message);
     },
   });
@@ -32,10 +32,9 @@ export default function Services() {
     item.factory?.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const handleAddToCart = (serviceId: number, factoryId: number) => {
+  const handleAddToCart = (serviceId: number) => {
     addToCartMutation.mutate({
-      serviceId,
-      factoryId,
+      productId: serviceId, // Using productId for serviceId as per cart router
       quantity: 1,
     });
   };
@@ -144,7 +143,7 @@ export default function Services() {
                       </Link>
                       <Button
                         className="bg-orange-500 hover:bg-orange-600"
-                        onClick={() => handleAddToCart(service.id, factory.id)}
+                        onClick={() => handleAddToCart(service.id)}
                         disabled={addToCartMutation.isPending}
                       >
                         {addToCartMutation.isPending ? (

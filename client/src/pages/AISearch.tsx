@@ -3,8 +3,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { CheckCircle, AlertCircle, Search, Loader2, ArrowRight } from 'lucide-react';
+import { CheckCircle, AlertCircle, Search, Loader2, ArrowRight, ArrowLeft, Home } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
+import { Link } from 'wouter';
 
 export default function AISearch() {
   const { t, language, dir } = useLanguage();
@@ -37,13 +38,57 @@ export default function AISearch() {
     });
   };
 
+  const BackArrow = language === 'ar' ? ArrowRight : ArrowLeft;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white" dir={dir}>
+      {/* Navigation Bar */}
+      <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-4">
+              <Link href="/">
+                <Button variant="ghost" className="flex items-center gap-2 text-gray-600 hover:text-blue-900">
+                  <BackArrow className="w-4 h-4" />
+                  {language === 'ar' ? 'العودة للرئيسية' : 'Back to Home'}
+                </Button>
+              </Link>
+            </div>
+            <Link href="/">
+              <div className="flex items-center gap-2 cursor-pointer">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#1e3a5f] to-[#ff8c42] rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">IF</span>
+                </div>
+                <span className="font-bold text-lg text-[#1e3a5f]">IFROF</span>
+              </div>
+            </Link>
+            <div className="flex items-center gap-3">
+              <Link href="/marketplace">
+                <Button variant="outline" size="sm">
+                  {language === 'ar' ? 'السوق' : 'Marketplace'}
+                </Button>
+              </Link>
+              <Link href="/import-request">
+                <Button size="sm" className="bg-[#ff8c42] hover:bg-[#e67a35]">
+                  {language === 'ar' ? 'طلب استيراد' : 'Import Request'}
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-4">{t('aiAgent.title')}</h1>
-          <p className="text-lg text-blue-100">{t('aiAgent.subtitle')}</p>
+          <h1 className="text-4xl font-bold mb-4">
+            {language === 'ar' ? 'محقق IFROF الذكي للمصانع' : 'IFROF AI Factory Investigator'}
+          </h1>
+          <p className="text-lg text-blue-100">
+            {language === 'ar' 
+              ? 'ابحث عن أي مصنع في الصين وسنتحقق منه بالذكاء الاصطناعي'
+              : 'Search for any factory in China and we will verify it with AI'}
+          </p>
         </div>
       </div>
 
@@ -61,7 +106,7 @@ export default function AISearch() {
                     {language === 'ar' ? 'ماذا تبحث عن؟' : 'What are you looking for?'}
                   </label>
                   <Input
-                    placeholder={language === 'ar' ? 'مثال: مصنع نسيج' : 'Example: Textile factory'}
+                    placeholder={language === 'ar' ? 'مثال: مصنع نسيج في قوانغتشو' : 'Example: Textile factory in Guangzhou'}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full"
@@ -86,13 +131,13 @@ export default function AISearch() {
                   >
                     {isSearching ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                        {t('aiAgent.searching')}
+                        <Loader2 className="w-4 h-4 animate-spin me-2" />
+                        {language === 'ar' ? 'جاري البحث...' : 'Searching...'}
                       </>
                     ) : (
                       <>
-                        <Search className="w-4 h-4 mr-2" />
-                        {t('common.search')}
+                        <Search className="w-4 h-4 me-2" />
+                        {language === 'ar' ? 'بحث' : 'Search'}
                       </>
                     )}
                   </Button>
@@ -106,7 +151,9 @@ export default function AISearch() {
         {searchResults.length > 0 && (
           <div className="mt-12 space-y-8">
             <div>
-              <h2 className="text-2xl font-bold text-blue-900 mb-6">{t('aiAgent.results')}</h2>
+              <h2 className="text-2xl font-bold text-blue-900 mb-6">
+                {language === 'ar' ? 'نتائج البحث' : 'Search Results'}
+              </h2>
               <div className="grid gap-6">
                 {searchResults.map((result, index) => (
                   <Card
@@ -137,8 +184,8 @@ export default function AISearch() {
                               }`}
                             >
                               {result.isDirectFactory
-                                ? t('verification.directFactory')
-                                : t('verification.notDirect')}
+                                ? (language === 'ar' ? 'مصنع مباشر ✓' : 'Direct Factory ✓')
+                                : (language === 'ar' ? 'وسيط/تاجر ✗' : 'Middleman/Trader ✗')}
                             </span>
                             <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-200 text-blue-800">
                               {language === 'ar'
@@ -180,7 +227,9 @@ export default function AISearch() {
         {!isSearching && searchResults.length === 0 && searchQuery && (
           <div className="mt-12 text-center py-12">
             <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-lg text-gray-600">{t('aiAgent.noResults')}</p>
+            <p className="text-lg text-gray-600">
+              {language === 'ar' ? 'لم يتم العثور على نتائج' : 'No results found'}
+            </p>
           </div>
         )}
 

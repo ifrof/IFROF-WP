@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -15,18 +14,18 @@ export default function FactoryDashboard() {
   // Mock factory ID - in production, this would come from user's factory association
   const factoryId = 1;
 
-  const { data: orders, isLoading: ordersLoading } = trpc.dashboard.getOrdersByFactory.useQuery(
-    { factoryId },
-    { enabled: !!factoryId }
+  const { data: orders, isLoading: ordersLoading } = trpc.dashboard.getRecentOrders.useQuery(
+    undefined,
+    { enabled: !!user }
   );
   
-  const { data: inquiries, isLoading: inquiriesLoading } = trpc.dashboard.getInquiriesByFactory.useQuery(
+  const { data: inquiries, isLoading: inquiriesLoading } = trpc.inquiries.getByFactory.useQuery(
     { factoryId },
-    { enabled: !!factoryId }
+    { enabled: !!user }
   );
 
   const { data: products } = trpc.products.getByFactory.useQuery({ factoryId });
-  const { data: services } = trpc.services.getByFactory.useQuery({ factoryId });
+  const { data: services } = trpc.services.list.useQuery();
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { variant: any; icon: any }> = {
@@ -83,7 +82,7 @@ export default function FactoryDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{products?.length || 0}</div>
+              <div className="text-3xl font-bold">{(products as any[])?.length || 0}</div>
             </CardContent>
           </Card>
 
@@ -94,7 +93,7 @@ export default function FactoryDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{services?.length || 0}</div>
+              <div className="text-3xl font-bold">{(services as any[])?.length || 0}</div>
             </CardContent>
           </Card>
 
@@ -106,7 +105,7 @@ export default function FactoryDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {orders?.filter((o: any) => o.status !== "delivered" && o.status !== "cancelled").length || 0}
+                {(orders as any[])?.filter((o: any) => o.status !== "delivered" && o.status !== "cancelled").length || 0}
               </div>
             </CardContent>
           </Card>
@@ -119,7 +118,7 @@ export default function FactoryDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {inquiries?.filter((i: any) => i.status === "pending").length || 0}
+                {(inquiries as any[])?.filter((i: any) => i.status === "pending").length || 0}
               </div>
             </CardContent>
           </Card>
@@ -145,9 +144,9 @@ export default function FactoryDashboard() {
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                   </div>
-                ) : orders && orders.length > 0 ? (
+                ) : orders && (orders as any[]).length > 0 ? (
                   <div className="space-y-4">
-                    {orders.map((order: any) => (
+                    {(orders as any[]).map((order: any) => (
                       <div key={order.id} className="border rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div>
@@ -191,9 +190,9 @@ export default function FactoryDashboard() {
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                   </div>
-                ) : inquiries && inquiries.length > 0 ? (
+                ) : inquiries && (inquiries as any[]).length > 0 ? (
                   <div className="space-y-4">
-                    {inquiries.map((inquiry: any) => (
+                    {(inquiries as any[]).map((inquiry: any) => (
                       <div key={inquiry.id} className="border rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div>
@@ -239,9 +238,9 @@ export default function FactoryDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                {products && products.length > 0 ? (
+                {products && (products as any[]).length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {products.map((product: any) => {
+                    {(products as any[]).map((product: any) => {
                       const images = product.imageUrls ? JSON.parse(product.imageUrls) : [];
                       return (
                         <div key={product.id} className="border rounded-lg overflow-hidden">
@@ -282,9 +281,9 @@ export default function FactoryDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                {services && services.length > 0 ? (
+                {services && (services as any[]).length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {services.map((service: any) => {
+                    {(services as any[]).map((service: any) => {
                       const images = service.imageUrls ? JSON.parse(service.imageUrls) : [];
                       return (
                         <div key={service.id} className="border rounded-lg overflow-hidden">

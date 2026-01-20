@@ -113,7 +113,15 @@ export const productsRouter = router({
       if (!product) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Product not found" });
       }
-      return product;
+      
+      // Fetch factory info to satisfy client-side expectations
+      const factory = await db.getFactoryById(product.factoryId);
+      
+      return {
+        ...product,
+        factory, // Add factory relation
+        product: product, // Alias for compatibility if needed
+      };
     }),
 
   // Search products (public)

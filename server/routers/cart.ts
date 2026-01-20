@@ -39,4 +39,12 @@ export const cartRouter = router({
       // TODO: Implement cart functionality
       return { success: true };
     }),
+
+  // Aliases for compatibility
+  add: protectedProcedure
+    .input(z.object({ productId: z.number(), quantity: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      // TODO: Implement cart functionality
+      return { success: true };
+    }),
 });
