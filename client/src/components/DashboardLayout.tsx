@@ -19,13 +19,13 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { getLoginUrl } from "@/const";
+import { OAuthLoginButton } from "@/components/OAuthLoginButton";
+import { getOAuthLoginUrl, isOAuthConfigured } from "@/config/env";
 import { useIsMobile } from "@/hooks/useMobile";
 import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
-import { Button } from "./ui/button";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Page 1", path: "/" },
@@ -47,10 +47,18 @@ export default function DashboardLayout({
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
   const { loading, user } = useAuth();
+  const oauthConfigured = isOAuthConfigured();
+  const loginUrl = getOAuthLoginUrl();
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
   }, [sidebarWidth]);
+
+  useEffect(() => {
+    if (loading || user) return;
+    if (!oauthConfigured || !loginUrl) return;
+    window.location.assign(loginUrl);
+  }, [loading, loginUrl, oauthConfigured, user]);
 
   if (loading) {
     return <DashboardLayoutSkeleton />
@@ -68,15 +76,10 @@ export default function DashboardLayout({
               Access to this dashboard requires authentication. Continue to launch the login flow.
             </p>
           </div>
-          <Button
-            onClick={() => {
-              window.location.href = getLoginUrl();
-            }}
-            size="lg"
-            className="w-full shadow-lg hover:shadow-xl transition-all"
-          >
-            Sign in
-          </Button>
+          <OAuthLoginButton
+            label="Sign in"
+            buttonClassName="w-full shadow-lg hover:shadow-xl transition-all"
+          />
         </div>
       </div>
     );
