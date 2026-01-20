@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { OAuthLoginButton } from '@/components/OAuthLoginButton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,13 +26,15 @@ import {
 } from 'lucide-react';
 import { Link } from 'wouter';
 import { toast } from 'sonner';
-import { getLoginUrl } from '@/const';
+import { getOAuthLoginUrl, isOAuthConfigured } from '@/config/env';
 
 export default function ImportRequest() {
   const { language, t, dir } = useLanguage();
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const oauthConfigured = isOAuthConfigured();
+  const loginUrl = getOAuthLoginUrl();
 
   const [formData, setFormData] = useState({
     productName: '',
@@ -47,6 +50,12 @@ export default function ImportRequest() {
   });
 
   const Arrow = language === 'ar' ? ArrowLeft : ArrowRight;
+
+  useEffect(() => {
+    if (authLoading || isAuthenticated) return;
+    if (!oauthConfigured || !loginUrl) return;
+    window.location.assign(loginUrl);
+  }, [authLoading, isAuthenticated, loginUrl, oauthConfigured]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,11 +169,10 @@ export default function ImportRequest() {
                         : 'You need to login to submit an import request'
                       }
                     </p>
-                    <a href={getLoginUrl()}>
-                      <Button className="bg-[#ff8c42] hover:bg-[#e67a35]">
-                        {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
-                      </Button>
-                    </a>
+                    <OAuthLoginButton
+                      label={language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+                      buttonClassName="bg-[#ff8c42] hover:bg-[#e67a35]"
+                    />
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
