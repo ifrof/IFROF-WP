@@ -9,6 +9,8 @@ import { useLocation } from "wouter";
 
 export default function Login() {
   const { language, t } = useLanguage();
+  // Ensure t is defined even if context fails for some reason
+  const safeT = t || ((key: string) => key);
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
