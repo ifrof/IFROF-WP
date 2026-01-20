@@ -5,6 +5,8 @@ import { eq } from "drizzle-orm";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "../_core/cookies";
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -28,23 +30,56 @@ export const authImprovedRouter = router({
     .input(loginSchema)
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      const usersTable = getUsersTable() as any;
-
-      // Find user by email
-      const [user] = await db
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.email, input.email))
-        .limit(1);
-
-      if (!user) {
-        throw new Error("User not found / المستخدم غير موجود");
+      
+      let user;
+      
+      // Try MySQL first
+      if (db && !db.isJsonMode) {
+        try {
+          const usersTable = getUsersTable() as any;
+          const [dbUser] = await db
+            .select()
+            .from(usersTable)
+            .where(eq(usersTable.email, input.email))
+            .limit(1);
+          user = dbUser;
+          
+          if (user) {
+            await db.update(usersTable)
+              .set({ lastSignedIn: new Date() })
+              .where(eq(usersTable.id, user.id));
+          }
+        } catch (e) {
+          console.warn("MySQL login failed, falling back to JSON", e);
+        }
       }
 
-      // Update last signed in
-      await db.update(usersTable)
-        .set({ lastSignedIn: new Date() })
-        .where(eq(usersTable.id, user.id));
+      // Fallback to JSON
+      if (!user) {
+        const data = JSON.parse(fs.readFileSync(path.join(process.cwd(), "local_db.json"), 'utf-8'));
+        user = data.users.find(u => u.email === input.email);
+        
+        if (user) {
+          user.lastSignedIn = new Date().toISOString();
+          fs.writeFileSync(path.join(process.cwd(), "local_db.json"), JSON.stringify(data, null, 2));
+        }
+      }
+
+      if (!user) {
+        // Auto-create demo user if it doesn't exist
+        if (input.email === "demo@ifrof.com") {
+          const openId = crypto.randomBytes(16).toString("hex");
+          user = await upsertUser({
+            email: input.email,
+            name: "Demo User",
+            role: input.role,
+            openId: openId,
+            loginMethod: "email",
+          });
+        } else {
+          throw new Error("User not found / المستخدم غير موجود");
+        }
+      }
 
       // Set session cookie
       const cookieOptions = getSessionCookieOptions(ctx.req);

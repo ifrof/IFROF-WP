@@ -95,6 +95,21 @@ export default function Home() {
                 {language === 'ar' ? 'EN' : 'عربي'}
               </button>
 
+              {/* Login Button */}
+              {!isAuthenticated ? (
+                <Link href="/login">
+                  <Button variant="ghost" className="text-[#1e3a5f] font-medium">
+                    {t('nav.login')}
+                  </Button>
+                </Link>
+              ) : (
+                <Link href={user?.role === 'factory' ? '/dashboard/factory' : '/dashboard/buyer'}>
+                  <Button variant="ghost" className="text-[#1e3a5f] font-medium">
+                    {t('nav.dashboard')}
+                  </Button>
+                </Link>
+              )}
+
               {/* CTA Button */}
               <Link href="/import-request">
                 <Button className="bg-[#ff8c42] hover:bg-[#e67a35] text-white font-semibold px-6 shadow-lg shadow-orange-200">

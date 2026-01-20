@@ -36,6 +36,7 @@ export const translations = {
       login: 'تسجيل الدخول',
       myRequests: 'طلباتي',
       dashboard: 'لوحة التحكم',
+      quickDemo: 'دخول تجريبي سريع',
     },
 
     // Hero Section - NEW POWERFUL VERSION
@@ -291,6 +292,7 @@ export const translations = {
       login: 'Login',
       myRequests: 'My Requests',
       dashboard: 'Dashboard',
+      quickDemo: 'Quick Demo Login',
     },
 
     // Hero Section - NEW POWERFUL VERSION

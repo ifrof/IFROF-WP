@@ -28,7 +28,25 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AIChat from "./components/AIChat";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { LanguageProvider } from "./contexts/LanguageContext";
+import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
+import { useEffect } from "react";
+
+function AppContent() {
+  const { dir, language } = useLanguage();
+  
+  useEffect(() => {
+    document.documentElement.dir = dir;
+    document.documentElement.lang = language;
+  }, [dir, language]);
+
+  return (
+    <TooltipProvider>
+      <Toaster />
+      <Router />
+      <AIChat />
+    </TooltipProvider>
+  );
+}
 
 function Router() {
   return (
@@ -67,11 +85,7 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
         <LanguageProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-            <AIChat />
-          </TooltipProvider>
+          <AppContent />
         </LanguageProvider>
       </ThemeProvider>
     </ErrorBoundary>

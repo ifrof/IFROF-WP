@@ -28,19 +28,28 @@ export default function Blog() {
             </div>
             <span className="font-bold text-xl text-blue-900">IFROF</span>
           </Link>
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="/" className="text-gray-700 hover:text-blue-900 transition-colors">
+          <div className="hidden md:flex items-center gap-6">
+            <Link href="/" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
               الرئيسية
             </Link>
-            <a href="/#features" className="text-gray-700 hover:text-blue-900 transition-colors">
-              المميزات
+            <a href="/#how-it-works" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
+              كيف يعمل
             </a>
-            <a href="/#services" className="text-gray-700 hover:text-blue-900 transition-colors">
-              الخدمات
-            </a>
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white">
-              ابدأ الآن
-            </Button>
+            <Link href="/ai-search" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
+              المحقق الذكي
+            </Link>
+            
+            <Link href="/login">
+              <Button variant="ghost" className="text-blue-900 font-medium">
+                تسجيل الدخول
+              </Button>
+            </Link>
+
+            <Link href="/import-request">
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold">
+                ابدأ طلب استيراد
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>

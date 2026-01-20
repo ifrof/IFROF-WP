@@ -143,6 +143,29 @@ export default function Login() {
                 >
                   {isLoading ? (language === "ar" ? "جاري التحميل..." : "Loading...") : (language === "ar" ? "دخول" : "Login")}
                 </Button>
+
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-gray-300"></span>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">
+                      {language === "ar" ? "أو" : "OR"}
+                    </span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
+                  onClick={() => {
+                    // Bypass login for demo purposes
+                    loginMutation.mutate({ email: "demo@ifrof.com", password: "password123", role: userType });
+                  }}
+                >
+                  {t('nav.quickDemo')}
+                </Button>
               </form>
             </TabsContent>
 

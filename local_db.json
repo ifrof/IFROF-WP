@@ -1,0 +1,70 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "openId": "admin-system",
+      "name": "System Admin",
+      "email": "admin@ifrof.com",
+      "role": "admin",
+      "createdAt": "2026-01-20T19:57:37.732Z"
+    }
+  ],
+  "blogPosts": [
+    {
+      "id": 1,
+      "title": "How to Identify Real Factories vs Trading Companies in China",
+      "slug": "how-to-identify-real-factories",
+      "content": "# How to Identify Real Factories vs Trading Companies in China\n\nWhen sourcing from China, one of the most critical decisions is determining whether you're dealing with a real factory or a trading company...",
+      "excerpt": "Learn the key differences between real factories and trading companies. Discover red flags and green flags that will help you make the right decision.",
+      "category": "Supplier Verification",
+      "tags": "[\"factories\",\"trading\",\"verification\",\"china\"]",
+      "featured": 1,
+      "authorId": 1,
+      "published": 1,
+      "createdAt": "2026-01-20T19:57:37.733Z",
+      "updatedAt": "2026-01-20T19:57:37.733Z"
+    },
+    {
+      "id": 2,
+      "title": "Top 10 Supplier Verification Tips That Save Money",
+      "slug": "top-10-supplier-verification-tips",
+      "content": "# Top 10 Supplier Verification Tips That Save Money\n\nDiscover the most effective strategies used by professional sourcing agents to verify suppliers and avoid costly mistakes.",
+      "excerpt": "Discover the most effective strategies used by professional sourcing agents to verify suppliers and avoid costly mistakes.",
+      "category": "Tips & Tricks",
+      "tags": "[\"verification\",\"tips\",\"suppliers\",\"sourcing\"]",
+      "featured": 1,
+      "authorId": 1,
+      "published": 1,
+      "createdAt": "2026-01-20T19:57:37.733Z",
+      "updatedAt": "2026-01-20T19:57:37.733Z"
+    },
+    {
+      "id": 3,
+      "title": "Secure Payment Methods for Importing from China",
+      "slug": "secure-payment-methods-china",
+      "content": "# Secure Payment Methods for Importing from China\n\nDiscover the safest payment methods when buying from Chinese suppliers. Learn about escrow, trade assurance, and payment protection strategies.",
+      "excerpt": "Discover the safest payment methods when buying from Chinese suppliers. Learn about escrow, trade assurance, and payment protection strategies.",
+      "category": "Payment & Finance",
+      "tags": "[\"payment\",\"security\",\"escrow\",\"finance\"]",
+      "featured": 1,
+      "authorId": 1,
+      "published": 1,
+      "createdAt": "2026-01-20T19:57:37.733Z",
+      "updatedAt": "2026-01-20T19:57:37.733Z"
+    },
+    {
+      "id": 4,
+      "title": "Complete Guide to Shipping from China",
+      "slug": "complete-guide-shipping-china",
+      "content": "# Complete Guide to Shipping from China\n\nMaster the shipping process from Chinese factories. Learn about different shipping methods, costs, timelines, and how to track your shipment.",
+      "excerpt": "Master the shipping process from Chinese factories. Learn about different shipping methods, costs, timelines, and how to track your shipment.",
+      "category": "Shipping & Logistics",
+      "tags": "[\"shipping\",\"logistics\",\"costs\",\"tracking\"]",
+      "featured": 1,
+      "authorId": 1,
+      "published": 1,
+      "createdAt": "2026-01-20T19:57:37.733Z",
+      "updatedAt": "2026-01-20T19:57:37.733Z"
+    }
+  ]
+}

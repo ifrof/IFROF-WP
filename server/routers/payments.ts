@@ -29,6 +29,13 @@ export const paymentsRouter = router({
   createCheckout: protectedProcedure
     .input(createCheckoutSchema)
     .mutation(async ({ ctx, input }) => {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        throw new TRPCError({
+          code: "SERVICE_UNAVAILABLE",
+          message: "Payment system is currently unavailable. Please contact support. / نظام الدفع غير متوفر حالياً، يرجى التواصل مع الدعم.",
+        });
+      }
+
       const db = await getDb();
       if (!db) throw new Error("Database not available");
 

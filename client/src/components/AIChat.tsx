@@ -60,6 +60,7 @@ export default function AIChat() {
 
     // Simulate AI response
     setTimeout(() => {
+      const currentLang = language || 'ar';
       const aiResponses = {
         ar: [
           'هذا سؤال ممتاز! دعني أساعدك في البحث عن أفضل المصانع الموثقة.',
@@ -75,7 +76,7 @@ export default function AIChat() {
         ]
       };
 
-      const responses = language === 'ar' ? aiResponses.ar : aiResponses.en;
+      const responses = currentLang === 'ar' ? aiResponses.ar : aiResponses.en;
       const randomResponse = responses[Math.floor(Math.random() * responses.length)];
 
       const assistantMessage: Message = {
