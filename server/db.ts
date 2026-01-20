@@ -417,51 +417,7 @@ export async function clearCart(userId: number) {
   return { success: true };
 }
 
-// Order operations
-export async function createOrder(data: any) {
-  if (!isJsonMode && _db) {
-    try {
-      const result = await _db.insert(schema.orders).values(data);
-      return { ...data, id: Date.now() };
-    } catch (e) {
-      console.error("[Database] createOrder MySQL error:", e);
-    }
-  }
-
-  const dbData = readJsonDb();
-  dbData.orders = dbData.orders || [];
-  const order = { id: Date.now(), ...data, createdAt: new Date(), updatedAt: new Date() };
-  dbData.orders.push(order);
-  writeJsonDb(dbData);
-  return order;
-}
-
-export async function getOrderById(orderId: number) {
-  if (!isJsonMode && _db) {
-    try {
-      const result = await _db.select().from(schema.orders).where(eq(schema.orders.id, orderId));
-      return result[0] || null;
-    } catch (e) {
-      console.error("[Database] getOrderById MySQL error:", e);
-    }
-  }
-
-  const dbData = readJsonDb();
-  return (dbData.orders || []).find((o: any) => o.id === orderId) || null;
-}
-
-export async function getOrdersByBuyer(buyerId: number) {
-  if (!isJsonMode && _db) {
-    try {
-      return await _db.select().from(schema.orders).where(eq(schema.orders.buyerId, buyerId));
-    } catch (e) {
-      console.error("[Database] getOrdersByBuyer MySQL error:", e);
-    }
-  }
-
-  const dbData = readJsonDb();
-  return (dbData.orders || []).filter((o: any) => o.buyerId === buyerId);
-}
+// Order operations are defined in the ORDER OPERATIONS section below
 
 export async function searchProducts(query: string) {
   if (!isJsonMode && _db) {
@@ -615,6 +571,20 @@ export async function getOrdersByBuyer(buyerId: number) {
 
   const dbData = readJsonDb();
   return (dbData.orders || []).filter((o: any) => o.buyerId === buyerId);
+}
+
+export async function getOrderById(orderId: number) {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.select().from(schema.orders).where(eq(schema.orders.id, orderId));
+      return result[0] || null;
+    } catch (e) {
+      console.error("[Database] getOrderById MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  return (dbData.orders || []).find((o: any) => o.id === orderId) || null;
 }
 
 export async function createOrder(data: any) {

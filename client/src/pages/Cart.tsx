@@ -64,8 +64,8 @@ export default function Cart() {
     updateQuantityMutation.mutate({ productId: itemId, quantity: newQuantity });
   };
 
-  const handleRemoveItem = (itemId: number) => {
-    removeItemMutation.mutate({ productId: itemId });
+  const handleRemoveItem = (productId: number) => {
+    removeItemMutation.mutate({ productId });
   };
 
   const handleClearCart = () => {
@@ -182,7 +182,7 @@ export default function Cart() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleRemoveItem(item.cartItem.id)}
+                                onClick={() => handleRemoveItem(item.product?.id || item.service?.id || 0)}
                                 disabled={removeItemMutation.isPending}
                               >
                                 <Trash2 className="w-4 h-4 text-red-500" />
@@ -196,7 +196,7 @@ export default function Cart() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() =>
-                                    handleQuantityChange(item.cartItem.id, item.cartItem.quantity - 1)
+                                    handleQuantityChange(item.product?.id || item.service?.id || 0, item.cartItem.quantity - 1)
                                   }
                                   disabled={item.cartItem.quantity <= 1}
                                 >
@@ -206,7 +206,7 @@ export default function Cart() {
                                   type="number"
                                   value={item.cartItem.quantity}
                                   onChange={(e) =>
-                                    handleQuantityChange(item.cartItem.id, parseInt(e.target.value) || 1)
+                                    handleQuantityChange(item.product?.id || item.service?.id || 0, parseInt(e.target.value) || 1)
                                   }
                                   className="w-16 text-center"
                                   min={1}
@@ -215,7 +215,7 @@ export default function Cart() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() =>
-                                    handleQuantityChange(item.cartItem.id, item.cartItem.quantity + 1)
+                                    handleQuantityChange(item.product?.id || item.service?.id || 0, item.cartItem.quantity + 1)
                                   }
                                 >
                                   +

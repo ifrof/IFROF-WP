@@ -82,10 +82,16 @@ export const cartRouter = router({
           throw new TRPCError({ code: "UNAUTHORIZED", message: "User not authenticated" });
         }
 
+        const product = await db.getProductById(input.productId);
+        if (!product) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Product not found" });
+        }
+
         await db.removeFromCart(userId, input.productId);
         return { success: true, message: "Item removed from cart" };
-      } catch (error) {
+      } catch (error: any) {
         console.error("[Cart] removeItem error:", error);
+        if (error.code) throw error;
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to remove item from cart" });
       }
     }),

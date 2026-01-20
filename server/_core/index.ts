@@ -4,6 +4,7 @@ import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
+import { registerStripeWebhook } from "./stripe-webhook";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -55,8 +56,13 @@ async function startServer() {
   
   // CSRF token endpoint
   app.get("/api/csrf-token", getCsrfTokenHandler);
+  
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  
+  // Stripe webhook endpoint (must be before CSRF check)
+  registerStripeWebhook(app);
+  
   // tRPC API
   app.use(
     "/api/trpc",

@@ -11,8 +11,9 @@ import Marketplace from "@/pages/Marketplace";
 import ProductDetail from "@/pages/ProductDetail";
 import Services from "@/pages/Services";
 import Cart from "@/pages/Cart";
-import Checkout from "@/pages/Checkout";
+import CheckoutImproved from "@/pages/CheckoutImproved";
 import Orders from "@/pages/Orders";
+import OrderDetail from "@/pages/OrderDetail";
 import FactoryDashboard from "@/pages/FactoryDashboard";
 import BuyerDashboard from "@/pages/BuyerDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
@@ -61,8 +62,9 @@ function Router() {
       <Route path={"/products/:id"} component={ProductDetail} />
       <Route path={"/services"} component={Services} />
       <Route path={"/cart"} component={Cart} />
-      <Route path={"/checkout"} component={Checkout} />
+      <Route path={"/checkout"} component={CheckoutImproved} />
       <Route path={"/orders"} component={Orders} />
+      <Route path={"/orders/:orderId"} component={OrderDetail} />
       <Route path={"/dashboard/factory"} component={FactoryDashboard} />
       <Route path={"/dashboard/buyer"} component={BuyerDashboard} />
       <Route path={"/dashboard/admin"} component={AdminDashboard} />
