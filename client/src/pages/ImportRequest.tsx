@@ -30,6 +30,8 @@ import { getOAuthLoginUrl, isOAuthConfigured } from '@/config/env';
 
 export default function ImportRequest() {
   const { language, t, dir } = useLanguage();
+  // Ensure t is defined even if context fails for some reason
+  const safeT = t || ((key: string) => key);
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -131,7 +133,7 @@ export default function ImportRequest() {
             {language === 'ar' ? 'العودة للرئيسية' : 'Back to Home'}
           </Link>
           <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            {t('importRequest.new')}
+            {safeT('importRequest.new')}
           </h1>
           <p className="text-gray-300">
             {language === 'ar' 
@@ -148,7 +150,7 @@ export default function ImportRequest() {
           <div className="md:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle>{t('importRequest.title')}</CardTitle>
+                <CardTitle>{safeT('importRequest.title')}</CardTitle>
                 <CardDescription>
                   {language === 'ar' 
                     ? 'املأ النموذج التالي وسنتواصل معك خلال 24 ساعة'
@@ -180,7 +182,7 @@ export default function ImportRequest() {
                     <div>
                       <Label htmlFor="productName" className="flex items-center gap-2">
                         <Package className="w-4 h-4" />
-                        {t('importRequest.form.product')} *
+                        {safeT('importRequest.form.product')} *
                       </Label>
                       <Input
                         id="productName"
@@ -196,7 +198,7 @@ export default function ImportRequest() {
                     <div>
                       <Label htmlFor="quantity" className="flex items-center gap-2">
                         <FileText className="w-4 h-4" />
-                        {t('importRequest.form.quantity')} *
+                        {safeT('importRequest.form.quantity')} *
                       </Label>
                       <Input
                         id="quantity"
@@ -212,7 +214,7 @@ export default function ImportRequest() {
                     <div>
                       <Label htmlFor="specifications" className="flex items-center gap-2">
                         <FileText className="w-4 h-4" />
-                        {t('importRequest.form.specifications')}
+                        {safeT('importRequest.form.specifications')}
                       </Label>
                       <Textarea
                         id="specifications"
@@ -228,7 +230,7 @@ export default function ImportRequest() {
                     <div>
                       <Label htmlFor="budget" className="flex items-center gap-2">
                         <DollarSign className="w-4 h-4" />
-                        {t('importRequest.form.budget')}
+                        {safeT('importRequest.form.budget')}
                       </Label>
                       <Input
                         id="budget"
@@ -243,7 +245,7 @@ export default function ImportRequest() {
                     <div>
                       <Label htmlFor="destination" className="flex items-center gap-2">
                         <Globe className="w-4 h-4" />
-                        {t('importRequest.form.destination')} *
+                        {safeT('importRequest.form.destination')} *
                       </Label>
                       <Input
                         id="destination"
@@ -259,7 +261,7 @@ export default function ImportRequest() {
                     <div>
                       <Label htmlFor="deadline" className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        {t('importRequest.form.deadline')}
+                        {safeT('importRequest.form.deadline')}
                       </Label>
                       <Input
                         id="deadline"
@@ -357,7 +359,7 @@ export default function ImportRequest() {
                     <div>
                       <Label className="flex items-center gap-2">
                         <Truck className="w-4 h-4" />
-                        {t('importRequest.form.shippingMethod')}
+                        {safeT('importRequest.form.shippingMethod')}
                       </Label>
                       <div className="flex gap-4 mt-2">
                         {[
@@ -384,7 +386,7 @@ export default function ImportRequest() {
                     <div>
                       <Label htmlFor="notes" className="flex items-center gap-2">
                         <FileText className="w-4 h-4" />
-                        {t('importRequest.form.notes')}
+                        {safeT('importRequest.form.notes')}
                       </Label>
                       <Textarea
                         id="notes"
@@ -409,7 +411,7 @@ export default function ImportRequest() {
                         </>
                       ) : (
                         <>
-                          {t('importRequest.submit')}
+                          {safeT('importRequest.submit')}
                           <Arrow className="w-5 h-5 ms-2" />
                         </>
                       )}

@@ -8,7 +8,9 @@ import { Link } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Marketplace() {
-  const { language, dir } = useLanguage();
+  const { language, t, dir } = useLanguage();
+  // Ensure t is defined even if context fails for some reason
+  const safeT = t || ((key: string) => key);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFactory, setSelectedFactory] = useState<number | null>(null);
 
