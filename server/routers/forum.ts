@@ -40,10 +40,11 @@ export const forumRouter = router({
       }
 
       // Increment view count
-      await db.updateForumPost(input.id, { views: (post.views || 0) + 1 });
+      const postData = post as any;
+      await db.updateForumPost(input.id, { views: (postData.views || 0) + 1 });
 
       const answers = await db.getForumAnswersByPost(input.id);
-      return { ...post, answers };
+      return { ...postData, answers };
     }),
 
   // Create forum post (authenticated users)
@@ -134,7 +135,8 @@ export const forumRouter = router({
       }
 
       // Only post author or admin can mark best answer
-      if (ctx.user.id !== post.authorId && ctx.user.role !== "admin") {
+      const postData = post as any;
+      if (ctx.user.id !== postData.authorId && ctx.user.role !== "admin") {
         throw new TRPCError({ code: "FORBIDDEN", message: "Only post author can mark best answer" });
       }
 

@@ -71,7 +71,7 @@ export function initPerformanceMonitoring() {
     if (perfData) {
       const pageLoadTime = perfData.loadEventEnd - perfData.loadEventStart;
       const connectTime = perfData.responseEnd - perfData.requestStart;
-      const renderTime = perfData.domComplete - perfData.domLoading;
+      const renderTime = perfData.domComplete - (perfData as any).domLoading;
 
       console.log("Page Load Time:", pageLoadTime);
       console.log("Connect Time:", connectTime);

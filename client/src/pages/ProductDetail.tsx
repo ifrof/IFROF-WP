@@ -23,7 +23,7 @@ export default function ProductDetail() {
   const { data: factory } = trpc.factories.getById.useQuery(
     { id: product?.factoryId || 0 },
     { enabled: !!product?.factoryId }
-  );
+  ) as { data: any };
 
   const { data: reviews } = trpc.reviews.getByProduct.useQuery(
     { productId: product?.id || 0 },

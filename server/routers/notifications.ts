@@ -101,7 +101,7 @@ export const notificationsRouter = router({
         .from(notifications)
         .where(eq(notifications.userId, ctx.user.id));
 
-      return result.filter((n) => n.read === 0).length;
+      return result.filter((n: any) => n.read === 0).length;
     } catch (error) {
       console.error("Error fetching unread count:", error);
       return 0;

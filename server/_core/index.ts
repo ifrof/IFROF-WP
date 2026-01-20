@@ -8,6 +8,10 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { apiLimiter, sanitizeInput, securityHeaders } from "./middleware";
+import { authRateLimiter } from "./auth-rate-limiter";
+import { ensureCsrfToken, getCsrfTokenHandler } from "./csrf";
+import { httpsRedirect } from "./https-redirect";
+import cookieParser from "cookie-parser";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -33,12 +37,24 @@ async function startServer() {
   const server = createServer(app);
   // Trust the first proxy hop so rate limiting uses the real client IP.
   app.set("trust proxy", 1);
+  
+  // Force HTTPS in production
+  app.use(httpsRedirect);
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  app.use(cookieParser());
   app.use(securityHeaders);
   app.use(sanitizeInput);
+  app.use(ensureCsrfToken);
   app.use("/api", apiLimiter);
+  
+  // Stricter rate limiting for auth endpoints
+  app.use("/api/oauth", authRateLimiter);
+  app.use("/api/trpc/auth", authRateLimiter);
+  
+  // CSRF token endpoint
+  app.get("/api/csrf-token", getCsrfTokenHandler);
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // tRPC API

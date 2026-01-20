@@ -115,12 +115,13 @@ export const productsRouter = router({
       }
       
       // Fetch factory info to satisfy client-side expectations
-      const factory = await db.getFactoryById(product.factoryId);
+      const productData = product as any;
+      const factory = await db.getFactoryById(productData.factoryId);
       
       return {
-        ...product,
+        ...productData,
         factory, // Add factory relation
-        product: product, // Alias for compatibility if needed
+        product: productData, // Alias for compatibility if needed
       };
     }),
 

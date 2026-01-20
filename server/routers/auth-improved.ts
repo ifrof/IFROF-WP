@@ -59,7 +59,7 @@ export const authImprovedRouter = router({
         const localDbPath = path.join(process.cwd(), "local_db.json");
         if (fs.existsSync(localDbPath)) {
           const data = JSON.parse(fs.readFileSync(localDbPath, 'utf-8'));
-          user = data.users.find(u => u.email === input.email);
+          user = data.users.find((u: any) => u.email === input.email);
           
           if (user) {
             user.lastSignedIn = new Date().toISOString();

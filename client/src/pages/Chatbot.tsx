@@ -34,7 +34,7 @@ export default function Chatbot() {
   useEffect(() => {
     if (chatHistory) {
       setMessages(
-        chatHistory.map((msg) => ({
+        chatHistory.map((msg: any) => ({
           role: msg.role,
           content: msg.content,
         }))

@@ -47,12 +47,12 @@ export const blogRouter = router({
 
       // Fallback to JSON
       const data = readJsonDb();
-      let posts = (data.blogPosts || []).filter(p => p.published === 1);
+      let posts = (data.blogPosts || []).filter((p: any) => p.published === 1);
       
       // Map to correct language if needed
-      const isAr = ctx.req.headers['accept-language']?.includes('ar') || true; // Default to AR for now or detect from context
+      const isAr = true; // Default to AR for now or detect from context
       
-      posts = posts.map(p => ({
+      posts = posts.map((p: any) => ({
         ...p,
         title: (isAr && p.titleAr) ? p.titleAr : p.title,
         excerpt: (isAr && p.excerptAr) ? p.excerptAr : p.excerpt,
@@ -61,11 +61,11 @@ export const blogRouter = router({
 
       if (input.search) {
         const search = input.search.toLowerCase();
-        posts = posts.filter(p => p.title.toLowerCase().includes(search));
+        posts = posts.filter((p: any) => p.title.toLowerCase().includes(search));
       }
       
       if (input.category) {
-        posts = posts.filter(p => p.category === input.category);
+        posts = posts.filter((p: any) => p.category === input.category);
       }
       
       return posts;
@@ -97,7 +97,7 @@ export const blogRouter = router({
 
       // Fallback to JSON
       const data = readJsonDb();
-      const post = (data.blogPosts || []).find(p => p.slug === input.slug && p.published === 1);
+      const post = (data.blogPosts || []).find((p: any) => p.slug === input.slug && p.published === 1);
       if (!post) return null;
 
       const isAr = ctx.req.headers['accept-language']?.includes('ar') || true;
