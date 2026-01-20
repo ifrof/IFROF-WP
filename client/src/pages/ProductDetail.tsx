@@ -17,31 +17,37 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const { t } = useLanguage();
 
-  const { data: productData, isLoading } = trpc.products.getById.useQuery({ id: productId });
-  const { data: reviews } = trpc.reviews.getByFactory.useQuery(
-    { factoryId: productData?.factory?.id || 0 },
-    { enabled: !!productData?.factory?.id }
-  );
-  const { data: factoryStats } = trpc.reviews.getFactoryStats.useQuery(
-    { factoryId: productData?.factory?.id || 0 },
-    { enabled: !!productData?.factory?.id }
+  const { data: product, isLoading } = trpc.products.getById.useQuery({ id: productId });
+  
+  // We need to fetch factory separately if it's not included in product
+  const { data: factory } = trpc.factories.getById.useQuery(
+    { id: product?.factoryId || 0 },
+    { enabled: !!product?.factoryId }
   );
 
-  const addToCartMutation = trpc.cart.add.useMutation({
+  const { data: reviews } = trpc.reviews.getByProduct.useQuery(
+    { productId: product?.id || 0 },
+    { enabled: !!product?.id }
+  );
+  const { data: factoryStats } = trpc.reviews.getAverageRating.useQuery(
+    { productId: product?.id || 0 },
+    { enabled: !!product?.id }
+  );
+
+  const addToCartMutation = trpc.cart.addItem.useMutation({
     onSuccess: () => {
       toast.success(t("cart.added"));
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message);
     },
   });
 
   const handleAddToCart = () => {
-    if (!productData?.product) return;
+    if (!product) return;
     
     addToCartMutation.mutate({
-      productId: productData.product.id,
-      factoryId: productData.factory!.id,
+      productId: product.id,
       quantity,
     });
   };
@@ -54,7 +60,7 @@ export default function ProductDetail() {
     );
   }
 
-  if (!productData?.product) {
+  if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card>
@@ -66,7 +72,6 @@ export default function ProductDetail() {
     );
   }
 
-  const { product, factory } = productData;
   const images = product.imageUrls ? JSON.parse(product.imageUrls) : [];
   const specifications = product.specifications ? JSON.parse(product.specifications) : {};
   const pricingTiers = product.pricingTiers ? JSON.parse(product.pricingTiers) : [];
@@ -169,7 +174,7 @@ export default function ProductDetail() {
                     <div className="flex items-center gap-2">
                       <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                       <span>
-                        {factoryStats.averageRating.toFixed(1)} ({factoryStats.totalReviews} {t("reviews.title")})
+                        {(factoryStats as any).rating.toFixed(1)} ({(factoryStats as any).count} {t("reviews.title")})
                       </span>
                     </div>
                   )}
@@ -284,7 +289,9 @@ export default function ProductDetail() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-center text-muted-foreground">{t("product.noSpecifications")}</p>
+                    <p className="text-center text-muted-foreground py-8">
+                      {t("product.noSpecifications")}
+                    </p>
                   )}
                 </CardContent>
               </Card>
@@ -293,39 +300,36 @@ export default function ProductDetail() {
             <TabsContent value="reviews">
               <Card>
                 <CardContent className="pt-6">
-                  {reviews && reviews.length > 0 ? (
-                    <div className="space-y-4">
-                      {reviews.map((review: any) => (
-                        <div key={review.review.id} className="border-b pb-4 last:border-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="flex">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-4 h-4 ${
-                                    i < review.review.rating
-                                      ? "text-yellow-500 fill-yellow-500"
-                                      : "text-gray-300"
-                                  }`}
-                                />
-                              ))}
+                  {!reviews || (reviews as any[]).length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">{t("reviews.noReviews")}</p>
+                  ) : (
+                    <div className="space-y-6">
+                      {(reviews as any[]).map((review: any) => (
+                        <div key={review.id} className="border-b pb-4 last:border-0">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-4 h-4 ${
+                                      i < review.rating
+                                        ? "text-yellow-500 fill-yellow-500"
+                                        : "text-gray-300"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="font-medium">{review.user?.name || t("common.anonymous")}</span>
                             </div>
-                            <span className="font-medium">{review.user?.name || t("common.anonymous")}</span>
                             <span className="text-sm text-muted-foreground">
-                              {new Date(review.review.createdAt).toLocaleDateString()}
+                              {new Date(review.createdAt).toLocaleDateString()}
                             </span>
                           </div>
-                          {review.review.title && (
-                            <h4 className="font-medium mb-1">{review.review.title}</h4>
-                          )}
-                          {review.review.comment && (
-                            <p className="text-muted-foreground">{review.review.comment}</p>
-                          )}
+                          <p className="text-sm">{review.comment}</p>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-center text-muted-foreground">{t("reviews.noReviews")}</p>
                   )}
                 </CardContent>
               </Card>

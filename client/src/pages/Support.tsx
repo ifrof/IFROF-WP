@@ -20,16 +20,16 @@ import { Link } from "wouter";
 export default function Support() {
   const { t } = useLanguage();
   const [showForm, setShowForm] = useState(false);
-  const [ticketType, setTicketType] = useState<"support" | "complaint" | "dispute">("support");
+  const [ticketType, setTicketType] = useState<string>("support");
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high" | "urgent">("medium");
+  const [priority, setPriority] = useState<string>("medium");
 
   const { data: user } = trpc.auth.me.useQuery();
-  const { data: myTickets, refetch } = trpc.support.getMyTickets.useQuery(undefined, {
+  const { data: myTickets, refetch } = trpc.support.getTickets.useQuery(undefined, {
     enabled: !!user,
   });
-  const createTicketMutation = trpc.support.create.useMutation();
+  const createTicketMutation = trpc.support.createTicket.useMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,10 +41,9 @@ export default function Support() {
 
     try {
       await createTicketMutation.mutateAsync({
-        type: ticketType,
+        category: ticketType,
         subject,
-        description,
-        priority,
+        message: description,
       });
 
       toast.success(t("support.ticketCreated"));
@@ -240,9 +239,9 @@ export default function Support() {
                 <CardTitle>{t("support.myTickets")}</CardTitle>
               </CardHeader>
               <CardContent>
-                {myTickets && myTickets.length > 0 ? (
+                {myTickets && (myTickets as any[]).length > 0 ? (
                   <div className="space-y-4">
-                    {myTickets.map((ticket: any) => (
+                    {(myTickets as any[]).map((ticket: any) => (
                       <div key={ticket.id} className="border rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div>

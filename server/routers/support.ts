@@ -32,4 +32,18 @@ export const supportRouter = router({
       // TODO: Implement support functionality
       return { success: true };
     }),
+
+  // Aliases for compatibility
+  getMyTickets: protectedProcedure
+    .query(async ({ ctx }) => {
+      // TODO: Implement support functionality
+      return [];
+    }),
+
+  create: protectedProcedure
+    .input(z.object({ subject: z.string(), message: z.string(), category: z.string().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      // TODO: Implement support functionality
+      return { success: true, ticketId: 1 };
+    }),
 });

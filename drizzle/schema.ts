@@ -355,3 +355,22 @@ export const productPortfolio = mysqlTable("product_portfolio", {
 
 export type ProductPortfolio = typeof productPortfolio.$inferSelect;
 export type InsertProductPortfolio = typeof productPortfolio.$inferInsert;
+
+/**
+ * Services table for factory services
+ */
+export const services = mysqlTable("services", {
+  id: int("id").autoincrement().primaryKey(),
+  factoryId: int("factoryId").notNull().references(() => factories.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 100 }),
+  basePrice: int("basePrice").notNull(),
+  imageUrls: text("imageUrls"),
+  active: int("active").default(1),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Service = typeof services.$inferSelect;
+export type InsertService = typeof services.$inferInsert;

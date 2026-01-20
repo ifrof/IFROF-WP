@@ -10,10 +10,34 @@ import { Loader2, CreditCard, MapPin, Package } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+interface CartItemData {
+  cartItem: {
+    id: number;
+    quantity: number;
+  };
+  product?: {
+    id: number;
+    name: string;
+    basePrice: number;
+    imageUrls?: string;
+    category?: string;
+  };
+  service?: {
+    id: number;
+    name: string;
+    basePrice: number;
+    imageUrls?: string;
+    category?: string;
+  };
+  factory?: {
+    id: number;
+    name: string;
+  };
+}
+
 export default function Checkout() {
   const [, setLocation] = useLocation();
   const { t } = useLanguage();
-  const utils = trpc.useUtils();
 
   const [shippingAddress, setShippingAddress] = useState({
     fullName: "",
@@ -27,13 +51,13 @@ export default function Checkout() {
   const [notes, setNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { data: cartItems, isLoading } = trpc.cart.list.useQuery();
+  const { data: cartItems, isLoading } = trpc.cart.getItems.useQuery();
   const createCheckoutMutation = trpc.payments.createCheckout.useMutation();
   const clearCartMutation = trpc.cart.clear.useMutation();
 
   const calculateTotal = () => {
     if (!cartItems) return 0;
-    return cartItems.reduce((total, item) => {
+    return (cartItems as CartItemData[]).reduce((total: number, item: CartItemData) => {
       const price = item.product?.basePrice || item.service?.basePrice || 0;
       return total + price * item.cartItem.quantity;
     }, 0);
@@ -61,7 +85,7 @@ export default function Checkout() {
 
     try {
       // Group items by factory
-      const factoryGroups = cartItems.reduce((groups: Record<number, any[]>, item) => {
+      const factoryGroups = (cartItems as CartItemData[]).reduce((groups: Record<number, CartItemData[]>, item: CartItemData) => {
         const factoryId = item.factory?.id;
         if (factoryId) {
           if (!groups[factoryId]) {
@@ -74,7 +98,7 @@ export default function Checkout() {
 
       // Create orders for each factory
       for (const [factoryId, items] of Object.entries(factoryGroups)) {
-        const orderItems = (items as any[]).map((item) => ({
+        const orderItems = items.map((item) => ({
           productId: item.product?.id || item.service?.id || 0,
           quantity: item.cartItem.quantity,
           price: (item.product?.basePrice || item.service?.basePrice || 0) / 100,
@@ -266,7 +290,7 @@ export default function Checkout() {
               <CardContent className="space-y-4">
                 {/* Items */}
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {cartItems.map((item) => {
+                  {(cartItems as CartItemData[]).map((item) => {
                     const itemData = item.product || item.service;
                     const price = itemData?.basePrice || 0;
                     return (

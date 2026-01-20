@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,43 +7,65 @@ import { Loader2, Trash2, ShoppingCart, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+interface CartItemData {
+  cartItem: {
+    id: number;
+    quantity: number;
+  };
+  product?: {
+    id: number;
+    name: string;
+    basePrice: number;
+    imageUrls?: string;
+    category?: string;
+  };
+  service?: {
+    id: number;
+    name: string;
+    basePrice: number;
+    imageUrls?: string;
+    category?: string;
+  };
+  factory?: {
+    id: number;
+    name: string;
+  };
+}
+
 export default function Cart() {
   const [, setLocation] = useLocation();
   const { t } = useLanguage();
   const utils = trpc.useUtils();
 
-  const { data: cartItems, isLoading } = trpc.cart.list.useQuery();
+  const { data: cartItems, isLoading } = trpc.cart.getItems.useQuery();
   
   const updateQuantityMutation = trpc.cart.updateQuantity.useMutation({
     onSuccess: () => {
-      utils.cart.list.invalidate();
-      utils.cart.count.invalidate();
+      utils.cart.getItems.invalidate();
     },
   });
 
-  const removeItemMutation = trpc.cart.remove.useMutation({
+  const removeItemMutation = trpc.cart.removeItem.useMutation({
     onSuccess: () => {
-      utils.cart.list.invalidate();
-      utils.cart.count.invalidate();
+      utils.cart.getItems.invalidate();
       toast.success(t("cart.removed"));
     },
   });
 
   const clearCartMutation = trpc.cart.clear.useMutation({
     onSuccess: () => {
-      utils.cart.list.invalidate();
-      utils.cart.count.invalidate();
+      utils.cart.getItems.invalidate();
       toast.success(t("cart.cleared"));
     },
   });
 
   const handleQuantityChange = (itemId: number, newQuantity: number) => {
     if (newQuantity < 1) return;
-    updateQuantityMutation.mutate({ id: itemId, quantity: newQuantity });
+    updateQuantityMutation.mutate({ productId: itemId, quantity: newQuantity });
   };
 
   const handleRemoveItem = (itemId: number) => {
-    removeItemMutation.mutate({ id: itemId });
+    removeItemMutation.mutate({ productId: itemId });
   };
 
   const handleClearCart = () => {
@@ -55,7 +76,7 @@ export default function Cart() {
 
   const calculateTotal = () => {
     if (!cartItems) return 0;
-    return cartItems.reduce((total, item) => {
+    return (cartItems as CartItemData[]).reduce((total: number, item: CartItemData) => {
       const price = item.product?.basePrice || item.service?.basePrice || 0;
       return total + price * item.cartItem.quantity;
     }, 0);
@@ -122,7 +143,7 @@ export default function Cart() {
               </div>
 
               <div className="space-y-4">
-                {cartItems.map((item) => {
+                {(cartItems as CartItemData[]).map((item) => {
                   const itemData = item.product || item.service;
                   const images = itemData?.imageUrls ? JSON.parse(itemData.imageUrls) : [];
                   const price = itemData?.basePrice || 0;

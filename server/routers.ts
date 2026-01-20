@@ -5,6 +5,7 @@ import { publicProcedure, router } from "./_core/trpc";
 
 // Import all feature routers
 import { factoriesRouter, productsRouter } from "./routers/factories";
+import { authImprovedRouter } from "./routers/auth-improved";
 import { inquiriesRouter, messagesRouter } from "./routers/inquiries";
 import { forumRouter } from "./routers/forum";
 import { chatbotRouter } from "./routers/chatbot";
@@ -22,14 +23,7 @@ import { mapsRouter } from "./routers/maps";
 export const appRouter = router({
   system: systemRouter,
   
-  auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
-    logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return { success: true } as const;
-    }),
-  }),
+  auth: authImprovedRouter,
 
   // Marketplace features
   factories: factoriesRouter,

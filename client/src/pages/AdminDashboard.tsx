@@ -3,75 +3,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Users, Building2, Package, ShoppingBag, AlertTriangle, CheckCircle, Plus, Edit, Trash2, Eye, Download, FileText, BarChart3, LogOut, Menu, X } from "lucide-react";
+import { Loader2, Users, Building2, Package, ShoppingBag, AlertTriangle, CheckCircle, BarChart3 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
-import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 export default function AdminDashboard() {
-  const { t, language, setLanguage, dir } = useLanguage();
-  const { user, logout } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview");
+  const { t, language, dir } = useLanguage();
+  const { user } = useAuth();
   
   const { data: factories, isLoading: factoriesLoading } = trpc.factories.list.useQuery();
   const { data: products } = trpc.products.getByFactory.useQuery({ factoryId: 0 });
-
-  // بيانات وهمية للرسوم البيانية
-  const supplierData = [
-    { name: "Jan", factories: 45, trading: 12, mixed: 8 },
-    { name: "Feb", factories: 52, trading: 15, mixed: 10 },
-    { name: "Mar", factories: 48, trading: 14, mixed: 9 },
-    { name: "Apr", factories: 61, trading: 18, mixed: 12 },
-    { name: "May", factories: 55, trading: 16, mixed: 11 },
-    { name: "Jun", factories: 67, trading: 20, mixed: 14 },
-  ];
-
-  const riskDistribution = [
-    { name: language === "ar" ? "مخاطر منخفضة" : "Low Risk", value: 45, color: "#10b981" },
-    { name: language === "ar" ? "مخاطر متوسطة" : "Medium Risk", value: 30, color: "#f59e0b" },
-    { name: language === "ar" ? "مخاطر عالية" : "High Risk", value: 20, color: "#ef4444" },
-    { name: language === "ar" ? "حرج" : "Critical", value: 5, color: "#7c2d12" },
-  ];
-
-  const blogPosts = [
-    {
-      id: 1,
-      title: "How to Identify Real Factories in China",
-      titleAr: "كيفية تحديد المصانع الحقيقية في الصين",
-      author: "Admin",
-      date: "2026-01-15",
-      views: 1250,
-      status: "published",
-    },
-    {
-      id: 2,
-      title: "Top 10 Supplier Verification Tips",
-      titleAr: "أفضل 10 نصائح للتحقق من المورّدين",
-      author: "Admin",
-      date: "2026-01-10",
-      views: 890,
-      status: "published",
-    },
-    {
-      id: 3,
-      title: "Understanding Supply Chain Risks",
-      titleAr: "فهم مخاطر سلسلة التوريد",
-      author: "Admin",
-      date: "2026-01-05",
-      views: 450,
-      status: "draft",
-    },
-  ];
-
-  const menuItems = [
-    { id: "overview", label: language === "ar" ? "نظرة عامة" : "Overview", icon: BarChart3 },
-    { id: "factories", label: language === "ar" ? "المصانع" : "Factories", icon: Building2 },
-    { id: "blog", label: language === "ar" ? "المدونة" : "Blog", icon: FileText },
-    { id: "users", label: language === "ar" ? "المستخدمون" : "Users", icon: Users },
-  ];
+  const { data: systemStats } = trpc.dashboard.getSystemStats.useQuery(undefined, { enabled: !!user && user.role === "admin" });
+  const { data: allUsers } = trpc.dashboard.getAllUsers.useQuery(undefined, { enabled: !!user && user.role === "admin" });
 
   if (!user || user.role !== "admin") {
     return (
@@ -95,8 +39,8 @@ export default function AdminDashboard() {
     );
   }
 
-  const verifiedFactories = factories?.filter((f: any) => f.verificationStatus === "verified").length || 0;
-  const pendingFactories = factories?.filter((f: any) => f.verificationStatus === "pending").length || 0;
+  const verifiedFactories = (factories as any[])?.filter((f: any) => f.verificationStatus === "verified").length || 0;
+  const pendingFactories = (factories as any[])?.filter((f: any) => f.verificationStatus === "pending").length || 0;
 
   return (
     <div className="min-h-screen bg-gray-50" dir={dir}>
@@ -119,7 +63,7 @@ export default function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{factories?.length || 0}</div>
+              <div className="text-3xl font-bold">{systemStats?.factories || (factories as any[])?.length || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {verifiedFactories} {t("dashboard.admin.verified")}
               </p>
@@ -134,7 +78,7 @@ export default function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{products?.length || 0}</div>
+              <div className="text-3xl font-bold">{systemStats?.products || (products as any[])?.length || 0}</div>
             </CardContent>
           </Card>
 
@@ -158,7 +102,7 @@ export default function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">-</div>
+              <div className="text-3xl font-bold">{systemStats?.users || (allUsers as any[])?.length || 0}</div>
             </CardContent>
           </Card>
         </div>
@@ -222,9 +166,9 @@ export default function AdminDashboard() {
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                   </div>
-                ) : factories && factories.length > 0 ? (
+                ) : factories && (factories as any[]).length > 0 ? (
                   <div className="space-y-3">
-                    {factories.slice(0, 10).map((factory: any) => (
+                    {(factories as any[]).slice(0, 10).map((factory: any) => (
                       <div key={factory.id} className="border rounded-lg p-4 flex justify-between items-center">
                         <div className="flex items-center gap-4">
                           {factory.logoUrl && (
@@ -264,61 +208,6 @@ export default function AdminDashboard() {
                     {t("dashboard.admin.noFactories")}
                   </p>
                 )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Verifications Tab */}
-          <TabsContent value="verifications">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("dashboard.admin.pendingVerifications")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {pendingFactories > 0 ? (
-                  <div className="space-y-3">
-                    {factories
-                      ?.filter((f: any) => f.verificationStatus === "pending")
-                      .map((factory: any) => (
-                        <div key={factory.id} className="border rounded-lg p-4">
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <h3 className="font-medium">{factory.name}</h3>
-                              <p className="text-sm text-muted-foreground">{factory.location}</p>
-                            </div>
-                            <Badge variant="secondary">{t("manufacturer.notVerified")}</Badge>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                              <CheckCircle className="w-4 h-4 mr-2" />
-                              {t("dashboard.admin.approve")}
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              {t("dashboard.admin.review")}
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">
-                    {t("dashboard.admin.noPendingVerifications")}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Disputes Tab */}
-          <TabsContent value="disputes">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("dashboard.admin.activeDisputes")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center text-muted-foreground py-8">
-                  {t("dashboard.admin.noDisputes")}
-                </p>
               </CardContent>
             </Card>
           </TabsContent>
