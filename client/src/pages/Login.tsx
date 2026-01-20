@@ -8,7 +8,7 @@ import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 
 export default function Login() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -164,7 +164,7 @@ export default function Login() {
                     loginMutation.mutate({ email: "demo@ifrof.com", password: "password123", role: userType });
                   }}
                 >
-                  {t('nav.quickDemo')}
+                  {language === "ar" ? "دخول تجريبي سريع" : "Quick Demo Login"}
                 </Button>
               </form>
             </TabsContent>
