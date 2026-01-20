@@ -4,8 +4,12 @@ import { Calendar, User, ArrowRight, Search } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Blog() {
+  const { language, t, dir } = useLanguage();
+  // Ensure t is defined even if context fails for some reason
+  const safeT = t || ((key: string) => key);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
 
@@ -18,7 +22,7 @@ export default function Blog() {
   const categories = ["تكنولوجيا", "تجارة", "لوجستيات", "جودة", "نصائح"];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white" dir={dir}>
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="container flex items-center justify-between py-4">

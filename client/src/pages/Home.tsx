@@ -38,6 +38,8 @@ import { Link } from "wouter";
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
   const { language, setLanguage, t, dir } = useLanguage();
+  // Ensure t is defined even if context fails for some reason
+  const safeT = t || ((key: string) => key);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -61,26 +63,26 @@ export default function Home() {
               </div>
               <div>
                 <span className="font-bold text-xl text-[#1e3a5f]">IFROF</span>
-                <p className="text-xs text-gray-500 -mt-1">{t('platform.tagline')}</p>
+                <p className="text-xs text-gray-500 -mt-1">{safeT('platform.tagline')}</p>
               </div>
             </div>
 
             {/* Navigation Links */}
             <div className="hidden md:flex items-center gap-6">
               <a href="#how-it-works" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
-                {t('nav.howItWorks')}
+                {safeT('nav.howItWorks')}
               </a>
               <a href="#pricing" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
-                {t('nav.pricing')}
+                {safeT('nav.pricing')}
               </a>
               <Link href="/blog" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
                 {language === 'ar' ? 'المدونة' : 'Blog'}
               </Link>
               <a href="#support" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
-                {t('nav.support')}
+                {safeT('nav.support')}
               </a>
               <Link href="/ai-search" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
-                {t('nav.smartAssistant')}
+                {safeT('nav.smartAssistant')}
               </Link>
             </div>
 
@@ -99,13 +101,13 @@ export default function Home() {
               {!isAuthenticated ? (
                 <Link href="/login">
                   <Button variant="ghost" className="text-[#1e3a5f] font-medium">
-                    {t('nav.login')}
+                    {safeT('nav.login')}
                   </Button>
                 </Link>
               ) : (
                 <Link href={user?.role === 'factory' ? '/dashboard/factory' : '/dashboard/buyer'}>
                   <Button variant="ghost" className="text-[#1e3a5f] font-medium">
-                    {t('nav.dashboard')}
+                    {safeT('nav.dashboard')}
                   </Button>
                 </Link>
               )}
@@ -113,7 +115,7 @@ export default function Home() {
               {/* CTA Button */}
               <Link href="/import-request">
                 <Button className="bg-[#ff8c42] hover:bg-[#e67a35] text-white font-semibold px-6 shadow-lg shadow-orange-200">
-                  {t('nav.startImport')}
+                  {safeT('nav.startImport')}
                   <Arrow className="w-4 h-4 ms-2" />
                 </Button>
               </Link>
@@ -130,31 +132,31 @@ export default function Home() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-8">
               <BadgeCheck className="w-5 h-5 text-[#ff8c42]" />
-              <span className="text-sm font-medium">{t('hero.badge')}</span>
+              <span className="text-sm font-medium">{safeT('hero.badge')}</span>
             </div>
 
             {/* Main Title */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              {t('hero.title')}
-              <span className="block text-[#ff8c42] mt-2">{t('hero.titleHighlight')}</span>
+              {safeT('hero.title')}
+              <span className="block text-[#ff8c42] mt-2">{safeT('hero.titleHighlight')}</span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-              {t('hero.subtitle')}
+              {safeT('hero.subtitle')}
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Link href="/import-request">
                 <Button size="lg" className="bg-[#ff8c42] hover:bg-[#e67a35] text-white font-bold px-8 py-6 text-lg shadow-xl shadow-orange-500/30 w-full sm:w-auto">
-                  {t('hero.cta')}
+                  {safeT('hero.cta')}
                   <Arrow className="w-5 h-5 ms-2" />
                 </Button>
               </Link>
               <a href="#how-it-works">
                 <Button size="lg" variant="outline" className="border-2 border-white/30 text-white hover:bg-white/10 font-semibold px-8 py-6 text-lg w-full sm:w-auto bg-transparent">
-                  {t('hero.ctaSecondary')}
+                  {safeT('hero.ctaSecondary')}
                 </Button>
               </a>
             </div>
@@ -221,9 +223,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
-              {t('howItWorks.title')}
+              {safeT('howItWorks.title')}
             </h2>
-            <p className="text-gray-600 text-lg">{t('howItWorks.subtitle')}</p>
+            <p className="text-gray-600 text-lg">{safeT('howItWorks.subtitle')}</p>
           </div>
 
           <div className="grid md:grid-cols-4 gap-8">
@@ -259,7 +261,7 @@ export default function Home() {
           <div className="text-center mt-12">
             <Link href="/import-request">
               <Button size="lg" className="bg-[#ff8c42] hover:bg-[#e67a35] text-white font-bold px-8 shadow-lg">
-                {t('hero.cta')}
+                {safeT('hero.cta')}
                 <Arrow className="w-5 h-5 ms-2" />
               </Button>
             </Link>
@@ -273,7 +275,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-6">
-                {t('verification.howWeVerify')}
+                {safeT('verification.howWeVerify')}
               </h2>
               <p className="text-gray-600 text-lg mb-8">
                 {language === 'ar'
@@ -303,7 +305,7 @@ export default function Home() {
                   <BadgeCheck className="w-10 h-10 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-[#1e3a5f] mb-2">
-                  {t('manufacturer.badge')}
+                  {safeT('manufacturer.badge')}
                 </h3>
                 <p className="text-gray-600 mb-6">
                   {language === 'ar'
@@ -314,15 +316,15 @@ export default function Home() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="text-2xl font-bold text-[#1e3a5f]">95%</div>
-                    <div className="text-xs text-gray-500">{t('verification.confidence')}</div>
+                    <div className="text-xs text-gray-500">{safeT('verification.confidence')}</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-green-600">✓</div>
-                    <div className="text-xs text-gray-500">{t('manufacturer.direct')}</div>
+                    <div className="text-xs text-gray-500">{safeT('manufacturer.direct')}</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-[#ff8c42]">4.8</div>
-                    <div className="text-xs text-gray-500">{t('manufacturer.rating')}</div>
+                    <div className="text-xs text-gray-500">{safeT('manufacturer.rating')}</div>
                   </div>
                 </div>
               </div>
@@ -336,9 +338,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
-              {t('pricing.title')}
+              {safeT('pricing.title')}
             </h2>
-            <p className="text-gray-600 text-lg">{t('pricing.subtitle')}</p>
+            <p className="text-gray-600 text-lg">{safeT('pricing.subtitle')}</p>
           </div>
 
           <div className="grid md:grid-cols-4 gap-6">
@@ -394,9 +396,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
-              {t('support.title')}
+              {safeT('support.title')}
             </h2>
-            <p className="text-gray-600 text-lg">{t('support.subtitle')}</p>
+            <p className="text-gray-600 text-lg">{safeT('support.subtitle')}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -445,7 +447,7 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-8">
-            <p className="text-gray-500">{t('support.responseTime')}</p>
+            <p className="text-gray-500">{safeT('support.responseTime')}</p>
           </div>
         </div>
       </section>
@@ -467,7 +469,7 @@ export default function Home() {
           </p>
           <Link href="/import-request">
             <Button size="lg" className="bg-[#ff8c42] hover:bg-[#e67a35] text-white font-bold px-10 py-6 text-lg shadow-xl">
-              {t('hero.cta')}
+              {safeT('hero.cta')}
               <Arrow className="w-5 h-5 ms-2" />
             </Button>
           </Link>
@@ -487,25 +489,25 @@ export default function Home() {
                 <span className="font-bold text-xl">IFROF</span>
               </div>
               <p className="text-gray-400 mb-4 max-w-md">
-                {t('footer.description')}
+                {safeT('footer.description')}
               </p>
-              <p className="text-sm text-gray-500">{t('footer.madeWith')}</p>
+              <p className="text-sm text-gray-500">{safeT('footer.madeWith')}</p>
             </div>
 
             {/* Quick Links */}
             <div>
-              <h4 className="font-bold mb-4">{t('footer.quickLinks')}</h4>
+              <h4 className="font-bold mb-4">{safeT('footer.quickLinks')}</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#how-it-works" className="hover:text-white transition-colors">{t('nav.howItWorks')}</a></li>
-                <li><a href="#pricing" className="hover:text-white transition-colors">{t('nav.pricing')}</a></li>
-                <li><a href="#support" className="hover:text-white transition-colors">{t('nav.support')}</a></li>
-                <li><Link href="/ai-search" className="hover:text-white transition-colors">{t('nav.smartAssistant')}</Link></li>
+                <li><a href="#how-it-works" className="hover:text-white transition-colors">{safeT('nav.howItWorks')}</a></li>
+                <li><a href="#pricing" className="hover:text-white transition-colors">{safeT('nav.pricing')}</a></li>
+                <li><a href="#support" className="hover:text-white transition-colors">{safeT('nav.support')}</a></li>
+                <li><Link href="/ai-search" className="hover:text-white transition-colors">{safeT('nav.smartAssistant')}</Link></li>
               </ul>
             </div>
 
             {/* Contact */}
             <div>
-              <h4 className="font-bold mb-4">{t('footer.contact')}</h4>
+              <h4 className="font-bold mb-4">{safeT('footer.contact')}</h4>
               <ul className="space-y-2 text-gray-400">
                 <li className="flex items-center gap-2">
                   <Mail className="w-4 h-4" />
@@ -525,11 +527,11 @@ export default function Home() {
 
           {/* Bottom */}
           <div className="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-500 text-sm">{t('footer.copyright')}</p>
+            <p className="text-gray-500 text-sm">{safeT('footer.copyright')}</p>
             <div className="flex gap-6 text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition-colors">{t('footer.terms')}</a>
-              <a href="#" className="hover:text-white transition-colors">{t('footer.privacy')}</a>
-              <a href="#" className="hover:text-white transition-colors">{t('footer.refund')}</a>
+              <a href="#" className="hover:text-white transition-colors">{safeT('footer.terms')}</a>
+              <a href="#" className="hover:text-white transition-colors">{safeT('footer.privacy')}</a>
+              <a href="#" className="hover:text-white transition-colors">{safeT('footer.refund')}</a>
             </div>
           </div>
         </div>

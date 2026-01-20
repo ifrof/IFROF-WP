@@ -9,6 +9,8 @@ import { Link } from 'wouter';
 
 export default function AISearch() {
   const { t, language, dir } = useLanguage();
+  // Ensure t is defined even if context fails for some reason
+  const safeT = t || ((key: string) => key);
   const [searchQuery, setSearchQuery] = useState('');
   const [category, setCategory] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -116,7 +118,7 @@ export default function AISearch() {
               <Link href="/">
                 <Button variant="ghost" className="flex items-center gap-2 text-gray-600 hover:text-blue-900">
                   <BackArrow className="w-4 h-4" />
-                  {t('common.back')}
+                  {safeT('common.back')}
                 </Button>
               </Link>
             </div>
@@ -131,12 +133,12 @@ export default function AISearch() {
             <div className="flex items-center gap-3">
               <Link href="/marketplace">
                 <Button variant="outline" size="sm">
-                  {t('nav.manufacturers')}
+                  {safeT('nav.manufacturers')}
                 </Button>
               </Link>
               <Link href="/import-request">
                 <Button size="sm" className="bg-[#ff8c42] hover:bg-[#e67a35]">
-                  {t('nav.startImport')}
+                  {safeT('nav.startImport')}
                 </Button>
               </Link>
             </div>
@@ -148,10 +150,10 @@ export default function AISearch() {
       <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl font-bold mb-4">
-            {t('smartAssistant.title')}
+            {safeT('smartAssistant.title')}
           </h1>
           <p className="text-lg text-blue-100">
-            {t('smartAssistant.subtitle')}
+            {safeT('smartAssistant.subtitle')}
           </p>
         </div>
       </div>
@@ -160,7 +162,7 @@ export default function AISearch() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>{t('common.search')}</CardTitle>
+            <CardTitle>{safeT('common.search')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSearch} className="space-y-6">
@@ -170,7 +172,7 @@ export default function AISearch() {
                     {language === 'ar' ? 'ماذا تبحث عن؟' : 'What are you looking for?'}
                   </label>
                   <Input
-                    placeholder={t('smartAssistant.placeholder')}
+                    placeholder={safeT('smartAssistant.placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full"
@@ -196,12 +198,12 @@ export default function AISearch() {
                     {isSearching ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin me-2" />
-                        {t('common.loading')}
+                        {safeT('common.loading')}
                       </>
                     ) : (
                       <>
                         <Search className="w-4 h-4 me-2" />
-                        {t('common.search')}
+                        {safeT('common.search')}
                       </>
                     )}
                   </Button>
