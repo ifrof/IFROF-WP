@@ -374,3 +374,18 @@ export const services = mysqlTable("services", {
 
 export type Service = typeof services.$inferSelect;
 export type InsertService = typeof services.$inferInsert;
+
+/**
+ * Shopping cart items table
+ */
+export const cartItems = mysqlTable("cart_items", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  productId: int("productId").notNull().references(() => products.id),
+  quantity: int("quantity").notNull().default(1),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CartItem = typeof cartItems.$inferSelect;
+export type InsertCartItem = typeof cartItems.$inferInsert;

@@ -98,11 +98,23 @@ export const factoriesRouter = router({
 });
 
 export const productsRouter = router({
+  // Get all products (public)
+  getAll: publicProcedure.query(async () => {
+    return db.getAllProducts();
+  }),
+
   // Get products by factory (public)
   getByFactory: publicProcedure
     .input(z.object({ factoryId: z.number() }))
     .query(async ({ input }) => {
       return db.getProductsByFactory(input.factoryId);
+    }),
+
+  // Get related products (public)
+  getRelated: publicProcedure
+    .input(z.object({ factoryId: z.number(), excludeProductId: z.number(), limit: z.number().default(4) }))
+    .query(async ({ input }) => {
+      return db.getRelatedProducts(input.factoryId, input.excludeProductId, input.limit);
     }),
 
   // Get single product (public)

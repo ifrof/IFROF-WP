@@ -34,6 +34,11 @@ export default function ProductDetail() {
     { enabled: !!product?.id }
   );
 
+  const { data: relatedProducts = [] } = trpc.products.getRelated.useQuery(
+    { factoryId: product?.factoryId || 0, excludeProductId: product?.id || 0, limit: 4 },
+    { enabled: !!product?.factoryId && !!product?.id }
+  );
+
   const addToCartMutation = trpc.cart.addItem.useMutation({
     onSuccess: () => {
       toast.success(t("cart.added"));
@@ -267,6 +272,31 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
+
+        {/* Related Products */}
+        {relatedProducts && relatedProducts.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {relatedProducts.map((rel: any) => {
+                const imgs = rel.imageUrls ? JSON.parse(rel.imageUrls) : [];
+                return (
+                  <Link key={rel.id} href={`/products/${rel.id}`}>
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+                      <div className="aspect-square bg-gray-100">
+                        <img src={imgs[0] || "https://via.placeholder.com/200"} alt={rel.name} className="w-full h-full object-cover" />
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold line-clamp-2 mb-2">{rel.name}</h3>
+                        <span className="text-lg font-bold text-blue-600">¥{rel.basePrice}</span>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Tabs Section */}
         <div className="mt-8">

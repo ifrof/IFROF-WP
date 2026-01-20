@@ -283,6 +283,19 @@ export async function getProductById(id: number) {
   return dbData.products.find((p: any) => p.id === id) || null;
 }
 
+export async function getAllProducts() {
+  if (!isJsonMode && _db) {
+    try {
+      return await _db.select().from(schema.products).where(eq(schema.products.active, 1));
+    } catch (e) {
+      console.error("[Database] getAllProducts MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  return (dbData.products || []).filter((p: any) => p.active === 1);
+}
+
 export async function getProductsByFactory(factoryId: number) {
   if (!isJsonMode && _db) {
     try {
@@ -294,6 +307,114 @@ export async function getProductsByFactory(factoryId: number) {
 
   const dbData = readJsonDb();
   return (dbData.products || []).filter((p: any) => p.factoryId === factoryId);
+}
+
+export async function getRelatedProducts(factoryId: number, excludeProductId: number, limit: number = 4) {
+  const products = await getProductsByFactory(factoryId);
+  return (products || [])
+    .filter((p: any) => p.id !== excludeProductId)
+    .slice(0, limit);
+}
+
+// Cart operations
+export async function getCartItems(userId: number) {
+  if (!isJsonMode && _db) {
+    try {
+      return await _db.select().from(schema.cartItems).where(eq(schema.cartItems.userId, userId));
+    } catch (e) {
+      console.error("[Database] getCartItems MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  return (dbData.cartItems || []).filter((c: any) => c.userId === userId);
+}
+
+export async function addToCart(userId: number, productId: number, quantity: number) {
+  if (!isJsonMode && _db) {
+    try {
+      const existing = await _db.select().from(schema.cartItems)
+        .where(and(eq(schema.cartItems.userId, userId), eq(schema.cartItems.productId, productId)));
+      
+      if (existing.length > 0) {
+        await _db.update(schema.cartItems)
+          .set({ quantity: existing[0].quantity + quantity })
+          .where(and(eq(schema.cartItems.userId, userId), eq(schema.cartItems.productId, productId)));
+      } else {
+        await _db.insert(schema.cartItems).values({ userId, productId, quantity });
+      }
+      return { success: true };
+    } catch (e) {
+      console.error("[Database] addToCart MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  const existing = (dbData.cartItems || []).find((c: any) => c.userId === userId && c.productId === productId);
+  
+  if (existing) {
+    existing.quantity += quantity;
+  } else {
+    dbData.cartItems = dbData.cartItems || [];
+    dbData.cartItems.push({ id: Date.now(), userId, productId, quantity, createdAt: new Date() });
+  }
+  
+  writeJsonDb(dbData);
+  return { success: true };
+}
+
+export async function removeFromCart(userId: number, productId: number) {
+  if (!isJsonMode && _db) {
+    try {
+      await _db.delete(schema.cartItems)
+        .where(and(eq(schema.cartItems.userId, userId), eq(schema.cartItems.productId, productId)));
+      return { success: true };
+    } catch (e) {
+      console.error("[Database] removeFromCart MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  dbData.cartItems = (dbData.cartItems || []).filter((c: any) => !(c.userId === userId && c.productId === productId));
+  writeJsonDb(dbData);
+  return { success: true };
+}
+
+export async function updateCartQuantity(userId: number, productId: number, quantity: number) {
+  if (!isJsonMode && _db) {
+    try {
+      await _db.update(schema.cartItems)
+        .set({ quantity })
+        .where(and(eq(schema.cartItems.userId, userId), eq(schema.cartItems.productId, productId)));
+      return { success: true };
+    } catch (e) {
+      console.error("[Database] updateCartQuantity MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  const item = (dbData.cartItems || []).find((c: any) => c.userId === userId && c.productId === productId);
+  if (item) {
+    item.quantity = quantity;
+  }
+  writeJsonDb(dbData);
+  return { success: true };
+}
+
+export async function clearCart(userId: number) {
+  if (!isJsonMode && _db) {
+    try {
+      await _db.delete(schema.cartItems).where(eq(schema.cartItems.userId, userId));
+      return { success: true };
+    } catch (e) {
+      console.error("[Database] clearCart MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  dbData.cartItems = (dbData.cartItems || []).filter((c: any) => c.userId !== userId);
+  writeJsonDb(dbData);
+  return { success: true };
 }
 
 export async function searchProducts(query: string) {
