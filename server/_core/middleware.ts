@@ -1,17 +1,22 @@
 import type { NextFunction, Request, Response } from "express";
-import DOMPurify from "isomorphic-dompurify";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 const apiOrigin = process.env.API_ORIGIN || "https://api.ifrof.com";
 
+const htmlEscapes: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+const escapeHtml = (value: string): string =>
+  value.replace(/[&<>"']/g, (match) => htmlEscapes[match]);
+
 const sanitizeValue = (value: unknown): unknown => {
   if (typeof value === "string") {
-    return DOMPurify.sanitize(value, {
-      ALLOWED_TAGS: [],
-      ALLOWED_ATTR: [],
-    });
+    return escapeHtml(value);
   }
 
   if (Array.isArray(value)) {
@@ -114,33 +119,106 @@ const contentSecurityPolicy = isDevelopment
       },
     };
 
-export const securityHeaders = helmet({
-  contentSecurityPolicy,
-  hsts: isDevelopment
-    ? false
-    : {
-        maxAge: 31536000,
-        includeSubDomains: true,
-        preload: true,
-      },
-});
+const toCspDirective = (directive: string): string =>
+  directive.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`);
+
+const buildCspHeader = (directives: Record<string, string[]>): string =>
+  Object.entries(directives)
+    .map(
+      ([key, values]) => `${toCspDirective(key)} ${values.join(" ")}`
+    )
+    .join("; ");
+
+const securityHeadersList: Array<[string, string]> = [
+  ["X-Frame-Options", "SAMEORIGIN"],
+  ["X-Content-Type-Options", "nosniff"],
+  ["Referrer-Policy", "no-referrer"],
+  ["X-DNS-Prefetch-Control", "off"],
+  ["Cross-Origin-Resource-Policy", "same-origin"],
+];
+
+export const securityHeaders = (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const directives = contentSecurityPolicy.directives;
+  res.setHeader("Content-Security-Policy", buildCspHeader(directives));
+
+  if (!isDevelopment) {
+    res.setHeader(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains; preload"
+    );
+  }
+
+  securityHeadersList.forEach(([header, value]) => {
+    res.setHeader(header, value);
+  });
+
+  next();
+};
 
 const rateLimitMessage =
   "تم تجاوز الحد المسموح من الطلبات، يرجى المحاولة لاحقاً";
+const rateLimitWindowMs = 15 * 60 * 1000;
+const rateLimitMax = 100;
 
-export const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: rateLimitMessage,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req, res, _next, options) => {
-    const retryAfter = req.rateLimit?.resetTime
-      ? Math.ceil((req.rateLimit.resetTime.getTime() - Date.now()) / 1000)
-      : undefined;
-    res.status(options.statusCode).json({
-      error: options.message || rateLimitMessage,
-      retryAfter,
+type RateLimitEntry = {
+  count: number;
+  resetTime: number;
+};
+
+const rateLimitStore = new Map<string, RateLimitEntry>();
+
+const getClientId = (req: Request): string => {
+  const forwardedFor = req.headers["x-forwarded-for"];
+  if (typeof forwardedFor === "string" && forwardedFor.length > 0) {
+    return forwardedFor.split(",")[0].trim();
+  }
+  return req.ip || req.socket.remoteAddress || "unknown";
+};
+
+const getRateLimitEntry = (clientId: string, now: number): RateLimitEntry => {
+  const existing = rateLimitStore.get(clientId);
+  if (!existing || existing.resetTime <= now) {
+    const entry = { count: 0, resetTime: now + rateLimitWindowMs };
+    rateLimitStore.set(clientId, entry);
+    return entry;
+  }
+  return existing;
+};
+
+export const apiLimiter = (req: Request, res: Response, next: NextFunction) => {
+  const now = Date.now();
+  const clientId = getClientId(req);
+  const entry = getRateLimitEntry(clientId, now);
+
+  entry.count += 1;
+
+  if (entry.count > rateLimitMax) {
+    const retryAfterSeconds = Math.max(
+      1,
+      Math.ceil((entry.resetTime - now) / 1000)
+    );
+
+    res.setHeader("Retry-After", retryAfterSeconds.toString());
+    res.status(429).json({
+      error: rateLimitMessage,
+      retryAfter: retryAfterSeconds,
     });
-  },
-});
+    return;
+  }
+
+  res.setHeader("X-RateLimit-Limit", rateLimitMax.toString());
+  res.setHeader(
+    "X-RateLimit-Remaining",
+    Math.max(rateLimitMax - entry.count, 0).toString()
+  );
+  res.setHeader(
+    "X-RateLimit-Reset",
+    Math.ceil(entry.resetTime / 1000).toString()
+  );
+
+  next();
+};
