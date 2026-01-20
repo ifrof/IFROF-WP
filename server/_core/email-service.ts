@@ -278,3 +278,78 @@ export async function sendPaymentFailedEmail(
     return false;
   }
 }
+
+export async function sendVerificationEmail(to: string, name: string, token: string): Promise<boolean> {
+  const transporter = getTransporter();
+  if (!transporter) return false;
+
+  const verificationUrl = `${process.env.PUBLIC_URL || 'https://ifrof.com'}/verify-email/${token}`;
+  const htmlContent = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px;">
+      <h2 style="color: #2563eb;">Welcome to IFROF!</h2>
+      <p>Hi ${name},</p>
+      <p>Thank you for registering with IFROF. Please click the button below to verify your email address and activate your account:</p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${verificationUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify Email Address</a>
+      </div>
+      <p>Or copy and paste this link into your browser:</p>
+      <p><a href="${verificationUrl}">${verificationUrl}</a></p>
+      <p>This link will expire in 24 hours.</p>
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+        <p>If you did not create an account, no further action is required.</p>
+        <p>&copy; 2026 IFROF. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: emailFrom,
+      to,
+      subject: "Verify your email - IFROF",
+      html: htmlContent,
+    });
+    return true;
+  } catch (error) {
+    console.error("[Email Service] Failed to send verification email:", error);
+    return false;
+  }
+}
+
+export async function sendPasswordResetEmail(to: string, name: string, token: string): Promise<boolean> {
+  const transporter = getTransporter();
+  if (!transporter) return false;
+
+  const resetUrl = `${process.env.PUBLIC_URL || 'https://ifrof.com'}/reset-password/${token}`;
+  const htmlContent = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px;">
+      <h2 style="color: #2563eb;">Password Reset Request</h2>
+      <p>Hi ${name},</p>
+      <p>You are receiving this email because we received a password reset request for your account.</p>
+      <p>Please click the button below to reset your password:</p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resetUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Password</a>
+      </div>
+      <p>Or copy and paste this link into your browser:</p>
+      <p><a href="${resetUrl}">${resetUrl}</a></p>
+      <p>This link will expire in 1 hour.</p>
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+        <p>If you did not request a password reset, no further action is required.</p>
+        <p>&copy; 2026 IFROF. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: emailFrom,
+      to,
+      subject: "Reset your password - IFROF",
+      html: htmlContent,
+    });
+    return true;
+  } catch (error) {
+    console.error("[Email Service] Failed to send password reset email:", error);
+    return false;
+  }
+}

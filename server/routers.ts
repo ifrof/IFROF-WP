@@ -5,7 +5,7 @@ import { publicProcedure, router } from "./_core/trpc";
 
 // Import all feature routers
 import { factoriesRouter, productsRouter } from "./routers/factories";
-import { authImprovedRouter } from "./routers/auth-improved";
+import { authRouter } from "./routers/auth-complete";
 import { inquiriesRouter, messagesRouter } from "./routers/inquiries";
 import { forumRouter } from "./routers/forum";
 import { chatbotRouter } from "./routers/chatbot";
@@ -24,7 +24,7 @@ import { mapsRouter } from "./routers/maps";
 export const appRouter = router({
   system: systemRouter,
   
-  auth: authImprovedRouter,
+  auth: authRouter,
 
   // Marketplace features
   factories: factoriesRouter,

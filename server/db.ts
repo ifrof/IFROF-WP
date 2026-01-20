@@ -91,6 +91,48 @@ export function getUsersTable() {
 // USER OPERATIONS
 // ============================================================================
 
+export async function getUserByEmail(email: string): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.select().from(schema.users).where(eq(schema.users.email, email)).limit(1);
+      return result[0] || null;
+    } catch (e) {
+      console.error("[Database] getUserByEmail MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  return dbData.users.find((u: any) => u.email === email) || null;
+}
+
+export async function getUserByVerificationToken(token: string): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.select().from(schema.users).where(eq(schema.users.verificationToken, token)).limit(1);
+      return result[0] || null;
+    } catch (e) {
+      console.error("[Database] getUserByVerificationToken MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  return dbData.users.find((u: any) => u.verificationToken === token) || null;
+}
+
+export async function getUserByResetToken(token: string): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.select().from(schema.users).where(eq(schema.users.resetPasswordToken, token)).limit(1);
+      return result[0] || null;
+    } catch (e) {
+      console.error("[Database] getUserByResetToken MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  return dbData.users.find((u: any) => u.resetPasswordToken === token) || null;
+}
+
 export async function upsertUser(user: any): Promise<any> {
   if (!isJsonMode && _db) {
     try {

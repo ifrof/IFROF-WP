@@ -257,9 +257,28 @@ class SDKServer {
   }
 
   async authenticateRequest(req: Request): Promise<User> {
-    // Regular authentication flow
     const cookies = this.parseCookies(req.headers.cookie);
     const sessionCookie = cookies.get(COOKIE_NAME);
+    
+    if (!sessionCookie) {
+      throw ForbiddenError("Missing session cookie");
+    }
+
+    // Try verifying as custom JWT first (Phase 4 implementation)
+    try {
+      const jwt = require('jsonwebtoken');
+      const JWT_SECRET = process.env.JWT_SECRET || "ifrof-secret-key-2026";
+      const decoded = jwt.verify(sessionCookie, JWT_SECRET);
+      
+      if (decoded && decoded.openId) {
+        const user = await db.getUserByOpenId(decoded.openId);
+        if (user) return user;
+      }
+    } catch (e) {
+      // Not a custom JWT or invalid, fall back to OAuth session
+    }
+
+    // Fallback to regular OAuth authentication flow
     const session = await this.verifySession(sessionCookie);
 
     if (!session) {

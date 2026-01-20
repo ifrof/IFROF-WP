@@ -25,6 +25,11 @@ import About from "@/pages/About";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Terms from "@/pages/Terms";
 import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import VerifyEmail from "@/pages/VerifyEmail";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
+import Profile from "@/pages/Profile";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AIChat from "./components/AIChat";
@@ -76,6 +81,11 @@ function Router() {
       <Route path={"/privacy"} component={PrivacyPolicy} />
       <Route path={"/terms"} component={Terms} />
       <Route path={"/login"} component={Login} />
+      <Route path={"/register"} component={Register} />
+      <Route path={"/verify-email/:token"} component={VerifyEmail} />
+      <Route path={"/forgot-password"} component={ForgotPassword} />
+      <Route path={"/reset-password/:token"} component={ResetPassword} />
+      <Route path={"/profile"} component={Profile} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
