@@ -42,9 +42,6 @@ export function performanceMonitor(req: Request, res: Response, next: NextFuncti
     if (performanceLog.length > maxLogSize) {
       performanceLog.shift();
     }
-
-    // Add timing header
-    res.setHeader('Server-Timing', `total;dur=${duration}`);
   });
 
   next();

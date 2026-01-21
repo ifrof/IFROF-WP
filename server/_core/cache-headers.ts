@@ -61,15 +61,7 @@ export function compressionHeaders(req: Request, res: Response, next: NextFuncti
  * Middleware to add performance headers
  */
 export function performanceHeaders(req: Request, res: Response, next: NextFunction) {
-  // Add timing header
-  const startTime = Date.now();
-  
-  res.on('finish', () => {
-    const duration = Date.now() - startTime;
-    res.setHeader('Server-Timing', `total;dur=${duration}`);
-  });
-
-  // Add resource hints
+  // Add resource hints before response is sent
   res.setHeader('Link', [
     '</assets/react-vendor.js>; rel=preload; as=script',
     '</assets/ui-vendor.js>; rel=preload; as=script',

@@ -1,0 +1,28 @@
+Error Analysis - Performance Optimization Deployment
+=====================================================
+
+Error: ERR_HTTP_HEADERS_SENT
+Location: file:///app/dist/index.js:4686:9
+Message: Cannot set headers after they are sent to the client
+
+Root Cause:
+-----------
+The performance monitoring middleware is trying to set headers (Server-Timing) 
+after the response has already been sent to the client.
+
+Problem Code in server/_core/performance-monitor.ts:
+  res.on('finish', () => {
+    const duration = Date.now() - startTime;
+    // This tries to set header AFTER response is finished
+    res.setHeader('Server-Timing', `total;dur=${duration}`);
+  });
+
+Solution:
+---------
+1. Set headers BEFORE the response is sent
+2. Remove the setHeader call from the 'finish' event
+3. The 'finish' event fires AFTER headers are sent, so we can only log there
+
+Fix Required:
+- Move Server-Timing header to be set before response.send()
+- Or remove it from the finish event handler
