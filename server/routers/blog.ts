@@ -24,10 +24,12 @@ export const blogRouter = router({
       z.object({
         search: z.string().optional(),
         category: z.string().optional(),
+        lang: z.string().optional(),
       })
     )
     .query(async ({ input }) => {
-      const cacheKey = `blog:list:${input.category || 'all'}:${input.search || 'none'}`;
+      const lang = input.lang || 'ar';
+      const cacheKey = `blog:list:${lang}:${input.category || 'all'}:${input.search || 'none'}`;
       
       return getCached(cacheKey, async () => {
         const db = await getDb();
@@ -36,6 +38,12 @@ export const blogRouter = router({
         if (db && !db.isJsonMode) {
         try {
           const conditions = [eq(blogPosts.published, 1)];
+          
+          // Strict language filtering
+          if ((blogPosts as any).lang) {
+            conditions.push(eq((blogPosts as any).lang, lang));
+          }
+          
           if (input.search) conditions.push(like(blogPosts.title, `%${input.search}%`));
           if (input.category) conditions.push(eq(blogPosts.category, input.category));
           
@@ -51,10 +59,13 @@ export const blogRouter = router({
 
       // Fallback to JSON
       const data = readJsonDb();
-      let posts = (data.blogPosts || []).filter((p: any) => p.published === 1);
+      const isAr = lang === 'ar';
       
-      // Map to correct language if needed
-      const isAr = true; // Default to AR for now or detect from context
+      let posts = (data.blogPosts || []).filter((p: any) => {
+        const isPublished = p.published === 1;
+        const matchesLang = p.lang === lang || (!p.lang && isAr); // Default to AR if no lang
+        return isPublished && matchesLang;
+      });
       
       posts = posts.map((p: any) => ({
         ...p,

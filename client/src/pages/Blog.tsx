@@ -18,6 +18,7 @@ export default function Blog() {
   const { data: posts = [], isLoading } = trpc.blog.list.useQuery({
     search: searchQuery,
     category: selectedCategory,
+    lang: language,
   });
 
   const categories = ["تكنولوجيا", "تجارة", "لوجستيات", "جودة", "نصائح"];
