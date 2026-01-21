@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { Loader2, ShoppingCart, MapPin, Star, Package, Truck, Shield, ArrowLeft } from "lucide-react";
+import MetaTags from "../components/SEO/MetaTags";
+import ProductSchema from "../components/SEO/ProductSchema";
+import BreadcrumbSchema from "../components/SEO/BreadcrumbSchema";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -81,8 +84,34 @@ export default function ProductDetail() {
   const specifications = product.specifications ? JSON.parse(product.specifications) : {};
   const pricingTiers = product.pricingTiers ? JSON.parse(product.pricingTiers) : [];
 
+  const seo = {
+    title: `${product.name} - Direct Import from China | IFROF`,
+    description: product.description.substring(0, 160),
+    keywords: [product.category || '', 'import from china', 'wholesale'],
+    ogImage: images[0] || 'https://ifrof.com/images/og-default.jpg',
+    canonical: `https://ifrof.com/products/${product.id}`
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <MetaTags seo={seo} type="product" />
+      <ProductSchema product={{
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        images: images,
+        price: product.basePrice / 100,
+        brand: factory?.name,
+        rating: factoryStats ? {
+          value: (factoryStats as any).rating,
+          count: (factoryStats as any).count
+        } : undefined
+      }} />
+      <BreadcrumbSchema items={[
+        { name: 'Home', url: 'https://ifrof.com' },
+        { name: 'Marketplace', url: 'https://ifrof.com/marketplace' },
+        { name: product.name, url: `https://ifrof.com/products/${product.id}` }
+      ]} />
       {/* Breadcrumb */}
       <div className="bg-muted py-4">
         <div className="max-w-7xl mx-auto px-4">

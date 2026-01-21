@@ -27,6 +27,10 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
+import MetaTags from "../components/SEO/MetaTags";
+import OrganizationSchema from "../components/SEO/OrganizationSchema";
+import BreadcrumbSchema from "../components/SEO/BreadcrumbSchema";
+import { staticPagesSEO } from "../../../server/config/seo-config";
 
 /**
  * IFROF Landing Page
@@ -52,6 +56,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white" dir={dir}>
+      <MetaTags seo={staticPagesSEO['/']} />
+      <OrganizationSchema />
+      <BreadcrumbSchema items={[{ name: 'Home', url: 'https://ifrof.com' }]} />
       {/* Navigation */}
       <nav className={`sticky top-0 z-50 bg-white/95 backdrop-blur-sm transition-shadow ${scrolled ? 'shadow-lg' : 'shadow-sm'} border-b border-gray-100`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

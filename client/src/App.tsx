@@ -32,6 +32,10 @@ import ResetPassword from "@/pages/ResetPassword";
 import Profile from "@/pages/Profile";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { HelmetProvider } from "react-helmet-async";
+import GA4 from "./components/Analytics/GA4";
+import GTM from "./components/Analytics/GTM";
+import FAQ from "./pages/FAQ";
 import AIChat from "./components/AIChat";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
@@ -47,6 +51,8 @@ function AppContent() {
 
   return (
     <TooltipProvider>
+      <GA4 />
+      <GTM />
       <Toaster />
       <Router />
       <AIChat />
@@ -86,6 +92,7 @@ function Router() {
       <Route path={"/forgot-password"} component={ForgotPassword} />
       <Route path={"/reset-password/:token"} component={ResetPassword} />
       <Route path={"/profile"} component={Profile} />
+      <Route path={"/faq"} component={FAQ} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -95,11 +102,13 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="light">
-        <LanguageProvider>
-          <AppContent />
-        </LanguageProvider>
-      </ThemeProvider>
+      <HelmetProvider>
+        <ThemeProvider defaultTheme="light">
+          <LanguageProvider>
+            <AppContent />
+          </LanguageProvider>
+        </ThemeProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   );
 }

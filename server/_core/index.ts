@@ -14,6 +14,9 @@ import { authRateLimiter } from "./auth-rate-limiter";
 import { ensureCsrfToken, getCsrfTokenHandler } from "./csrf";
 import { httpsRedirect } from "./https-redirect";
 import cookieParser from "cookie-parser";
+import sitemapRouter from "../routes/sitemap";
+import { redirectMiddleware } from "../middleware/redirects";
+import { initializeCronJobs } from "../cron/cron-jobs";
 import { performanceMonitor, errorTracker } from "./performance-monitor";
 import { healthCheck, metricsEndpoint } from "./health-check";
 
@@ -44,6 +47,15 @@ async function startServer() {
   
   // Force HTTPS in production
   app.use(httpsRedirect);
+
+  // SEO Redirects
+  app.use(redirectMiddleware);
+
+  // Sitemap
+  app.use(sitemapRouter);
+  
+  // Initialize SEO Cron Jobs
+  initializeCronJobs();
   
   // Enable compression for all responses
   app.use(compression({
