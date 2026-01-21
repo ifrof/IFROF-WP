@@ -17,6 +17,8 @@ import cookieParser from "cookie-parser";
 import sitemapRouter from "../routes/sitemap";
 import { redirectMiddleware } from "../middleware/redirects";
 import { initializeCronJobs } from "../cron/cron-jobs";
+import path from "path";
+import fs from "fs";
 import { performanceMonitor, errorTracker } from "./performance-monitor";
 import { healthCheck, metricsEndpoint } from "./health-check";
 
@@ -53,6 +55,19 @@ async function startServer() {
 
   // Sitemap
   app.use(sitemapRouter);
+
+  // Robots.txt explicit route
+  app.get("/robots.txt", (req, res) => {
+    const robotsPath = process.env.NODE_ENV === "production"
+      ? path.resolve(import.meta.dirname, "public", "robots.txt")
+      : path.resolve(import.meta.dirname, "../../client/public", "robots.txt");
+    
+    if (fs.existsSync(robotsPath)) {
+      res.sendFile(robotsPath);
+    } else {
+      res.type("text/plain").send("User-agent: *\nAllow: /\nSitemap: https://ifrof.com/sitemap.xml");
+    }
+  });
   
   // Initialize SEO Cron Jobs
   initializeCronJobs();
