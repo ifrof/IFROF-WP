@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { db } from '../db.js';
-import { products, blogPosts, factories } from '../../drizzle/schema.js';
+import * as dbModule from '../db';
+const db = dbModule as any;
 
 const router = Router();
 
@@ -33,11 +33,11 @@ router.get('/sitemap.xml', async (req, res) => {
     });
 
     // Add dynamic products
-    const allProducts = await db.select().from(products);
-    allProducts.forEach(product => {
+    const allProducts = await db.getProducts();
+    allProducts.forEach((product: any) => {
       xml += `
   <url>
-    <loc>${baseUrl}/shop/products/${product.id}</loc>
+    <loc>${baseUrl}/products/${product.id}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -45,8 +45,8 @@ router.get('/sitemap.xml', async (req, res) => {
     });
 
     // Add dynamic blog posts
-    const allPosts = await db.select().from(blogPosts);
-    allPosts.forEach(post => {
+    const allPosts = await db.getBlogPosts();
+    allPosts.forEach((post: any) => {
       xml += `
   <url>
     <loc>${baseUrl}/blog/${post.slug}</loc>
@@ -57,11 +57,11 @@ router.get('/sitemap.xml', async (req, res) => {
     });
 
     // Add dynamic factories
-    const allFactories = await db.select().from(factories);
-    allFactories.forEach(factory => {
+    const allFactories = await db.getFactories();
+    allFactories.forEach((factory: any) => {
       xml += `
   <url>
-    <loc>${baseUrl}/factory/${factory.id}</loc>
+    <loc>${baseUrl}/factories/${factory.id}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
