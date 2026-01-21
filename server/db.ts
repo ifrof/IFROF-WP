@@ -211,17 +211,28 @@ export async function getUserById(id: number) {
 // FACTORY OPERATIONS
 // ============================================================================
 
-export async function getAllFactories() {
+export async function getAllFactories(limit: number = 50, offset: number = 0) {
   if (!isJsonMode && _db) {
     try {
-      return await _db.select().from(schema.factories).orderBy(desc(schema.factories.createdAt));
+      return await _db.select({
+        id: schema.factories.id,
+        name: schema.factories.name,
+        location: schema.factories.location,
+        logoUrl: schema.factories.logoUrl,
+        verificationStatus: schema.factories.verificationStatus,
+        rating: schema.factories.rating,
+      })
+      .from(schema.factories)
+      .orderBy(desc(schema.factories.createdAt))
+      .limit(limit)
+      .offset(offset);
     } catch (e) {
       console.error("[Database] getAllFactories MySQL error:", e);
     }
   }
 
   const dbData = readJsonDb();
-  return dbData.factories || [];
+  return (dbData.factories || []).slice(offset, offset + limit);
 }
 
 export async function getFactories() {
@@ -325,17 +336,32 @@ export async function getProductById(id: number) {
   return dbData.products.find((p: any) => p.id === id) || null;
 }
 
-export async function getAllProducts() {
+export async function getAllProducts(limit: number = 50, offset: number = 0) {
   if (!isJsonMode && _db) {
     try {
-      return await _db.select().from(schema.products).where(eq(schema.products.active, 1));
+      return await _db.select({
+        id: schema.products.id,
+        name: schema.products.name,
+        category: schema.products.category,
+        basePrice: schema.products.basePrice,
+        imageUrls: schema.products.imageUrls,
+        factoryId: schema.products.factoryId,
+        minimumOrderQuantity: schema.products.minimumOrderQuantity,
+        featured: schema.products.featured,
+      })
+      .from(schema.products)
+      .where(eq(schema.products.active, 1))
+      .limit(limit)
+      .offset(offset);
     } catch (e) {
       console.error("[Database] getAllProducts MySQL error:", e);
     }
   }
 
   const dbData = readJsonDb();
-  return (dbData.products || []).filter((p: any) => p.active === 1);
+  return (dbData.products || [])
+    .filter((p: any) => p.active === 1)
+    .slice(offset, offset + limit);
 }
 
 export async function getProductsByFactory(factoryId: number) {

@@ -6,6 +6,7 @@ import { trpc } from "@/lib/trpc";
 import { Loader2, MapPin, Phone, Mail, Search, ArrowLeft, ArrowRight, Home } from "lucide-react";
 import { Link } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { LazyImage } from "@/components/LazyImage";
 
 export default function Marketplace() {
   const { language, t, dir } = useLanguage();
@@ -119,7 +120,7 @@ export default function Marketplace() {
                   >
                     <CardHeader className="pb-3">
                       {factory.logoUrl && (
-                        <img
+                        <LazyImage
                           src={factory.logoUrl}
                           alt={factory.name}
                           className="w-full h-20 object-cover rounded mb-2"
@@ -183,7 +184,7 @@ export default function Marketplace() {
                         {product.imageUrls && (
                           <div className="w-full h-40 bg-gray-200 rounded-t-lg overflow-hidden">
                             {typeof product.imageUrls === "string" && product.imageUrls.startsWith("[") ? (
-                              <img
+                              <LazyImage
                                 src={JSON.parse(product.imageUrls)[0]}
                                 alt={product.name}
                                 className="w-full h-full object-cover"

@@ -4,6 +4,7 @@ import { getDb } from "../db";
 import { blogPosts } from "../../drizzle/schema";
 import { eq, like, and } from "drizzle-orm";
 import type { BlogPost } from "../../drizzle/schema";
+import { getCached } from "../utils/cache";
 
 import fs from "fs";
 import path from "path";
@@ -26,10 +27,13 @@ export const blogRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const db = await getDb();
+      const cacheKey = `blog:list:${input.category || 'all'}:${input.search || 'none'}`;
       
-      // Try MySQL first
-      if (db && !db.isJsonMode) {
+      return getCached(cacheKey, async () => {
+        const db = await getDb();
+        
+        // Try MySQL first
+        if (db && !db.isJsonMode) {
         try {
           const conditions = [eq(blogPosts.published, 1)];
           if (input.search) conditions.push(like(blogPosts.title, `%${input.search}%`));
@@ -69,6 +73,7 @@ export const blogRouter = router({
       }
       
       return posts;
+      }, 600); // 10 minutes
     }),
 
   getBySlug: publicProcedure

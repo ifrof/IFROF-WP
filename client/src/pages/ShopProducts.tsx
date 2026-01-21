@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { LazyImage } from "@/components/LazyImage";
 
 const PRODUCTS_PER_PAGE = 20;
 
@@ -363,10 +364,9 @@ export default function ShopProducts() {
                         <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full">
                           {/* Product Image */}
                           <div className="aspect-square bg-gray-100 overflow-hidden">
-                            <img
+                            <LazyImage
                               src={mainImage}
                               alt={product.name}
-                              loading="lazy"
                               className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                             />
                           </div>

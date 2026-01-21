@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { LazyImage } from "@/components/LazyImage";
 
 export default function Blog() {
   const { language, t, dir } = useLanguage();
@@ -131,7 +132,16 @@ export default function Blog() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map((post: any) => (
                 <Link key={post.id} href={`/blog/${post.slug}`}>
-                  <Card className="h-full hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+                  <Card className="h-full hover:shadow-lg transition-shadow duration-300 cursor-pointer overflow-hidden">
+                    {post.imageUrl && (
+                      <div className="aspect-video w-full overflow-hidden">
+                        <LazyImage
+                          src={post.imageUrl}
+                          alt={post.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
                     <CardHeader>
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-sm font-semibold text-orange-500 bg-orange-50 px-3 py-1 rounded-full">

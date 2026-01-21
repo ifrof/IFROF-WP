@@ -97,11 +97,23 @@ export const factoriesRouter = router({
     }),
 });
 
+import { getCached } from "../utils/cache";
+
 export const productsRouter = router({
   // Get all products (public)
-  getAll: publicProcedure.query(async () => {
-    return db.getAllProducts();
-  }),
+  getAll: publicProcedure
+    .input(z.object({ limit: z.number().default(50), offset: z.number().default(0) }).optional())
+    .query(async ({ input }) => {
+      const limit = input?.limit ?? 50;
+      const offset = input?.offset ?? 0;
+      const cacheKey = `products:all:${limit}:${offset}`;
+      
+      return getCached(
+        cacheKey,
+        () => db.getAllProducts(limit, offset),
+        300 // 5 minutes
+      );
+    }),
 
   // Get products by factory (public)
   getByFactory: publicProcedure
