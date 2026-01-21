@@ -9,7 +9,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { Loader2, Lock, CheckCircle2 } from "lucide-react";
+import { Loader2, Lock, CheckCircle2, Home } from "lucide-react";
 
 const resetPasswordSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters / يجب أن تكون كلمة المرور 8 أحرف على الأقل")
@@ -28,6 +28,9 @@ export default function ResetPassword() {
   const [, setLocation] = useLocation();
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Simple language detection
+  const language = typeof window !== "undefined" && window.location.pathname.startsWith("/ar") ? "ar" : "en";
 
   const { register, handleSubmit, formState: { errors } } = useForm<ResetPasswordForm>({
     resolver: zodResolver(resetPasswordSchema),
@@ -53,8 +56,15 @@ export default function ResetPassword() {
 
   if (isSuccess) {
     return (
-      <div className="container max-w-md py-20">
-        <Card className="text-center">
+      <div className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}>
+        <div className="mb-8">
+          <Link to="/" className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium">
+            <Home className={`h-5 w-5 ${language === "ar" ? "ml-2" : "mr-2"}`} />
+            {language === "ar" ? "العودة للرئيسية" : "Back to Home"}
+          </Link>
+        </div>
+
+        <Card className="w-full max-w-md text-center shadow-xl border-gray-200">
           <CardHeader>
             <div className="flex justify-center mb-4">
               <CheckCircle2 className="h-12 w-12 text-green-600" />
@@ -80,8 +90,15 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="container max-w-md py-20">
-      <Card>
+    <div className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}>
+      <div className="mb-8">
+        <Link to="/" className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium">
+          <Home className={`h-5 w-5 ${language === "ar" ? "ml-2" : "mr-2"}`} />
+          {language === "ar" ? "العودة للرئيسية" : "Back to Home"}
+        </Link>
+      </div>
+
+      <Card className="w-full max-w-md shadow-xl border-gray-200">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Reset Password</CardTitle>
           <CardDescription className="text-center">

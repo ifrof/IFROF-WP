@@ -3,12 +3,15 @@ import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { Loader2, CheckCircle2, XCircle, Mail } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Home } from "lucide-react";
 
 export default function VerifyEmail() {
   const { token } = useParams<{ token: string }>();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  
+  // Simple language detection
+  const language = typeof window !== "undefined" && window.location.pathname.startsWith("/ar") ? "ar" : "en";
 
   const verifyMutation = trpc.auth.verifyEmail.useMutation({
     onSuccess: () => {
@@ -30,8 +33,15 @@ export default function VerifyEmail() {
   }, [token]);
 
   return (
-    <div className="container max-w-md py-20">
-      <Card className="text-center">
+    <div className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}>
+      <div className="mb-8">
+        <Link to="/" className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium">
+          <Home className={`h-5 w-5 ${language === "ar" ? "ml-2" : "mr-2"}`} />
+          {language === "ar" ? "العودة للرئيسية" : "Back to Home"}
+        </Link>
+      </div>
+
+      <Card className="w-full max-w-md text-center shadow-xl border-gray-200">
         <CardHeader>
           <div className="flex justify-center mb-4">
             {status === "loading" && <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />}
