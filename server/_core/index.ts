@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import compression from "compression";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStripeWebhook } from "./stripe-webhook";
@@ -13,6 +14,8 @@ import { authRateLimiter } from "./auth-rate-limiter";
 import { ensureCsrfToken, getCsrfTokenHandler } from "./csrf";
 import { httpsRedirect } from "./https-redirect";
 import cookieParser from "cookie-parser";
+import { performanceMonitor, errorTracker } from "./performance-monitor";
+import { healthCheck, metricsEndpoint } from "./health-check";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -41,12 +44,25 @@ async function startServer() {
   
   // Force HTTPS in production
   app.use(httpsRedirect);
+  
+  // Enable compression for all responses
+  app.use(compression({
+    filter: (req, res) => {
+      if (req.headers['x-no-compression']) {
+        return false;
+      }
+      return compression.filter(req, res);
+    },
+    level: 6,
+  }));
+  
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use(cookieParser());
   app.use(securityHeaders);
   app.use(sanitizeInput);
+  app.use(performanceMonitor);
   app.use(ensureCsrfToken);
   app.use("/api", apiLimiter);
   
@@ -56,6 +72,10 @@ async function startServer() {
   
   // CSRF token endpoint
   app.get("/api/csrf-token", getCsrfTokenHandler);
+  
+  // Health check and metrics endpoints
+  app.get("/api/health", healthCheck);
+  app.get("/api/metrics", metricsEndpoint);
   
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
@@ -77,6 +97,9 @@ async function startServer() {
   } else {
     serveStatic(app);
   }
+  
+  // Error tracking middleware (must be last)
+  app.use(errorTracker);
 
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);
