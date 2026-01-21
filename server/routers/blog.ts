@@ -138,8 +138,9 @@ export const blogRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      if (!ctx.user) {
-        throw new Error("Unauthorized");
+      // التحقق من أن المستخدم مسجل دخول وأنه أدمن
+      if (!ctx.user || ctx.user.role !== 'admin') {
+        throw new Error("Unauthorized: Only admins can create blog posts");
       }
 
       const db = await getDb();

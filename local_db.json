@@ -17,6 +17,17 @@
       "createdAt": "2026-01-20T21:16:55.115Z",
       "updatedAt": "2026-01-20T21:16:55.116Z",
       "lastSignedIn": "2026-01-20T21:16:55.116Z"
+    },
+    {
+      "id": 3,
+      "email": "ifrof4@gmail.com",
+      "password": "$2b$10$/8flF8iQj1b59aRw8I/p3OAwhTkoNjdeG36lDs9LdaFlFeV.PdwFC",
+      "role": "admin",
+      "fullName": "Hady Essam",
+      "isVerified": true,
+      "createdAt": "2026-01-21T13:56:53.816Z",
+      "updatedAt": "2026-01-21T13:56:53.816Z",
+      "lastSignedIn": "2026-01-21T13:56:53.816Z"
     }
   ],
   "factories": [
