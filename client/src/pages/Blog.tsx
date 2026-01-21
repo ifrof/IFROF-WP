@@ -21,7 +21,9 @@ export default function Blog() {
     lang: language,
   });
 
-  const categories = ["تكنولوجيا", "تجارة", "لوجستيات", "جودة", "نصائح"];
+  const categories = language === 'ar' 
+    ? ["تكنولوجيا", "تجارة", "لوجستيات", "جودة", "نصائح"]
+    : ["Technology", "Trade", "Logistics", "Quality", "Tips"];
 
   return (
     <div className="min-h-screen bg-white" dir={dir}>
@@ -36,24 +38,24 @@ export default function Blog() {
           </Link>
           <div className="hidden md:flex items-center gap-6">
             <Link href="/" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
-              الرئيسية
+              {language === 'ar' ? 'الرئيسية' : 'Home'}
             </Link>
             <a href="/#how-it-works" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
-              كيف يعمل
+              {language === 'ar' ? 'كيف يعمل' : 'How It Works'}
             </a>
             <Link href="/ai-search" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
-              المحقق الذكي
+              {language === 'ar' ? 'المحقق الذكي' : 'Smart Investigator'}
             </Link>
             
             <Link href="/login">
               <Button variant="ghost" className="text-blue-900 font-medium">
-                تسجيل الدخول
+                {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
               </Button>
             </Link>
 
             <Link href="/import-request">
               <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold">
-                ابدأ طلب استيراد
+                {language === 'ar' ? 'ابدأ طلب استيراد' : 'Start Import'}
               </Button>
             </Link>
           </div>
@@ -64,10 +66,12 @@ export default function Blog() {
       <section className="bg-gradient-to-b from-blue-50 to-white py-16 md:py-24">
         <div className="container text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">
-            مدونة IFROF
+            {language === 'ar' ? 'مدونة IFROF' : 'IFROF Blog'}
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            اكتشف أحدث المقالات والنصائح حول التجارة الإلكترونية والمصانع والتكنولوجيا
+            {language === 'ar' 
+              ? 'اكتشف أحدث المقالات والنصائح حول التجارة الإلكترونية والمصانع والتكنولوجيا'
+              : 'Discover the latest articles and tips on e-commerce, factories, and technology'}
           </p>
         </div>
       </section>
@@ -78,13 +82,13 @@ export default function Blog() {
           {/* Search Bar */}
           <div className="mb-8">
             <div className="relative">
-              <Search className="absolute right-4 top-3.5 w-5 h-5 text-gray-400" />
+              <Search className={language === 'ar' ? "absolute right-4 top-3.5 w-5 h-5 text-gray-400" : "absolute left-4 top-3.5 w-5 h-5 text-gray-400"} />
               <input
                 type="text"
-                placeholder="ابحث عن مقالات..."
+                placeholder={language === 'ar' ? "ابحث عن مقالات..." : "Search articles..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pr-12 pl-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className={`w-full ${language === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
               />
             </div>
           </div>
@@ -99,7 +103,7 @@ export default function Blog() {
                   : "bg-white text-gray-700 border border-gray-300 hover:border-blue-900"
               }`}
             >
-              الكل
+              {language === 'ar' ? 'الكل' : 'All'}
             </button>
             {categories.map((cat) => (
               <button
@@ -123,11 +127,11 @@ export default function Blog() {
         <div className="container">
           {isLoading ? (
             <div className="text-center py-12">
-              <p className="text-gray-600">جاري تحميل المقالات...</p>
+              <p className="text-gray-600">{language === 'ar' ? 'جاري تحميل المقالات...' : 'Loading articles...'}</p>
             </div>
           ) : posts.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">لا توجد مقالات حالياً</p>
+              <p className="text-gray-600 text-lg">{language === 'ar' ? 'لا توجد مقالات حالياً' : 'No articles found'}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -146,11 +150,11 @@ export default function Blog() {
                     <CardHeader>
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-sm font-semibold text-orange-500 bg-orange-50 px-3 py-1 rounded-full">
-                          {post.category || "عام"}
+                          {post.category || (language === 'ar' ? "عام" : "General")}
                         </span>
                         {post.featured && (
                           <span className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                            مميز
+                            {language === 'ar' ? "مميز" : "Featured"}
                           </span>
                         )}
                       </div>
@@ -167,10 +171,10 @@ export default function Blog() {
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            {new Date(post.createdAt).toLocaleDateString("ar-SA")}
+                            {new Date(post.createdAt).toLocaleDateString(language === 'ar' ? "ar-SA" : "en-US")}
                           </div>
                         </div>
-                        <ArrowRight className="w-5 h-5 text-orange-500" />
+                        <ArrowRight className={`w-5 h-5 text-orange-500 ${language === 'en' ? '' : 'rotate-180'}`} />
                       </div>
                     </CardContent>
                   </Card>
