@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, uniqueIndex } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -32,7 +32,8 @@ export type InsertUser = typeof users.$inferInsert;
 export const blogPosts = mysqlTable("blog_posts", {
   id: int("id").autoincrement().primaryKey(),
   title: text("title").notNull(),
-  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  lang: mysqlEnum("lang", ["ar", "en"]).notNull().default("ar"),
+  slug: varchar("slug", { length: 255 }).notNull(),
   content: text("content").notNull(),
   excerpt: text("excerpt"),
   authorId: int("authorId").notNull().references(() => users.id),
@@ -42,6 +43,10 @@ export const blogPosts = mysqlTable("blog_posts", {
   published: int("published").default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => {
+  return {
+    langSlugIdx: uniqueIndex("blog_posts_lang_slug_idx").on(table.lang, table.slug),
+  };
 });
 
 export type BlogPost = typeof blogPosts.$inferSelect;
