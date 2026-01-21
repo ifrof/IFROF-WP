@@ -9,7 +9,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { Loader2, UserPlus, Mail, Lock, User, Phone } from "lucide-react";
+import { Loader2, UserPlus, Mail, Lock, User, Phone, Home } from "lucide-react";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email format / تنسيق البريد الإلكتروني غير صحيح"),
@@ -31,6 +31,9 @@ export default function Register() {
   const [, setLocation] = useLocation();
   const [error, setError] = useState<string | null>(null);
   
+  // Simple language detection
+  const language = typeof window !== "undefined" && window.location.pathname.startsWith("/ar") ? "ar" : "en";
+
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -54,8 +57,15 @@ export default function Register() {
   };
 
   return (
-    <div className="container max-w-lg py-12">
-      <Card className="w-full">
+    <div className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}>
+      <div className="mb-8">
+        <Link to="/" className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium">
+          <Home className={`h-5 w-5 ${language === "ar" ? "ml-2" : "mr-2"}`} />
+          {language === "ar" ? "العودة للرئيسية" : "Back to Home"}
+        </Link>
+      </div>
+
+      <Card className="w-full max-w-lg shadow-xl border-gray-200">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
           <CardDescription className="text-center">

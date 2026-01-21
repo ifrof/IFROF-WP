@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
 import { useLocation, Link } from "wouter";
-import { Loader2, Mail, Lock, ArrowRight } from "lucide-react";
+import { Loader2, Mail, Lock, ArrowRight, Home } from "lucide-react";
 
 export default function Login() {
   const { language } = useLanguage();
@@ -41,7 +41,14 @@ export default function Login() {
   const isLoading = loginMutation.isPending;
 
   return (
-    <div className={`min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}>
+    <div className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}>
+      <div className="mb-8">
+        <Link to="/" className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium">
+          <Home className={`h-5 w-5 ${language === "ar" ? "ml-2" : "mr-2"}`} />
+          {language === "ar" ? "العودة للرئيسية" : "Back to Home"}
+        </Link>
+      </div>
+
       <Card className="w-full max-w-md shadow-xl border-gray-200">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
