@@ -33,8 +33,8 @@ router.get('/sitemap.xml', async (req, res) => {
     });
 
     // Add dynamic products
-    const allProducts = await db.getProducts();
-    allProducts.forEach((product: any) => {
+    const allProducts = await db.getAllProducts(100, 0);
+    (allProducts || []).forEach((product: any) => {
       xml += `
   <url>
     <loc>${baseUrl}/products/${product.id}</loc>
@@ -45,8 +45,8 @@ router.get('/sitemap.xml', async (req, res) => {
     });
 
     // Add dynamic blog posts
-    const allPosts = await db.getBlogPosts();
-    allPosts.forEach((post: any) => {
+    const allPosts = await db.getBlogPosts(100, 0);
+    (allPosts || []).forEach((post: any) => {
       xml += `
   <url>
     <loc>${baseUrl}/blog/${post.slug}</loc>
@@ -57,8 +57,8 @@ router.get('/sitemap.xml', async (req, res) => {
     });
 
     // Add dynamic factories
-    const allFactories = await db.getFactories();
-    allFactories.forEach((factory: any) => {
+    const allFactories = await db.getAllFactories(100, 0);
+    (allFactories || []).forEach((factory: any) => {
       xml += `
   <url>
     <loc>${baseUrl}/factories/${factory.id}</loc>
