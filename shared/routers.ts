@@ -80,5 +80,4 @@ export {
   supportRouter,
   dashboardRouter,
   mapsRouter,
-  adminRouter,
 };
