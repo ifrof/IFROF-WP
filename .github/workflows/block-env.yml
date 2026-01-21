@@ -1,0 +1,14 @@
+name: Block Env Files
+on: [push, pull_request]
+jobs:
+  check-env:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for .env files
+        run: |
+          if ls .env* 1> /dev/null 2>&1; then
+            echo "Error: .env files detected in repository. Please remove them."
+            ls -a .env*
+            exit 1
+          fi
