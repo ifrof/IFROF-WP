@@ -15,6 +15,7 @@ import { blogRouter } from "./routers/blog";
 import { aiAgentRouter } from "./routers/aiAgent";
 import { cartRouter } from "./routers/cart";
 import { checkoutImprovedRouter } from "./routers/checkout-improved";
+import { checkoutRouter } from "./routers/checkout";
 import { reviewsRouter } from "./routers/reviews";
 import { servicesRouter } from "./routers/services";
 import { supportRouter } from "./routers/support";
@@ -50,6 +51,7 @@ export const appRouter = router({
   // Shopping features
   cart: cartRouter,
   checkout: checkoutImprovedRouter,
+  checkoutOld: checkoutRouter,
   reviews: reviewsRouter,
   
   // Additional features
