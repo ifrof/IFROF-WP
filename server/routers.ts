@@ -20,6 +20,7 @@ import { servicesRouter } from "./routers/services";
 import { supportRouter } from "./routers/support";
 import { dashboardRouter } from "./routers/dashboard";
 import { mapsRouter } from "./routers/maps";
+import { adminRouter } from "./routers/admin";
 
 export const appRouter = router({
   system: systemRouter,
@@ -56,6 +57,7 @@ export const appRouter = router({
   support: supportRouter,
   dashboard: dashboardRouter,
   maps: mapsRouter,
+  admin: adminRouter,
 });
 
 export type AppRouter = typeof appRouter;
@@ -78,4 +80,5 @@ export {
   supportRouter,
   dashboardRouter,
   mapsRouter,
+  adminRouter,
 };
