@@ -13,6 +13,8 @@ const inquirySchema = z.object({
   description: z.string().optional(),
   specifications: z.string().optional(),
   quantityRequired: z.number().optional(),
+  shippingMethod: z.enum(["air", "sea", "land", "rail", "multimodal", "other"]).optional(),
+  shippingDetails: z.string().optional(),
 });
 
 const messageSchema = z.object({
@@ -60,13 +62,20 @@ export const inquiriesRouter = router({
 
   // Update inquiry status (factory owner or admin)
   updateStatus: protectedProcedure
-    .input(z.object({ id: z.number(), status: z.enum(["pending", "responded", "negotiating", "completed", "cancelled"]) }))
+    .input(z.object({ 
+      id: z.number(), 
+      status: z.enum(["pending", "responded", "negotiating", "completed", "cancelled"]),
+      shippingCostEstimate: z.number().optional(),
+    }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== "admin" && ctx.user.role !== "factory") {
         throw new TRPCError({ code: "FORBIDDEN", message: "Only factory owners can update inquiry status" });
       }
 
-      const result = await db.updateInquiry(input.id, { status: input.status });
+      const result = await db.updateInquiry(input.id, { 
+        status: input.status,
+        shippingCostEstimate: input.shippingCostEstimate,
+      });
       return result;
     }),
 });

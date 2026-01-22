@@ -133,6 +133,9 @@ export const inquiries = mysqlTable("inquiries", {
   specifications: text("specifications"),
   quantityRequired: int("quantityRequired"),
   status: mysqlEnum("status", ["pending", "responded", "negotiating", "completed", "cancelled"]).default("pending"),
+  shippingMethod: mysqlEnum("shippingMethod", ["air", "sea", "land", "rail", "multimodal", "other"]),
+  shippingDetails: text("shippingDetails"),
+  shippingCostEstimate: int("shippingCostEstimate"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

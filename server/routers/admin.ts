@@ -29,6 +29,12 @@ export const adminRouter = router({
       .orderBy(desc(schema.orders.createdAt))
       .limit(10);
 
+    // Recent Inquiries
+    const recentInquiries = await db.select()
+      .from(schema.inquiries)
+      .orderBy(desc(schema.inquiries.createdAt))
+      .limit(10);
+
     return {
       stats: {
         products: productsCount[0]?.count || 0,
@@ -36,7 +42,8 @@ export const adminRouter = router({
         users: usersCount[0]?.count || 0,
         revenue: (revenue[0]?.total || 0) / 100, // Convert cents to dollars
       },
-      recentOrders
+      recentOrders,
+      recentInquiries
     };
   }),
 

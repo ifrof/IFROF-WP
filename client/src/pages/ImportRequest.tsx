@@ -45,7 +45,8 @@ export default function ImportRequest() {
     budget: '',
     deadline: '',
     destination: '',
-    shippingMethod: 'sea',
+    shippingMethod: '',
+    shippingDetails: '',
     notes: '',
     attachments: [] as File[],
     attachmentUrls: [] as string[],
@@ -67,8 +68,8 @@ export default function ImportRequest() {
       return;
     }
 
-    if (!formData.productName || !formData.quantity || !formData.destination) {
-      toast.error(language === 'ar' ? 'يرجى ملء الحقول المطلوبة' : 'Please fill required fields');
+    if (!formData.productName || !formData.quantity || !formData.destination || !formData.shippingMethod) {
+      toast.error(language === 'ar' ? 'يرجى ملء الحقول المطلوبة واختيار طريقة الشحن' : 'Please fill required fields and select a shipping method');
       return;
     }
 
@@ -356,30 +357,54 @@ export default function ImportRequest() {
                     </div>
 
                     {/* Shipping Method */}
-                    <div>
-                      <Label className="flex items-center gap-2">
-                        <Truck className="w-4 h-4" />
-                        {safeT('importRequest.form.shippingMethod')}
+                    <div className="space-y-4">
+                      <Label className="flex items-center gap-2 text-lg font-semibold">
+                        <Truck className="w-5 h-5 text-[#ff8c42]" />
+                        {safeT('importRequest.form.shippingMethod')} *
                       </Label>
-                      <div className="flex gap-4 mt-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {[
-                          { value: 'sea', label: language === 'ar' ? 'بحري' : 'Sea' },
-                          { value: 'air', label: language === 'ar' ? 'جوي' : 'Air' },
-                          { value: 'express', label: language === 'ar' ? 'سريع' : 'Express' },
+                          { value: 'air', label: safeT('importRequest.form.shippingMethodOptions.air') },
+                          { value: 'sea', label: safeT('importRequest.form.shippingMethodOptions.sea') },
+                          { value: 'land', label: safeT('importRequest.form.shippingMethodOptions.land') },
+                          { value: 'rail', label: safeT('importRequest.form.shippingMethodOptions.rail') },
+                          { value: 'multimodal', label: safeT('importRequest.form.shippingMethodOptions.multimodal') },
+                          { value: 'other', label: safeT('importRequest.form.shippingMethodOptions.other') },
                         ].map((option) => (
-                          <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                          <label 
+                            key={option.value} 
+                            className={`flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                              formData.shippingMethod === option.value 
+                                ? 'border-[#ff8c42] bg-orange-50 text-[#ff8c42] font-bold' 
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
                             <input
                               type="radio"
                               name="shippingMethod"
                               value={option.value}
                               checked={formData.shippingMethod === option.value}
                               onChange={(e) => setFormData({ ...formData, shippingMethod: e.target.value })}
-                              className="w-4 h-4 text-[#ff8c42]"
+                              className="hidden"
                             />
-                            <span>{option.label}</span>
+                            <span className="text-sm">{option.label}</span>
                           </label>
                         ))}
                       </div>
+
+                      {formData.shippingMethod === 'other' && (
+                        <div className="mt-3 animate-in fade-in slide-in-from-top-2">
+                          <Label htmlFor="shippingDetails">{safeT('importRequest.form.shippingDetails')}</Label>
+                          <Input
+                            id="shippingDetails"
+                            placeholder={language === 'ar' ? 'يرجى تحديد تفاصيل الشحن...' : 'Please specify shipping details...'}
+                            value={formData.shippingDetails}
+                            onChange={(e) => setFormData({ ...formData, shippingDetails: e.target.value })}
+                            className="mt-2"
+                            required={formData.shippingMethod === 'other'}
+                          />
+                        </div>
+                      )}
                     </div>
 
                     {/* Notes */}

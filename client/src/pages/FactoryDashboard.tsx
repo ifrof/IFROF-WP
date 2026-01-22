@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Package, ShoppingBag, MessageSquare, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Loader2, Package, ShoppingBag, MessageSquare, CheckCircle, Clock, XCircle, Truck, DollarSign } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
 
@@ -201,14 +201,33 @@ export default function FactoryDashboard() {
                               {new Date(inquiry.createdAt).toLocaleDateString()}
                             </p>
                           </div>
-                          <Badge>{inquiry.status}</Badge>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge>{inquiry.status}</Badge>
+                            {inquiry.shippingMethod && (
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                <Truck className="w-3 h-3 mr-1" />
+                                {t(`importRequest.form.shippingMethodOptions.${inquiry.shippingMethod}`)}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
+                        {inquiry.shippingMethod === 'other' && inquiry.shippingDetails && (
+                          <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-muted-foreground">
+                            <strong>{t("importRequest.form.shippingDetails")}:</strong> {inquiry.shippingDetails}
+                          </div>
+                        )}
                         {inquiry.description && (
                           <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
                             {inquiry.description}
                           </p>
                         )}
-                        <div className="flex justify-end mt-4">
+                        <div className="flex justify-between items-center mt-4">
+                          {inquiry.shippingCostEstimate ? (
+                            <div className="text-sm font-semibold text-green-600 flex items-center">
+                              <DollarSign className="w-4 h-4 mr-1" />
+                              {t("importRequest.form.shippingCostEstimate")}: ${(inquiry.shippingCostEstimate / 100).toFixed(2)}
+                            </div>
+                          ) : <div></div>}
                           <Button variant="outline" size="sm">
                             <MessageSquare className="w-4 h-4 mr-2" />
                             {t("dashboard.factory.respond")}
