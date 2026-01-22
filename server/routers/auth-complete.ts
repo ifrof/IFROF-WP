@@ -54,6 +54,20 @@ const buyerProfileSchema = z.object({
   interests: z.string().optional(),
 });
 
+const factoryProfileSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  location: z.string().optional(),
+  contactEmail: z.string().email().optional(),
+  contactPhone: z.string().optional(),
+  certifications: z.string().optional(),
+  productCategories: z.string().optional(),
+  productionCapacity: z.string().optional(),
+  minimumOrderQuantity: z.number().optional(),
+  logoUrl: z.string().url().optional(),
+  bannerUrl: z.string().url().optional(),
+});
+
 export const authRouter = router({
   // Get current user
   me: publicProcedure.query(async ({ ctx }) => {
@@ -91,10 +105,16 @@ export const authRouter = router({
         throw new Error("Failed to create user / فشل إنشاء الحساب");
       }
 
-      // Create empty buyer profile if role is buyer
+      // Create empty profile based on role
       if (input.role === "buyer") {
         await createBuyerProfile({
           userId: newUser.id,
+        });
+      } else if (input.role === "factory") {
+        await db.createFactory({
+          userId: newUser.id,
+          name: newUser.name || "New Factory",
+          verificationStatus: "pending",
         });
       }
 
@@ -319,5 +339,43 @@ export const authRouter = router({
 
       const updatedProfile = await db.updateBuyerProfile(id, input);
       return { success: true, profile: updatedProfile };
+    }),
+
+  // Get Factory Profile
+  getFactoryProfile: protectedProcedure
+    .query(async ({ ctx }) => {
+      const { id, role } = ctx.user;
+      if (role !== "factory") {
+        throw new Error("User is not a factory / المستخدم ليس مصنعاً");
+      }
+      
+      const { factories } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
+      const db_instance = await db.getDb();
+      if (!db_instance) return null;
+      
+      const result = await db_instance.select().from(factories).where(eq(factories.userId, id)).limit(1);
+      return result[0] || null;
+    }),
+
+  // Update Factory Profile
+  updateFactoryProfile: protectedProcedure
+    .input(factoryProfileSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { id, role } = ctx.user;
+      if (role !== "factory") {
+        throw new Error("User is not a factory / المستخدم ليس مصنعاً");
+      }
+
+      const { factories } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
+      const db_instance = await db.getDb();
+      if (!db_instance) throw new Error("Database connection failed");
+
+      await db_instance.update(factories)
+        .set({ ...input, updatedAt: new Date() })
+        .where(eq(factories.userId, id));
+        
+      return { success: true };
     }),
 });
