@@ -258,28 +258,25 @@ class SDKServer {
 
   async authenticateRequest(req: Request): Promise<User> {
     const cookies = this.parseCookies(req.headers.cookie);
-    const sessionCookie = cookies.get(COOKIE_NAME);
+    const sessionToken = cookies.get(COOKIE_NAME);
     
-    if (!sessionCookie) {
+    if (!sessionToken) {
       throw ForbiddenError("Missing session cookie");
     }
 
-    // Try verifying as custom JWT first (Phase 4 implementation)
-    try {
-      const jwt = require('jsonwebtoken');
-      const JWT_SECRET = process.env.JWT_SECRET || "ifrof-secret-key-2026";
-      const decoded = jwt.verify(sessionCookie, JWT_SECRET);
-      
-      if (decoded && decoded.openId) {
-        const user = await db.getUserByOpenId(decoded.openId);
-        if (user) return user;
+    // 1. Check database sessions first (Email/Password & New OAuth)
+    const dbSession = await db.getSession(sessionToken);
+    if (dbSession) {
+      if (new Date() > new Date(dbSession.expiresAt)) {
+        await db.deleteSession(sessionToken);
+        throw ForbiddenError("Session expired");
       }
-    } catch (e) {
-      // Not a custom JWT or invalid, fall back to OAuth session
+      const user = await db.getUserById(dbSession.userId);
+      if (user) return user;
     }
 
-    // Fallback to regular OAuth authentication flow
-    const session = await this.verifySession(sessionCookie);
+    // 2. Fallback to regular OAuth authentication flow (Legacy/Manus OAuth)
+    const session = await this.verifySession(sessionToken);
 
     if (!session) {
       throw ForbiddenError("Invalid session cookie");
@@ -292,7 +289,7 @@ class SDKServer {
     // If user not in DB, sync from OAuth server automatically
     if (!user) {
       try {
-        const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
+        const userInfo = await this.getUserInfoWithJwt(sessionToken ?? "");
         await db.upsertUser({
           openId: userInfo.openId,
           name: userInfo.name || null,

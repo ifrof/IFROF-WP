@@ -208,6 +208,59 @@ export async function getUserById(id: number) {
 }
 
 // ============================================================================
+// SESSION OPERATIONS
+// ============================================================================
+
+export async function createSession(session: any): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      await _db.insert(schema.sessions).values(session);
+      return session;
+    } catch (e) {
+      console.error("[Database] createSession MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  if (!dbData.sessions) dbData.sessions = [];
+  dbData.sessions.push(session);
+  writeJsonDb(dbData);
+  return session;
+}
+
+export async function getSession(id: string): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.select().from(schema.sessions).where(eq(schema.sessions.id, id)).limit(1);
+      return result[0] || null;
+    } catch (e) {
+      console.error("[Database] getSession MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  if (!dbData.sessions) return null;
+  return dbData.sessions.find((s: any) => s.id === id) || null;
+}
+
+export async function deleteSession(id: string): Promise<void> {
+  if (!isJsonMode && _db) {
+    try {
+      await _db.delete(schema.sessions).where(eq(schema.sessions.id, id));
+      return;
+    } catch (e) {
+      console.error("[Database] deleteSession MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  if (dbData.sessions) {
+    dbData.sessions = dbData.sessions.filter((s: any) => s.id !== id);
+    writeJsonDb(dbData);
+  }
+}
+
+// ============================================================================
 // FACTORY OPERATIONS
 // ============================================================================
 

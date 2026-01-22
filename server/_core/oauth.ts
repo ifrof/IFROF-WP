@@ -3,6 +3,7 @@ import type { Express, Request, Response } from "express";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
+import crypto from "crypto";
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
@@ -28,17 +29,31 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      await db.upsertUser({
+      // Filter for Google only
+      const loginMethod = userInfo.loginMethod ?? userInfo.platform;
+      if (loginMethod !== "google") {
+        console.warn(`[OAuth] Rejected login attempt from platform: ${loginMethod}`);
+        res.status(403).json({ error: "Only Google authentication is allowed / يسمح فقط بتسجيل الدخول عبر جوجل" });
+        return;
+      }
+
+      const user = await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
         email: userInfo.email ?? null,
-        loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
+        loginMethod: "google",
         lastSignedIn: new Date(),
+        emailVerified: 1, // OAuth emails are considered verified
       });
 
-      const sessionToken = await sdk.createSessionToken(userInfo.openId, {
-        name: userInfo.name || "",
-        expiresInMs: ONE_YEAR_MS,
+      // Create a database session
+      const sessionToken = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + ONE_YEAR_MS);
+      
+      await db.createSession({
+        id: sessionToken,
+        userId: user.id,
+        expiresAt,
       });
 
       const cookieOptions = getSessionCookieOptions(req);

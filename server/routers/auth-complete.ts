@@ -1,16 +1,13 @@
 import { z } from "zod";
 import { publicProcedure, router, protectedProcedure } from "../_core/trpc";
-import { getDb, getUserByEmail, upsertUser, getUserByVerificationToken, getUserByResetToken } from "../db";
+import { getDb, getUserByEmail, upsertUser, getUserByVerificationToken, getUserByResetToken, createSession, deleteSession } from "../db";
 import { eq } from "drizzle-orm";
 import { users } from "../../drizzle/schema";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "../_core/cookies";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../_core/email-service";
-
-const JWT_SECRET = process.env.JWT_SECRET || "ifrof-secret-key-2026";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email format / تنسيق البريد الإلكتروني غير صحيح"),
@@ -92,9 +89,17 @@ export const authRouter = router({
       }
 
       // Set session cookie (auto-login)
-      const token = jwt.sign({ userId: newUser.id, openId: newUser.openId }, JWT_SECRET, { expiresIn: "7d" });
+      const sessionToken = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      
+      await createSession({
+        id: sessionToken,
+        userId: newUser.id,
+        expiresAt,
+      });
+
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.cookie(COOKIE_NAME, token, {
+      ctx.res.cookie(COOKIE_NAME, sessionToken, {
         ...cookieOptions,
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
@@ -145,13 +150,18 @@ export const authRouter = router({
         throw new Error("Please verify your email first / يرجى تفعيل البريد الإلكتروني أولاً");
       }
 
-      const expiresIn = input.rememberMe ? "30d" : "7d";
       const maxAge = (input.rememberMe ? 30 : 7) * 24 * 60 * 60 * 1000;
+      const sessionToken = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + maxAge);
       
-      const token = jwt.sign({ userId: user.id, openId: user.openId }, JWT_SECRET, { expiresIn });
+      await createSession({
+        id: sessionToken,
+        userId: user.id,
+        expiresAt,
+      });
       
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.cookie(COOKIE_NAME, token, {
+      ctx.res.cookie(COOKIE_NAME, sessionToken, {
         ...cookieOptions,
         maxAge,
       });
@@ -255,7 +265,15 @@ export const authRouter = router({
     }),
 
   // Logout
-  logout: publicProcedure.mutation(({ ctx }) => {
+  logout: publicProcedure.mutation(async ({ ctx }) => {
+    const cookies = ctx.req.headers.cookie;
+    if (cookies) {
+      const parsed = require('cookie').parse(cookies);
+      const sessionToken = parsed[COOKIE_NAME];
+      if (sessionToken) {
+        await deleteSession(sessionToken);
+      }
+    }
     const cookieOptions = getSessionCookieOptions(ctx.req);
     ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
     return { success: true };
