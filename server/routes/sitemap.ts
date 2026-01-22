@@ -13,9 +13,12 @@ router.get('/sitemap.xml', async (req, res) => {
     const staticPages = [
       '',
       '/marketplace',
+      '/search',
       '/faq',
       '/about',
-      '/contact'
+      '/contact',
+      '/privacy',
+      '/terms'
     ];
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>

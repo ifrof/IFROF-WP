@@ -177,6 +177,8 @@ export const products = mysqlTable("products", {
   descriptionAr: text("descriptionAr"),
   descriptionEn: text("descriptionEn"),
   descriptionZh: text("descriptionZh"),
+  categoryId: int("categoryId").references(() => categories.id),
+  subcategoryId: int("subcategoryId").references(() => subcategories.id),
   category: varchar("category", { length: 100 }),
   tags: text("tags"),
   specifications: text("specifications"),
@@ -195,6 +197,40 @@ export const products = mysqlTable("products", {
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
+
+/**
+ * Categories table for product classification
+ */
+export const categories = mysqlTable("categories", {
+  id: int("id").autoincrement().primaryKey(),
+  nameAr: varchar("nameAr", { length: 100 }).notNull(),
+  nameEn: varchar("nameEn", { length: 100 }).notNull(),
+  nameZh: varchar("nameZh", { length: 100 }),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  icon: varchar("icon", { length: 50 }),
+  descriptionAr: text("descriptionAr"),
+  descriptionEn: text("descriptionEn"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Category = typeof categories.$inferSelect;
+export type InsertCategory = typeof categories.$inferInsert;
+
+/**
+ * Subcategories table linked to categories
+ */
+export const subcategories = mysqlTable("subcategories", {
+  id: int("id").autoincrement().primaryKey(),
+  categoryId: int("categoryId").notNull().references(() => categories.id),
+  nameAr: varchar("nameAr", { length: 100 }).notNull(),
+  nameEn: varchar("nameEn", { length: 100 }).notNull(),
+  nameZh: varchar("nameZh", { length: 100 }),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Subcategory = typeof subcategories.$inferSelect;
+export type InsertSubcategory = typeof subcategories.$inferInsert;
 
 /**
  * Inquiries table for buyer-factory inquiries
