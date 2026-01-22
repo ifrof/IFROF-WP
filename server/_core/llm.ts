@@ -209,15 +209,46 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
-const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-    : "https://forge.manus.im/v1/chat/completions";
-
-const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
+/**
+ * Resolves the API URL and key based on available environment variables.
+ * Priority:
+ * 1. Forge API (BUILT_IN_FORGE_API_URL + BUILT_IN_FORGE_API_KEY)
+ * 2. Groq API (GROQ_API_KEY) - Free tier
+ * 3. OpenAI API (OPENAI_API_KEY)
+ */
+const resolveApiConfig = (): { url: string; key: string; model: string } => {
+  // 1. Try Forge API first (internal)
+  if (ENV.forgeApiUrl && ENV.forgeApiKey) {
+    return {
+      url: `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`,
+      key: ENV.forgeApiKey,
+      model: "gemini-2.5-flash",
+    };
   }
+
+  // 2. Try Groq API (free tier)
+  const groqKey = process.env.GROQ_API_KEY;
+  if (groqKey) {
+    return {
+      url: "https://api.groq.com/openai/v1/chat/completions",
+      key: groqKey,
+      model: "llama-3.3-70b-versatile", // Free tier model with good capabilities
+    };
+  }
+
+  // 3. Try OpenAI API
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (openaiKey) {
+    return {
+      url: "https://api.openai.com/v1/chat/completions",
+      key: openaiKey,
+      model: "gpt-4o-mini",
+    };
+  }
+
+  throw new Error(
+    "No LLM API key configured. Please set GROQ_API_KEY (free) or OPENAI_API_KEY in environment variables."
+  );
 };
 
 const normalizeResponseFormat = ({
@@ -266,7 +297,7 @@ const normalizeResponseFormat = ({
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  assertApiKey();
+  const apiConfig = resolveApiConfig();
 
   const {
     messages,
@@ -280,7 +311,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   } = params;
 
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
+    model: apiConfig.model,
     messages: messages.map(normalizeMessage),
   };
 
@@ -296,11 +327,9 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768
-  payload.thinking = {
-    "budget_tokens": 128
-  }
+  payload.max_tokens = 8192;
 
+  // Handle response format - Groq supports json_object but not json_schema
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
     response_format,
@@ -309,24 +338,42 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   });
 
   if (normalizedResponseFormat) {
-    payload.response_format = normalizedResponseFormat;
+    // For Groq, convert json_schema to json_object since Groq doesn't support json_schema
+    if (normalizedResponseFormat.type === "json_schema" && apiConfig.url.includes("groq.com")) {
+      payload.response_format = { type: "json_object" };
+      // Add schema instructions to the system message
+      const schemaInstructions = `\n\nYou MUST respond with valid JSON that matches this exact schema:\n${JSON.stringify(normalizedResponseFormat.json_schema.schema, null, 2)}`;
+      const systemMsg = payload.messages as any[];
+      if (systemMsg.length > 0 && systemMsg[0].role === 'system') {
+        systemMsg[0].content += schemaInstructions;
+      } else {
+        systemMsg.unshift({ role: 'system', content: schemaInstructions });
+      }
+    } else {
+      payload.response_format = normalizedResponseFormat;
+    }
   }
 
-  const response = await fetch(resolveApiUrl(), {
+  console.log(`[LLM] Invoking ${apiConfig.model} via ${apiConfig.url.includes('groq') ? 'Groq' : apiConfig.url.includes('openai') ? 'OpenAI' : 'Forge'}`);
+
+  const response = await fetch(apiConfig.url, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
+      authorization: `Bearer ${apiConfig.key}`,
     },
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error(`[LLM] Error: ${response.status} ${response.statusText} – ${errorText}`);
     throw new Error(
       `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
     );
   }
 
-  return (await response.json()) as InvokeResult;
+  const result = (await response.json()) as InvokeResult;
+  console.log(`[LLM] Success: ${result.usage?.total_tokens || 'N/A'} tokens used`);
+  return result;
 }

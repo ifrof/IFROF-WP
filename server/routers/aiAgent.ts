@@ -32,55 +32,108 @@ export const aiAgentRouter = router({
     .input(searchQuerySchema)
     .mutation(async ({ input }): Promise<SearchResult> => {
       console.log(`[AI Agent] Starting search for: "${input.query}" in ${input.language}`);
+      
       try {
-        // 1. Perform real-time search using DuckDuckGo
-        const searchQuery = `${input.query} ${input.category || ''} factory manufacturer China business license`;
+        // 1. Perform real-time search using DuckDuckGo (completely free)
+        const searchQuery = `${input.query} ${input.category || ''} factory manufacturer China supplier`;
         const searchResults = await searchDuckDuckGo(searchQuery);
         
-        console.log(`[AI Agent] Search returned ${searchResults.length} results`);
+        console.log(`[AI Agent] DuckDuckGo returned ${searchResults.length} results`);
 
-        if (searchResults.length === 0) {
-          console.warn(`[AI Agent] No search results found for query: ${searchQuery}`);
-          // We still continue to let LLM handle the "no results" case or provide general advice
-        }
-
-        const searchContext = searchResults.map((r, i) => 
-          `Result ${i+1}:
+        // Build search context for LLM
+        let searchContext = '';
+        if (searchResults.length > 0) {
+          searchContext = searchResults.map((r, i) => 
+            `Result ${i+1}:
 Title: ${r.title}
 Link: ${r.link}
 Snippet: ${r.snippet}`
-        ).join('\n\n');
+          ).join('\n\n');
+        } else {
+          searchContext = 'No search results were found. Please provide general guidance based on the query.';
+        }
 
         // 2. Use LLM to analyze search results and identify real factories
         const systemPrompt = input.language === 'ar'
-          ? `أنت وكيل ذكي متخصص في البحث عن المصانع المباشرة في الصين. مهمتك هي تحليل نتائج البحث وتحديد المصانع الحقيقية.
-يجب أن تفرق بوضوح بين المصنع المباشر (الذي يملك خطوط إنتاج) والشركة التجارية (الوسيط).
+          ? `أنت محقق ذكي متخصص في البحث عن المصانع الصينية المباشرة. مهمتك هي تحليل نتائج البحث وتحديد المصانع الحقيقية.
+
+يجب أن تفرق بوضوح بين:
+- المصنع المباشر (direct_manufacturer): يملك خطوط إنتاج ومعدات
+- الشركة التجارية (commercial_company): وسيط يشتري من مصانع أخرى
+- التاجر (trader): وسيط صغير
+
+علامات المصنع الحقيقي:
+- ذكر معدات الإنتاج والآلات
+- عدد كبير من الموظفين
+- شهادات ISO, CE, SGS
+- عنوان في منطقة صناعية
+- وجود على موقع 1688.com كـ "生产厂家"
+
+علامات الوسيط:
+- كلمات مثل "Trading", "Commerce", "Import & Export" في الاسم
+- تنوع كبير في المنتجات غير المترابطة
+- عنوان مكتب صغير
+
 أرجع النتائج بصيغة JSON فقط.`
-          : `You are an AI agent specialized in finding direct manufacturers in China. Your task is to analyze search results and identify real factories.
-You must clearly distinguish between a direct manufacturer (owns production lines) and a trading company (intermediary).
+          : `You are an AI investigator specialized in finding direct Chinese manufacturers. Your task is to analyze search results and identify real factories.
+
+You must clearly distinguish between:
+- Direct Manufacturer (direct_manufacturer): Owns production lines and equipment
+- Commercial Company (commercial_company): Intermediary that buys from other factories
+- Trader (trader): Small intermediary
+
+Signs of a Real Factory:
+- Mentions of production equipment and machinery
+- Large number of employees
+- ISO, CE, SGS certifications
+- Address in an industrial zone
+- Presence on 1688.com as "生产厂家" (manufacturer)
+
+Signs of an Intermediary:
+- Words like "Trading", "Commerce", "Import & Export" in the name
+- Wide variety of unrelated products
+- Small office address
+
 Return results in JSON format only.`;
 
         const userPrompt = input.language === 'ar'
-          ? `بناءً على نتائج البحث التالية، استخرج قائمة بـ 5 مصانع محتملة وقم بتقييمها:
-${searchContext || 'لا توجد نتائج بحث متاحة حالياً.'}
+          ? `بناءً على نتائج البحث التالية عن "${input.query}"، استخرج قائمة بـ 5 مصانع/موردين محتملين وقم بتقييمها:
 
-المطلوب:
-1. اسم المصنع.
-2. النوع (direct_manufacturer أو trader).
-3. درجة الثقة (0-100).
-4. التفسير (لماذا تعتقد أنه مصنع أو وسيط).
-5. توصيات عامة للمشتري.`
-          : `Based on the following search results, extract a list of 5 potential factories and evaluate them:
-${searchContext || 'No search results available currently.'}
+${searchContext}
 
-Required:
-1. Factory Name.
-2. Type (direct_manufacturer or trader).
-3. Confidence Score (0-100).
-4. Reasoning (Why you think it's a factory or intermediary).
-5. General recommendations for the buyer.`;
+المطلوب إرجاعه بصيغة JSON:
+{
+  "results": [
+    {
+      "name": "اسم المصنع أو المورد",
+      "type": "direct_manufacturer أو commercial_company أو trader أو unknown",
+      "confidence": رقم من 0 إلى 100,
+      "reasoning": "سبب التصنيف",
+      "source": "رابط المصدر إن وجد"
+    }
+  ],
+  "recommendations": ["توصية 1", "توصية 2"]
+}`
+          : `Based on the following search results for "${input.query}", extract a list of 5 potential factories/suppliers and evaluate them:
+
+${searchContext}
+
+Return in JSON format:
+{
+  "results": [
+    {
+      "name": "Factory or supplier name",
+      "type": "direct_manufacturer or commercial_company or trader or unknown",
+      "confidence": number from 0 to 100,
+      "reasoning": "Reason for classification",
+      "source": "Source URL if available"
+    }
+  ],
+  "recommendations": ["Recommendation 1", "Recommendation 2"]
+}`;
 
         console.log(`[AI Agent] Invoking LLM for analysis...`);
+        
         const response = await invokeLLM({
           messages: [
             { role: 'system', content: systemPrompt },
@@ -104,12 +157,11 @@ Required:
                           type: 'string',
                           enum: ['direct_manufacturer', 'trader', 'commercial_company', 'unknown'],
                         },
-                        confidence: { type: 'number', minimum: 0, maximum: 100 },
+                        confidence: { type: 'number' },
                         reasoning: { type: 'string' },
                         source: { type: 'string' },
                       },
                       required: ['name', 'type', 'confidence', 'reasoning'],
-                      additionalProperties: false,
                     },
                   },
                   recommendations: {
@@ -118,7 +170,6 @@ Required:
                   },
                 },
                 required: ['results', 'recommendations'],
-                additionalProperties: false,
               },
             },
           },
@@ -147,7 +198,7 @@ Required:
           recommendations: parsed.recommendations || [],
         };
       } catch (error: any) {
-        console.error('[AI Agent] Search error:', error);
+        console.error('[AI Agent] Search error:', error.message || error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: error.message || 'Failed to search factories via AI. Please try again later.',
@@ -168,19 +219,26 @@ Required:
       console.log(`[AI Agent] Verifying factory: "${input.factoryName}"`);
       try {
         // Real-time verification using search
-        const searchQuery = `${input.factoryName} ${input.factoryInfo || ''} factory manufacturer China verification`;
+        const searchQuery = `${input.factoryName} ${input.factoryInfo || ''} factory manufacturer China`;
         const searchResults = await searchDuckDuckGo(searchQuery);
         const searchContext = searchResults.map((r, i) => `[${i+1}] ${r.title}: ${r.snippet}`).join('\n');
 
         const systemPrompt = input.language === 'ar'
-          ? `أنت خبير في التحقق من المصانع الصينية. حلل البيانات وقرر ما إذا كان المصنع حقيقياً أم وسيطاً.`
-          : `You are an expert in verifying Chinese factories. Analyze the data and decide if the factory is real or an intermediary.`;
+          ? `أنت خبير في التحقق من المصانع الصينية. حلل البيانات وقرر ما إذا كان المصنع حقيقياً أم وسيطاً. أرجع النتيجة بصيغة JSON.`
+          : `You are an expert in verifying Chinese factories. Analyze the data and decide if the factory is real or an intermediary. Return the result in JSON format.`;
 
         const userPrompt = `Verify this factory: ${input.factoryName}
 Context from web search:
 ${searchContext || 'No search context found.'}
 
-Additional Info: ${input.factoryInfo || 'None'}`;
+Additional Info: ${input.factoryInfo || 'None'}
+
+Return JSON:
+{
+  "type": "direct_manufacturer or trader or commercial_company or unknown",
+  "confidence": number 0-100,
+  "reasoning": "explanation"
+}`;
 
         const response = await invokeLLM({
           messages: [
@@ -199,11 +257,10 @@ Additional Info: ${input.factoryInfo || 'None'}`;
                     type: 'string',
                     enum: ['direct_manufacturer', 'trader', 'commercial_company', 'unknown'],
                   },
-                  confidence: { type: 'number', minimum: 0, maximum: 100 },
+                  confidence: { type: 'number' },
                   reasoning: { type: 'string' },
                 },
                 required: ['type', 'confidence', 'reasoning'],
-                additionalProperties: false,
               },
             },
           },
@@ -224,7 +281,7 @@ Additional Info: ${input.factoryInfo || 'None'}`;
           isDirectFactory: parsed.type === 'direct_manufacturer' && parsed.confidence >= 70,
         };
       } catch (error: any) {
-        console.error('[AI Agent] Factory verification error:', error);
+        console.error('[AI Agent] Factory verification error:', error.message || error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: error.message || 'Failed to verify factory',
