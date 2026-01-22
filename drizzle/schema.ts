@@ -152,6 +152,8 @@ export const factories = mysqlTable("factories", {
   bannerUrl: text("bannerUrl"),
   certificationProofs: text("certificationProofs"), // JSON array of certification proof URLs or objects
   verificationStatus: mysqlEnum("verificationStatus", ["pending", "verified", "rejected"]).default("pending"),
+  verificationNotes: text("verificationNotes"),
+  verifiedAt: timestamp("verifiedAt"),
   rating: int("rating").default(0),
   responseTime: varchar("responseTime", { length: 50 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

@@ -95,6 +95,49 @@ export const factoriesRouter = router({
       // Note: In production, you'd want to soft-delete or handle related records
       throw new TRPCError({ code: "NOT_IMPLEMENTED", message: "Delete not yet implemented" });
     }),
+
+  // Admin: Approve factory verification
+  approveVerification: protectedProcedure
+    .input(z.object({ id: z.number(), notes: z.string().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can approve factories" });
+      }
+
+      await db.updateFactory(input.id, {
+        verificationStatus: "verified",
+        verificationNotes: input.notes,
+        verifiedAt: new Date(),
+      });
+
+      return { success: true };
+    }),
+
+  // Admin: Reject factory verification
+  rejectVerification: protectedProcedure
+    .input(z.object({ id: z.number(), reason: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can reject factories" });
+      }
+
+      await db.updateFactory(input.id, {
+        verificationStatus: "rejected",
+        verificationNotes: input.reason,
+      });
+
+      return { success: true };
+    }),
+
+  // Admin: Get pending verifications
+  getPendingVerifications: protectedProcedure
+    .query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can view pending verifications" });
+      }
+
+      return db.getFactoriesByStatus("pending");
+    }),
 });
 
 import { getCached } from "../utils/cache";

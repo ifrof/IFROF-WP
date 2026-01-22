@@ -505,6 +505,19 @@ export async function updateFactory(id: number, data: any) {
   return null;
 }
 
+export async function getFactoriesByStatus(status: string) {
+  if (!isJsonMode && _db) {
+    try {
+      return await _db.select().from(schema.factories).where(eq(schema.factories.verificationStatus, status));
+    } catch (e) {
+      console.error("[Database] getFactoriesByStatus MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  return (dbData.factories || []).filter((f: any) => f.verificationStatus === status);
+}
+
 // ============================================================================
 // PRODUCT OPERATIONS
 // ============================================================================
