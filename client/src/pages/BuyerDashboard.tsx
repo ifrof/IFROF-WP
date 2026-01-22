@@ -53,7 +53,6 @@ export default function BuyerDashboard() {
           <p className="text-muted-foreground">{t("dashboard.buyer.subtitle")}</p>
         </div>
 
-        <div>
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card>
