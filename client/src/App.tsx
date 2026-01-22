@@ -28,7 +28,8 @@ import FactoryListings from "@/pages/FactoryListings";
 import FactoryOrders from "@/pages/FactoryOrders";
 import FactoryRequestDetail from "@/pages/FactoryRequestDetail";
 import FactoryVerification from "@/pages/FactoryVerification";
-import PublicFactoryListings from "@/pages/PublicFactoryListings";
+import PublicFactoryListings from "./pages/PublicFactoryListings";
+import FactoryPublicProfile from "./pages/FactoryPublicProfile";
 import Support from "@/pages/Support";
 import Maps from "@/pages/Maps";
 import HowItWorks from "@/pages/HowItWorks";
@@ -86,6 +87,7 @@ function Router() {
       <Route path={"/marketplace"} component={Marketplace} />
       <Route path={"/products"} component={ProductSearch} />
       <Route path={"/factories"} component={PublicFactoryListings} />
+      <Route path={"/factories/:id"} component={FactoryPublicProfile} />
       <Route path={"/products/:id"} component={ProductDetail} />
       <Route path={"/services"} component={Services} />
       <Route path={"/cart"} component={Cart} />

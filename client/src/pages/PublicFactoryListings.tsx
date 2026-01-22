@@ -122,12 +122,14 @@ export default function PublicFactoryListings() {
                       <Award className="w-12 h-12 text-gray-300" />
                     </div>
                   )}
-                  <div className="absolute top-4 right-4">
-                    <Badge className="bg-green-500 hover:bg-green-600 text-white border-none px-3 py-1 flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3" />
-                      {language === 'ar' ? 'موثق' : 'Verified'}
-                    </Badge>
-                  </div>
+                  {factory.verificationStatus === 'verified' && (
+                    <div className="absolute top-4 right-4">
+                      <Badge className="bg-green-500 hover:bg-green-600 text-white border-none px-3 py-1 flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3" />
+                        {language === 'ar' ? 'موثق' : 'Verified'}
+                      </Badge>
+                    </div>
+                  )}
                   {factory.logoUrl && (
                     <div className="absolute -bottom-6 left-6 w-16 h-16 bg-white rounded-lg shadow-md p-1 overflow-hidden border">
                       <img src={factory.logoUrl} alt={factory.name} className="w-full h-full object-contain" />
@@ -171,9 +173,9 @@ export default function PublicFactoryListings() {
                       </div>
                       <span className="text-xs text-gray-400">(12+)</span>
                     </div>
-                    <Link href={`/marketplace?factory=${factory.id}`}>
+                    <Link href={`/factories/${factory.id}`}>
                       <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 gap-1">
-                        {language === 'ar' ? 'عرض المنتجات' : 'View Products'}
+                        {language === 'ar' ? 'عرض الملف الشخصي' : 'View Profile'}
                         <ExternalLink className="w-3 h-3" />
                       </Button>
                     </Link>

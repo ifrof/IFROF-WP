@@ -719,8 +719,52 @@ export async function searchProductsAdvanced(filters: {
   location?: string;
 }) {
   if (!isJsonMode && _db) {
-    // MySQL implementation would go here with complex where clauses
-    // For now, let's use the JSON implementation logic as a base
+    try {
+      const conditions = [];
+      if (filters.query) {
+        const q = `%${filters.query}%`;
+        conditions.push(or(
+          like(schema.products.nameAr, q),
+          like(schema.products.nameEn, q),
+          like(schema.products.nameZh, q),
+          like(schema.products.descriptionAr, q),
+          like(schema.products.descriptionEn, q),
+          like(schema.products.descriptionZh, q)
+        ));
+      }
+      if (filters.category) {
+        conditions.push(eq(schema.products.category, filters.category));
+      }
+      if (filters.minPrice !== undefined) {
+        conditions.push(schema.products.minPrice.gte(filters.minPrice * 100));
+      }
+      if (filters.maxPrice !== undefined) {
+        conditions.push(schema.products.minPrice.lte(filters.maxPrice * 100));
+      }
+      if (filters.moq !== undefined) {
+        conditions.push(schema.products.minimumOrderQuantity.lte(filters.moq));
+      }
+      
+      let query = _db.select().from(schema.products);
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+      
+      const results = await query;
+      
+      if (filters.location) {
+        const loc = `%${filters.location}%`;
+        const matchingFactories = await _db.select({ id: schema.factories.id })
+          .from(schema.factories)
+          .where(like(schema.factories.location, loc));
+        const factoryIds = matchingFactories.map((f: any) => f.id);
+        return results.filter((p: any) => factoryIds.includes(p.factoryId));
+      }
+      
+      return results;
+    } catch (e) {
+      console.error("[Database] searchProductsAdvanced MySQL error:", e);
+    }
   }
 
   const dbData = readJsonDb();
