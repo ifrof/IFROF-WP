@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2, Search, Shield, User as UserIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import AdminDashboardLayout from "@/components/AdminDashboardLayout";
 
 export default function AdminUsers() {
-  const { language, dir } = useLanguage();
+  const { language } = useLanguage();
   const [search, setSearch] = useState("");
   
   const { data: users, isLoading, refetch } = trpc.admin.getUsers.useQuery({ search });
@@ -28,20 +28,18 @@ export default function AdminUsers() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8" dir={dir}>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-[#1e3a5f]">
-              {language === "ar" ? "إدارة المستخدمين" : "User Management"}
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              {language === "ar" ? "إدارة صلاحيات المستخدمين ومراقبة النشاط" : "Manage user roles and monitor activity"}
-            </p>
-          </div>
+    <AdminDashboardLayout>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {language === "ar" ? "إدارة المستخدمين" : "User Management"}
+          </h1>
+          <p className="text-muted-foreground">
+            {language === "ar" ? "إدارة صلاحيات المستخدمين ومراقبة النشاط" : "Manage user roles and monitor activity"}
+          </p>
         </div>
 
-        <Card className="mb-8">
+        <Card>
           <CardHeader>
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -106,12 +104,19 @@ export default function AdminUsers() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  {users?.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                        No users found matching your search.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             )}
           </CardContent>
         </Card>
       </div>
-    </div>
+    </AdminDashboardLayout>
   );
 }

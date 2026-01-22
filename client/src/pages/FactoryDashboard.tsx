@@ -6,22 +6,18 @@ import { trpc } from "@/lib/trpc";
 import { Loader2, Package, ShoppingBag, MessageSquare, CheckCircle, Clock, XCircle, Truck, DollarSign } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
+import FactoryDashboardLayout from "@/components/FactoryDashboardLayout";
 
 export default function FactoryDashboard() {
   const { t } = useLanguage();
-  const { data: user } = trpc.auth.me.useQuery();
   
   // Mock factory ID - in production, this would come from user's factory association
   const factoryId = 1;
 
-  const { data: orders, isLoading: ordersLoading } = trpc.dashboard.getRecentOrders.useQuery(
-    undefined,
-    { enabled: !!user }
-  );
+  const { data: orders, isLoading: ordersLoading } = trpc.dashboard.getRecentOrders.useQuery();
   
   const { data: inquiries, isLoading: inquiriesLoading } = trpc.inquiries.getByFactory.useQuery(
-    { factoryId },
-    { enabled: !!user }
+    { factoryId }
   );
 
   const { data: products } = trpc.products.getByFactory.useQuery({ factoryId });
@@ -48,33 +44,25 @@ export default function FactoryDashboard() {
     );
   };
 
-  if (!user || user.role !== "factory") {
+  if (ordersLoading || inquiriesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">
-              {t("dashboard.accessDenied")}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-8 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold">{t("dashboard.factory.title")}</h1>
-          <p className="text-blue-100 mt-2">{t("dashboard.factory.subtitle")}</p>
+    <FactoryDashboardLayout>
+      <div className="space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.factory.title")}</h1>
+          <p className="text-muted-foreground">{t("dashboard.factory.subtitle")}</p>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -140,11 +128,7 @@ export default function FactoryDashboard() {
                 <CardTitle>{t("dashboard.factory.recentOrders")}</CardTitle>
               </CardHeader>
               <CardContent>
-                {ordersLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : orders && (orders as any[]).length > 0 ? (
+                {orders && (orders as any[]).length > 0 ? (
                   <div className="space-y-4">
                     {(orders as any[]).map((order: any) => (
                       <div key={order.id} className="border rounded-lg p-4">
@@ -186,11 +170,7 @@ export default function FactoryDashboard() {
                 <CardTitle>{t("dashboard.factory.recentInquiries")}</CardTitle>
               </CardHeader>
               <CardContent>
-                {inquiriesLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : inquiries && (inquiries as any[]).length > 0 ? (
+                {inquiries && (inquiries as any[]).length > 0 ? (
                   <div className="space-y-4">
                     {(inquiries as any[]).map((inquiry: any) => (
                       <div key={inquiry.id} className="border rounded-lg p-4">
@@ -211,16 +191,6 @@ export default function FactoryDashboard() {
                             )}
                           </div>
                         </div>
-                        {inquiry.shippingMethod === 'other' && inquiry.shippingDetails && (
-                          <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-muted-foreground">
-                            <strong>{t("importRequest.form.shippingDetails")}:</strong> {inquiry.shippingDetails}
-                          </div>
-                        )}
-                        {inquiry.description && (
-                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                            {inquiry.description}
-                          </p>
-                        )}
                         <div className="flex justify-between items-center mt-4">
                           {inquiry.shippingCostEstimate ? (
                             <div className="text-sm font-semibold text-green-600 flex items-center">
@@ -334,6 +304,6 @@ export default function FactoryDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </FactoryDashboardLayout>
   );
 }

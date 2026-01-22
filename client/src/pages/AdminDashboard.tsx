@@ -1,43 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Users, Building2, Package, ShoppingBag, DollarSign, CheckCircle, ArrowRight, Plus, Truck } from "lucide-react";
+import { Loader2, Users, Package, ShoppingBag, DollarSign, ArrowRight, Truck } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import AdminDashboardLayout from "@/components/AdminDashboardLayout";
 
 export default function AdminDashboard() {
-  const { language, dir } = useLanguage();
+  const { language } = useLanguage();
   const { user } = useAuth();
   
   const { data, isLoading } = trpc.admin.getStats.useQuery(undefined, { 
     enabled: !!user && user.role === "admin" 
   });
-
-  if (!user || user.role !== "admin") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <p className="text-red-600 font-semibold mb-4">
-              {language === "ar" ? "ممنوع الوصول" : "Access Denied"}
-            </p>
-            <p className="text-gray-600 mb-6">
-              {language === "ar"
-                ? "أنت لا تملك صلاحيات الوصول إلى لوحة التحكم"
-                : "You do not have permission to access this dashboard"}
-            </p>
-            <Link href="/">
-              <Button>{language === "ar" ? "العودة للرئيسية" : "Go Home"}</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -64,30 +42,19 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50" dir={dir}>
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#1e3a5f] to-[#2a528a] text-white py-8 px-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">
-              {language === "ar" ? "لوحة تحكم المسؤول" : "Admin Dashboard"}
-            </h1>
-            <p className="text-blue-100 mt-2">
-              {language === "ar" ? "إدارة المنتجات والطلبات والمستخدمين" : "Manage products, orders, and users"}
-            </p>
-          </div>
-          <Link href="/admin/products">
-            <Button className="bg-white text-[#1e3a5f] hover:bg-blue-50">
-              <Plus className="mr-2 h-4 w-4" />
-              {language === "ar" ? "إضافة منتج" : "Add Product"}
-            </Button>
-          </Link>
+    <AdminDashboardLayout>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {language === "ar" ? "لوحة تحكم المسؤول" : "Admin Dashboard"}
+          </h1>
+          <p className="text-muted-foreground">
+            {language === "ar" ? "إدارة المنتجات والطلبات والمستخدمين" : "Manage products, orders, and users"}
+          </p>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="border-l-4 border-blue-500">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -135,45 +102,6 @@ export default function AdminDashboard() {
               <div className="text-3xl font-bold">${stats?.revenue.toLocaleString()}</div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Link href="/admin/factories">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="pt-6 text-center">
-                <Building2 className="w-10 h-10 mx-auto text-blue-600 mb-2" />
-                <h3 className="font-medium text-sm">{language === "ar" ? "إدارة المصانع" : "Manage Factories"}</h3>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/admin/products">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="pt-6 text-center">
-                <Package className="w-10 h-10 mx-auto text-green-600 mb-2" />
-                <h3 className="font-medium text-sm">{language === "ar" ? "إدارة المنتجات" : "Manage Products"}</h3>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/admin/orders">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="pt-6 text-center">
-                <ShoppingBag className="w-10 h-10 mx-auto text-purple-600 mb-2" />
-                <h3 className="font-medium text-sm">{language === "ar" ? "إدارة الطلبات" : "Manage Orders"}</h3>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/admin/users">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="pt-6 text-center">
-                <Users className="w-10 h-10 mx-auto text-orange-600 mb-2" />
-                <h3 className="font-medium text-sm">{language === "ar" ? "إدارة المستخدمين" : "Manage Users"}</h3>
-              </CardContent>
-            </Card>
-          </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -265,6 +193,6 @@ export default function AdminDashboard() {
           </Card>
         </div>
       </div>
-    </div>
+    </AdminDashboardLayout>
   );
 }

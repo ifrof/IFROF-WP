@@ -19,6 +19,12 @@ import BuyerDashboard from "@/pages/BuyerDashboard";
 import BuyerRequests from "@/pages/BuyerRequests";
 import BuyerOrders from "@/pages/BuyerOrders";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AdminUsers from "@/pages/AdminUsers";
+import AdminFactories from "@/pages/AdminFactories";
+import AdminRequests from "@/pages/AdminRequests";
+import FactoryListings from "@/pages/FactoryListings";
+import FactoryOrders from "@/pages/FactoryOrders";
+import FactoryVerification from "@/pages/FactoryVerification";
 import Support from "@/pages/Support";
 import Maps from "@/pages/Maps";
 import HowItWorks from "@/pages/HowItWorks";
@@ -81,12 +87,21 @@ function Router() {
       <Route path={"/orders"} component={Orders} />
       <Route path={"/orders/:orderId"} component={OrderDetail} />
       <Route path={"/dashboard/factory"} component={FactoryDashboard} />
+      <Route path={"/factory"} component={FactoryDashboard} />
+      <Route path={"/factory/listings"} component={FactoryListings} />
+      <Route path={"/factory/orders"} component={FactoryOrders} />
+      <Route path={"/factory/verification"} component={FactoryVerification} />
+      <Route path={"/factory/profile"} component={Profile} />
       <Route path={"/dashboard/buyer"} component={BuyerDashboard} />
       <Route path={"/buyer"} component={BuyerDashboard} />
       <Route path={"/buyer/requests"} component={BuyerRequests} />
       <Route path={"/buyer/orders"} component={BuyerOrders} />
       <Route path={"/buyer/profile"} component={Profile} />
       <Route path={"/dashboard/admin"} component={AdminDashboard} />
+      <Route path={"/admin"} component={AdminDashboard} />
+      <Route path={"/admin/users"} component={AdminUsers} />
+      <Route path={"/admin/factories"} component={AdminFactories} />
+      <Route path={"/admin/requests"} component={AdminRequests} />
       <Route path={"/support"} component={Support} />
       <Route path={"/maps"} component={Maps} />
       <Route path={"/how-it-works"} component={HowItWorks} />
