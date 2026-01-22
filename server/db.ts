@@ -208,20 +208,6 @@ export async function getUserByOpenId(openId: string) {
   return dbData.users.find((u: any) => u.openId === openId) || null;
 }
 
-export async function getUserById(id: number) {
-  if (!isJsonMode && _db) {
-    try {
-      const result = await _db.select().from(schema.users).where(eq(schema.users.id, id)).limit(1);
-      return result[0] || null;
-    } catch (e) {
-      console.error("[Database] getUserById MySQL error:", e);
-    }
-  }
-
-  const dbData = readJsonDb();
-  return dbData.users.find((u: any) => u.id === id) || null;
-}
-
 // ============================================================================
 // SESSION OPERATIONS
 // ============================================================================
