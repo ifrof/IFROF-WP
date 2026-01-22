@@ -292,7 +292,7 @@ export type InsertQuote = typeof quotes.$inferInsert;
  */
 export const messages = mysqlTable("messages", {
   id: int("id").autoincrement().primaryKey(),
-  inquiryId: int("inquiryId").notNull().references(() => inquiries.id),
+  inquiryId: int("inquiryId").notNull().references(() => importRequests.id),
   senderId: int("senderId").notNull().references(() => users.id),
   receiverId: int("receiverId").notNull().references(() => users.id),
   content: text("content").notNull(),

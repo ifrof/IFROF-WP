@@ -459,10 +459,14 @@ export async function searchFactoriesAdvanced(filters: {
     try {
       const conditions = [eq(schema.factories.verificationStatus, "verified")];
       if (filters.query) {
-        conditions.push(or(
-          like(schema.factories.name, `%${filters.query}%`),
-          like(schema.factories.description, `%${filters.query}%`)
-        ));
+        const q = `%${filters.query}%`;
+        const searchCondition = or(
+          like(schema.factories.name, q),
+          like(schema.factories.description, q)
+        );
+        if (searchCondition) {
+          conditions.push(searchCondition);
+        }
       }
       if (filters.location) {
         conditions.push(like(schema.factories.location, `%${filters.location}%`));
@@ -538,7 +542,7 @@ export async function updateFactory(id: number, data: any) {
   return null;
 }
 
-export async function getFactoriesByStatus(status: string) {
+export async function getFactoriesByStatus(status: any) {
   if (!isJsonMode && _db) {
     try {
       return await _db.select().from(schema.factories).where(eq(schema.factories.verificationStatus, status));
@@ -619,6 +623,56 @@ export async function getRelatedProducts(factoryId: number, excludeProductId: nu
   return (products || [])
     .filter((p: any) => p.id !== excludeProductId)
     .slice(0, limit);
+}
+
+export async function getFeaturedProducts(limit: number = 10) {
+  if (!isJsonMode && _db) {
+    try {
+      return await _db.select().from(schema.products)
+        .where(and(eq(schema.products.active, 1), eq(schema.products.featured, 1)))
+        .limit(limit);
+    } catch (e) {
+      console.error("[Database] getFeaturedProducts MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  return (dbData.products || [])
+    .filter((p: any) => p.active === 1 && p.featured === 1)
+    .slice(0, limit);
+}
+
+export async function getProductCategories() {
+  if (!isJsonMode && _db) {
+    try {
+      const results = await _db.select({ category: schema.products.category })
+        .from(schema.products)
+        .where(eq(schema.products.active, 1));
+      return Array.from(new Set(results.map((r: any) => r.category).filter(Boolean)));
+    } catch (e) {
+      console.error("[Database] getProductCategories MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  const categories = (dbData.products || [])
+    .filter((p: any) => p.active === 1)
+    .map((p: any) => p.category)
+    .filter(Boolean);
+  return Array.from(new Set(categories));
+}
+
+export async function getInquiriesByBuyer(buyerId: number) {
+  if (!isJsonMode && _db) {
+    try {
+      return await _db.select().from(schema.importRequests).where(eq(schema.importRequests.buyerId, buyerId));
+    } catch (e) {
+      console.error("[Database] getInquiriesByBuyer MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  return (dbData.importRequests || []).filter((i: any) => i.buyerId === buyerId);
 }
 
 // Cart operations
@@ -747,26 +801,30 @@ export async function searchProductsAdvanced(filters: {
       const conditions = [eq(schema.products.active, 1)];
       if (filters.query) {
         const q = `%${filters.query}%`;
-        conditions.push(or(
+        const searchCondition = or(
           like(schema.products.nameAr, q),
           like(schema.products.nameEn, q),
           like(schema.products.nameZh, q),
           like(schema.products.descriptionAr, q),
           like(schema.products.descriptionEn, q),
           like(schema.products.descriptionZh, q)
-        ));
+        );
+        if (searchCondition) {
+          conditions.push(searchCondition);
+        }
       }
       if (filters.category) {
         conditions.push(eq(schema.products.category, filters.category));
       }
+      const { gte, lte } = await import("drizzle-orm");
       if (filters.minPrice !== undefined) {
-        conditions.push(schema.products.minPrice.gte(filters.minPrice * 100));
+        conditions.push(gte(schema.products.minPrice, filters.minPrice * 100));
       }
       if (filters.maxPrice !== undefined) {
-        conditions.push(schema.products.minPrice.lte(filters.maxPrice * 100));
+        conditions.push(lte(schema.products.minPrice, filters.maxPrice * 100));
       }
       if (filters.moq !== undefined) {
-        conditions.push(schema.products.minimumOrderQuantity.lte(filters.moq));
+        conditions.push(lte(schema.products.minimumOrderQuantity, filters.moq));
       }
       
       let query = _db.select().from(schema.products);

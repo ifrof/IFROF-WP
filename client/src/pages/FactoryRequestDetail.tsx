@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatSkeleton } from "@/components/ChatSkeleton";
 import { Loader2, ArrowLeft, ArrowRight, Package, FileText, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 

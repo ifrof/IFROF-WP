@@ -73,6 +73,8 @@ const adminProfileSchema = z.object({
   accessLevel: z.number().optional(),
 });
 
+import { getBuyerProfileByUserId, getAdminProfileByUserId, updateBuyerProfile } from "../db";
+
 export const authRouter = router({
   // Get current user
   me: publicProcedure.query(async ({ ctx }) => {
@@ -116,11 +118,16 @@ export const authRouter = router({
           userId: newUser.id,
         });
       } else if (input.role === "factory") {
-        await db.createFactory({
-          userId: newUser.id,
-          name: newUser.name || "New Factory",
-          verificationStatus: "pending",
-        });
+        const db_instance = await getDb();
+        if (db_instance) {
+          // Import createFactory from db.ts or use it if already imported
+          const { createFactory } = await import("../db");
+          await createFactory({
+            userId: newUser.id,
+            name: newUser.name || "New Factory",
+            verificationStatus: "pending",
+          });
+        }
       } else if (input.role === "admin") {
         const adminProfile = await createAdminProfile({
           userId: newUser.id,
@@ -347,7 +354,7 @@ export const authRouter = router({
         throw new Error("User is not a buyer / المستخدم ليس مشترياً");
       }
       
-      const profile = await db.getBuyerProfileByUserId(id);
+      const profile = await getBuyerProfileByUserId(id);
       return profile || null;
     }),
 
@@ -360,7 +367,7 @@ export const authRouter = router({
         throw new Error("User is not a buyer / المستخدم ليس مشترياً");
       }
 
-      const updatedProfile = await db.updateBuyerProfile(id, input);
+      const updatedProfile = await updateBuyerProfile(id, input);
       return { success: true, profile: updatedProfile };
     }),
 
@@ -374,7 +381,7 @@ export const authRouter = router({
       
       const { factories } = await import('../../drizzle/schema');
       const { eq } = await import('drizzle-orm');
-      const db_instance = await db.getDb();
+      const db_instance = await getDb();
       if (!db_instance) return null;
       
       const result = await db_instance.select().from(factories).where(eq(factories.userId, id)).limit(1);
@@ -392,7 +399,7 @@ export const authRouter = router({
 
       const { factories } = await import('../../drizzle/schema');
       const { eq } = await import('drizzle-orm');
-      const db_instance = await db.getDb();
+      const db_instance = await getDb();
       if (!db_instance) throw new Error("Database connection failed");
 
       await db_instance.update(factories)
@@ -410,12 +417,12 @@ export const authRouter = router({
         throw new Error("User is not an admin / المستخدم ليس مسؤولاً");
       }
       
-      const profile = await db.getAdminProfileByUserId(id);
+      const profile = await getAdminProfileByUserId(id);
       if (!profile) return null;
 
       const { adminPermissions } = await import('../../drizzle/schema');
       const { eq } = await import('drizzle-orm');
-      const db_instance = await db.getDb();
+      const db_instance = await getDb();
       if (!db_instance) return { profile, permissions: [] };
 
       const permissions = await db_instance.select().from(adminPermissions).where(eq(adminPermissions.adminId, profile.id));
@@ -434,7 +441,7 @@ export const authRouter = router({
 
       const { adminProfiles } = await import('../../drizzle/schema');
       const { eq } = await import('drizzle-orm');
-      const db_instance = await db.getDb();
+      const db_instance = await getDb();
       if (!db_instance) throw new Error("Database connection failed");
 
       // Admins can only update their own department, accessLevel is restricted to superadmins

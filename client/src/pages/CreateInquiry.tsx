@@ -61,13 +61,11 @@ export default function CreateInquiry() {
 
     try {
       await createInquiryMutation.mutateAsync({
-        buyerId: user.id,
         factoryId: parseInt(formData.factoryId),
         productId: formData.productId ? parseInt(formData.productId) : undefined,
-        subject: formData.subject,
-        description: formData.description,
-        specifications: formData.specifications,
-        quantityRequired: formData.quantityRequired ? parseInt(formData.quantityRequired) : undefined,
+        productName: formData.subject,
+        quantity: formData.quantityRequired ? parseInt(formData.quantityRequired) : 1,
+        specifications: formData.specifications || formData.description,
       });
 
       toast.success("Inquiry created successfully!");

@@ -1,13 +1,15 @@
 import { z } from "zod";
 import { adminProcedure, router } from "../_core/trpc";
+import { getDb } from "../db";
 import * as schema from "../../drizzle/schema";
-import { eq, desc, sql, and, like } from "drizzle-orm";
+import { eq, desc, sql, and, like, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const adminRouter = router({
   // Dashboard Stats
   getStats: adminProcedure.query(async ({ ctx }) => {
-    const db = ctx.db;
+    const db = await getDb();
+if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
     
     // Total Products
     const productsCount = await db.select({ count: sql<number>`count(*)` }).from(schema.products);
@@ -31,8 +33,8 @@ export const adminRouter = router({
 
     // Recent Inquiries
     const recentInquiries = await db.select()
-      .from(schema.inquiries)
-      .orderBy(desc(schema.inquiries.createdAt))
+      .from(schema.importRequests)
+      .orderBy(desc(schema.importRequests.createdAt))
       .limit(10);
 
     return {
@@ -55,11 +57,16 @@ export const adminRouter = router({
       search: z.string().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const db = ctx.db;
+      const db = await getDb();
+if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
       let query = db.select().from(schema.products);
       
       if (input.search) {
-        query = query.where(like(schema.products.name, `%${input.search}%`));
+        query = query.where(or(
+          like(schema.products.nameAr, `%${input.search}%`),
+          like(schema.products.nameEn, `%${input.search}%`),
+          like(schema.products.nameZh, `%${input.search}%`)
+        ));
       }
       
       const products = await query
@@ -81,7 +88,8 @@ export const adminRouter = router({
       imageUrls: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = ctx.db;
+      const db = await getDb();
+if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
       const result = await db.insert(schema.products).values({
         ...input,
         active: 1,
@@ -101,7 +109,8 @@ export const adminRouter = router({
       active: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = ctx.db;
+      const db = await getDb();
+if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
       const { id, ...data } = input;
       await db.update(schema.products)
         .set(data)
@@ -112,7 +121,8 @@ export const adminRouter = router({
   deleteProduct: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const db = ctx.db;
+      const db = await getDb();
+if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
       // Soft delete by setting active to 0
       await db.update(schema.products)
         .set({ active: 0 })
@@ -128,7 +138,8 @@ export const adminRouter = router({
       offset: z.number().default(0),
     }))
     .query(async ({ ctx, input }) => {
-      const db = ctx.db;
+      const db = await getDb();
+if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
       let query = db.select().from(schema.orders);
       
       if (input.status) {
@@ -149,7 +160,8 @@ export const adminRouter = router({
       status: z.enum(["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]),
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = ctx.db;
+      const db = await getDb();
+if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
       await db.update(schema.orders)
         .set({ status: input.status })
         .where(eq(schema.orders.id, input.id));
@@ -164,7 +176,8 @@ export const adminRouter = router({
       search: z.string().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const db = ctx.db;
+      const db = await getDb();
+if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
       let query = db.select().from(schema.users);
       
       if (input.search) {
@@ -179,7 +192,7 @@ export const adminRouter = router({
         .offset(input.offset)
         .orderBy(desc(schema.users.createdAt));
         
-      return users.map(u => {
+      return users.map((u: any) => {
         const { password, ...userWithoutPassword } = u;
         return userWithoutPassword;
       });
@@ -191,7 +204,8 @@ export const adminRouter = router({
       role: z.enum(["user", "admin", "factory", "buyer"]),
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = ctx.db;
+      const db = await getDb();
+if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
       await db.update(schema.users)
         .set({ role: input.role })
         .where(eq(schema.users.id, input.id));
@@ -204,7 +218,8 @@ export const adminRouter = router({
       status: z.string().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const db = ctx.db;
+      const db = await getDb();
+if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
       let query = db.select().from(schema.factories);
       
       if (input.status) {
@@ -220,7 +235,8 @@ export const adminRouter = router({
       status: z.enum(["pending", "verified", "rejected"]),
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = ctx.db;
+      const db = await getDb();
+if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
       await db.update(schema.factories)
         .set({ verificationStatus: input.status })
         .where(eq(schema.factories.id, input.id));

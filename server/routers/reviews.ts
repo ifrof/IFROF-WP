@@ -153,7 +153,7 @@ export const reviewsRouter = router({
         };
       }
 
-      const totalRating = allReviews.reduce((sum, r) => sum + r.rating, 0);
+      const totalRating = allReviews.reduce((sum: number, r: any) => sum + r.rating, 0);
       const averageRating = Math.round((totalRating / allReviews.length) * 10) / 10;
 
       return {
@@ -295,7 +295,7 @@ export const reviewsRouter = router({
         return { rating: 0, count: 0 };
       }
 
-      const totalRating = allReviews.reduce((sum, r) => sum + r.rating, 0);
+      const totalRating = allReviews.reduce((sum: number, r: any) => sum + r.rating, 0);
       const averageRating = Math.round((totalRating / allReviews.length) * 10) / 10;
 
       return {

@@ -2,12 +2,14 @@ import { z } from "zod";
 import { publicProcedure, protectedProcedure, router, adminProcedure } from "../_core/trpc";
 import * as schema from "../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
+import { getDb } from "../db";
 
 export const servicesRouter = router({
   // Get all services
   list: publicProcedure
     .query(async ({ ctx }) => {
-      const db = ctx.db;
+      const db = await getDb();
+      if (!db) return [];
       const services = await db.select().from(schema.services).where(eq(schema.services.active, 1)).orderBy(desc(schema.services.createdAt));
       
       // Fetch factory info for each service
@@ -26,7 +28,8 @@ export const servicesRouter = router({
   getById: publicProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ ctx, input }) => {
-      const db = ctx.db;
+      const db = await getDb();
+      if (!db) return null;
       const service = await db.select().from(schema.services).where(eq(schema.services.id, input.id)).limit(1);
       if (!service[0]) return null;
       
@@ -49,7 +52,8 @@ export const servicesRouter = router({
       imageUrls: z.string().optional()
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = ctx.db;
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
       const result = await db.insert(schema.services).values({
         ...input,
         active: 1

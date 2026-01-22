@@ -2,7 +2,7 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import Stripe from "stripe";
-import { orders } from "../../drizzle/schema";
+import { orders, quotes } from "../../drizzle/schema";
 import { getDb } from "../db";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -43,7 +43,7 @@ export const paymentsRouter = router({
         const origin = ctx.req.headers.origin || "https://ifrof.com";
         
         // Get quote details
-        const quoteRecords = await db_instance.select().from(schema.quotes).where(eq(schema.quotes.id, input.quoteId));
+        const quoteRecords = await db_instance.select().from(quotes).where(eq(quotes.id, input.quoteId));
         if (quoteRecords.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Quote not found" });
         const quote = quoteRecords[0];
 

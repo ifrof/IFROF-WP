@@ -6,7 +6,7 @@ import { searchDuckDuckGo } from '../utils/search';
 
 const searchQuerySchema = z.object({
   query: z.string().min(3, 'Query must be at least 3 characters'),
-  language: z.enum(['ar', 'en']).default('ar'),
+  language: z.enum(['ar', 'en', 'zh']).default('ar'),
   category: z.string().optional(),
 });
 
@@ -212,7 +212,7 @@ Return in JSON format:
       z.object({
         factoryName: z.string(),
         factoryInfo: z.string().optional(),
-        language: z.enum(['ar', 'en']).default('ar'),
+        language: z.enum(['ar', 'en', 'zh']).default('ar'),
       })
     )
     .mutation(async ({ input }): Promise<FactoryVerificationResult> => {

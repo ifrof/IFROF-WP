@@ -79,7 +79,7 @@ export default function AdminOrders() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orders?.map((order) => (
+                  {orders?.map((order: any) => (
                     <TableRow key={order.id}>
                       <TableCell className="font-medium">{order.orderNumber}</TableCell>
                       <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
