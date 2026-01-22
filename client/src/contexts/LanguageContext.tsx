@@ -17,7 +17,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   // Initialize language from localStorage
   useEffect(() => {
     const stored = localStorage.getItem('language') as Language | null;
-    if (stored && (stored === 'ar' || stored === 'en')) {
+    if (stored && (stored === 'ar' || stored === 'en' || stored === 'zh')) {
       setLanguageState(stored);
     }
     setMounted(true);
@@ -29,6 +29,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.lang = language;
       document.documentElement.dir = LANGUAGES[language].dir;
       localStorage.setItem('language', language);
+      
+      // Update body class for RTL/LTR specific styles
+      document.body.classList.remove('rtl', 'ltr');
+      document.body.classList.add(LANGUAGES[language].dir);
     }
   }, [language, mounted]);
 

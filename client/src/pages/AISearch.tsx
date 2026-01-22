@@ -8,6 +8,109 @@ import { trpc } from '@/lib/trpc';
 import { Link } from 'wouter';
 import { Badge } from '@/components/ui/badge';
 
+// Translations for this page
+const pageTranslations = {
+  ar: {
+    back: 'العودة',
+    manufacturers: 'المصانع',
+    importRequest: 'طلب استيراد',
+    poweredByAI: 'مدعوم بالذكاء الاصطناعي',
+    title: 'نظام التحقق الذكي من المصانع',
+    subtitle: 'ابحث عن الموردين الصينيين وتحقق من هويتهم الحقيقية (مصنع مباشر أم شركة تجارية) في ثوانٍ معدودة.',
+    productOrFactory: 'اسم المنتج أو المصنع',
+    productPlaceholder: 'مثال: مصنع أثاث مكتبي في فوشان...',
+    category: 'الفئة الصناعية',
+    categoryPlaceholder: 'إلكترونيات، ملابس...',
+    searching: 'جاري البحث والتحقق...',
+    startVerification: 'بدء التحقق الذكي الآن',
+    analyzingData: 'جاري تحليل البيانات الحية',
+    analyzingDesc: 'نقوم الآن بالبحث في السجلات التجارية، ملفات علي بابا، وشهادات الجودة للتحقق من المصنع...',
+    resultsTitle: 'نتائج التحقق والتحليل',
+    results: 'نتائج',
+    verifiedSource: 'مصدر موثق',
+    directFactory: 'مصنع مباشر',
+    tradingCompany: 'شركة تجارية/وسيط',
+    confidence: 'نسبة الثقة',
+    aiAnalysis: 'تحليل الذكاء الاصطناعي',
+    expertRecommendations: 'توصيات الخبراء للاستيراد الآمن',
+    noResults: 'لا توجد نتائج مطابقة',
+    noResultsDesc: 'حاول تغيير كلمات البحث أو الفئة للحصول على نتائج أفضل من نظام التحقق.',
+    comprehensiveSearch: 'بحث شامل',
+    comprehensiveSearchDesc: 'نبحث في آلاف السجلات التجارية الصينية لحظياً.',
+    accurateVerification: 'تحقق دقيق',
+    accurateVerificationDesc: 'نستخدم الذكاء الاصطناعي لكشف الوسطاء والشركات الوهمية.',
+    directFactories: 'مصانع مباشرة',
+    directFactoriesDesc: 'نساعدك في الوصول للمصنع الحقيقي لضمان أفضل سعر.',
+    searchError: 'حدث خطأ أثناء البحث. يرجى المحاولة مرة أخرى.',
+  },
+  en: {
+    back: 'Back',
+    manufacturers: 'Manufacturers',
+    importRequest: 'Import Request',
+    poweredByAI: 'Powered by AI',
+    title: 'AI Factory Verification System',
+    subtitle: 'Search for Chinese suppliers and verify their true identity (direct factory or trading company) in seconds.',
+    productOrFactory: 'Product or Factory Name',
+    productPlaceholder: 'Example: Office furniture factory in Foshan...',
+    category: 'Industrial Category',
+    categoryPlaceholder: 'Electronics, Apparel...',
+    searching: 'Searching & Verifying...',
+    startVerification: 'Start AI Verification Now',
+    analyzingData: 'Analyzing Live Data',
+    analyzingDesc: 'We are currently searching business records, Alibaba profiles, and quality certificates to verify the factory...',
+    resultsTitle: 'Verification & Analysis Results',
+    results: 'Results',
+    verifiedSource: 'Verified Source',
+    directFactory: 'Direct Factory',
+    tradingCompany: 'Trading Company/Agent',
+    confidence: 'Confidence',
+    aiAnalysis: 'AI Analysis',
+    expertRecommendations: 'Expert Recommendations for Safe Import',
+    noResults: 'No Matching Results',
+    noResultsDesc: 'Try changing your search terms or category to get better results from the verification system.',
+    comprehensiveSearch: 'Comprehensive Search',
+    comprehensiveSearchDesc: 'We search thousands of Chinese business records in real-time.',
+    accurateVerification: 'Accurate Verification',
+    accurateVerificationDesc: 'We use AI to detect intermediaries and shell companies.',
+    directFactories: 'Direct Factories',
+    directFactoriesDesc: 'We help you reach the real factory to ensure the best price.',
+    searchError: 'An error occurred during search. Please try again.',
+  },
+  zh: {
+    back: '返回',
+    manufacturers: '制造商',
+    importRequest: '进口申请',
+    poweredByAI: 'AI驱动',
+    title: 'AI工厂验证系统',
+    subtitle: '搜索中国供应商并在几秒钟内验证其真实身份（直接工厂或贸易公司）。',
+    productOrFactory: '产品或工厂名称',
+    productPlaceholder: '例如：佛山办公家具厂...',
+    category: '工业类别',
+    categoryPlaceholder: '电子、服装...',
+    searching: '搜索和验证中...',
+    startVerification: '立即开始AI验证',
+    analyzingData: '正在分析实时数据',
+    analyzingDesc: '我们正在搜索商业记录、阿里巴巴档案和质量证书以验证工厂...',
+    resultsTitle: '验证和分析结果',
+    results: '结果',
+    verifiedSource: '已验证来源',
+    directFactory: '直接工厂',
+    tradingCompany: '贸易公司/代理',
+    confidence: '置信度',
+    aiAnalysis: 'AI分析',
+    expertRecommendations: '安全进口专家建议',
+    noResults: '没有匹配结果',
+    noResultsDesc: '尝试更改搜索词或类别以从验证系统获得更好的结果。',
+    comprehensiveSearch: '全面搜索',
+    comprehensiveSearchDesc: '我们实时搜索数千条中国商业记录。',
+    accurateVerification: '准确验证',
+    accurateVerificationDesc: '我们使用AI检测中间商和空壳公司。',
+    directFactories: '直接工厂',
+    directFactoriesDesc: '我们帮助您联系真正的工厂以确保最佳价格。',
+    searchError: '搜索时发生错误。请重试。',
+  },
+};
+
 export default function AISearch() {
   const { language, dir } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,6 +119,8 @@ export default function AISearch() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const t = pageTranslations[language] || pageTranslations.en;
 
   const searchMutation = trpc.aiAgent.searchFactories.useMutation({
     onSuccess: (data) => {
@@ -27,7 +132,7 @@ export default function AISearch() {
     onError: (error) => {
       console.error("Search API Error:", error);
       setIsSearching(false);
-      setError(language === 'ar' ? 'حدث خطأ أثناء البحث. يرجى المحاولة مرة أخرى.' : 'An error occurred during search. Please try again.');
+      setError(t.searchError);
     },
   });
 
@@ -41,7 +146,7 @@ export default function AISearch() {
     
     searchMutation.mutate({
       query: searchQuery,
-      language: language as 'ar' | 'en',
+      language: language as 'ar' | 'en' | 'zh',
       category: category || undefined,
     });
   };
@@ -58,7 +163,7 @@ export default function AISearch() {
               <Link href="/">
                 <Button variant="ghost" className="flex items-center gap-2 text-gray-600 hover:text-[#1e3a5f]">
                   <BackArrow className="w-4 h-4" />
-                  {language === 'ar' ? 'العودة' : 'Back'}
+                  {t.back}
                 </Button>
               </Link>
             </div>
@@ -73,12 +178,12 @@ export default function AISearch() {
             <div className="flex items-center gap-3">
               <Link href="/marketplace">
                 <Button variant="outline" size="sm">
-                  {language === 'ar' ? 'المصانع' : 'Manufacturers'}
+                  {t.manufacturers}
                 </Button>
               </Link>
               <Link href="/import-request">
                 <Button size="sm" className="bg-[#ff8c42] hover:bg-[#e67a35]">
-                  {language === 'ar' ? 'طلب استيراد' : 'Import Request'}
+                  {t.importRequest}
                 </Button>
               </Link>
             </div>
@@ -94,15 +199,13 @@ export default function AISearch() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <Badge className="mb-4 bg-[#ff8c42] hover:bg-[#ff8c42] text-white border-none px-4 py-1">
-            {language === 'ar' ? 'مدعوم بالذكاء الاصطناعي' : 'Powered by AI'}
+            {t.poweredByAI}
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            {language === 'ar' ? 'نظام التحقق الذكي من المصانع' : 'AI Factory Verification System'}
+            {t.title}
           </h1>
           <p className="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
-            {language === 'ar' 
-              ? 'ابحث عن الموردين الصينيين وتحقق من هويتهم الحقيقية (مصنع مباشر أم شركة تجارية) في ثوانٍ معدودة.' 
-              : 'Search for Chinese suppliers and verify their true identity (direct factory or trading company) in seconds.'}
+            {t.subtitle}
           </p>
         </div>
       </div>
@@ -116,10 +219,10 @@ export default function AISearch() {
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
                     <Search className="w-4 h-4 text-[#ff8c42]" />
-                    {language === 'ar' ? 'اسم المنتج أو المصنع' : 'Product or Factory Name'}
+                    {t.productOrFactory}
                   </label>
                   <Input
-                    placeholder={language === 'ar' ? 'مثال: مصنع أثاث مكتبي في فوشان...' : 'Example: Office furniture factory in Foshan...'}
+                    placeholder={t.productPlaceholder}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="h-14 border-gray-200 focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/20 text-lg rounded-xl"
@@ -128,10 +231,10 @@ export default function AISearch() {
                 <div>
                   <label className="block text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
                     <Factory className="w-4 h-4 text-[#ff8c42]" />
-                    {language === 'ar' ? 'الفئة الصناعية' : 'Industrial Category'}
+                    {t.category}
                   </label>
                   <Input
-                    placeholder={language === 'ar' ? 'إلكترونيات، ملابس...' : 'Electronics, Apparel...'}
+                    placeholder={t.categoryPlaceholder}
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     className="h-14 border-gray-200 focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/20 text-lg rounded-xl"
@@ -146,12 +249,12 @@ export default function AISearch() {
                 {isSearching ? (
                   <>
                     <Loader2 className="w-6 h-6 animate-spin" />
-                    {language === 'ar' ? 'جاري البحث والتحقق...' : 'Searching & Verifying...'}
+                    {t.searching}
                   </>
                 ) : (
                   <>
                     <ShieldCheck className="w-6 h-6" />
-                    {language === 'ar' ? 'بدء التحقق الذكي الآن' : 'Start AI Verification Now'}
+                    {t.startVerification}
                   </>
                 )}
               </Button>
@@ -176,22 +279,20 @@ export default function AISearch() {
                 <Search className="absolute inset-0 m-auto w-8 h-8 text-[#1e3a5f]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                {language === 'ar' ? 'جاري تحليل البيانات الحية' : 'Analyzing Live Data'}
+                {t.analyzingData}
               </h3>
               <p className="text-gray-500 max-w-md mx-auto">
-                {language === 'ar' 
-                  ? 'نقوم الآن بالبحث في السجلات التجارية، ملفات علي بابا، وشهادات الجودة للتحقق من المصنع...' 
-                  : 'We are currently searching business records, Alibaba profiles, and quality certificates to verify the factory...'}
+                {t.analyzingDesc}
               </p>
             </div>
           ) : searchResults.length > 0 ? (
             <div className="space-y-10">
               <div className="flex items-center justify-between border-b border-gray-200 pb-6">
                 <h2 className="text-3xl font-bold text-[#1e3a5f]">
-                  {language === 'ar' ? 'نتائج التحقق والتحليل' : 'Verification & Analysis Results'}
+                  {t.resultsTitle}
                 </h2>
                 <Badge variant="outline" className="text-gray-500">
-                  {searchResults.length} {language === 'ar' ? 'نتائج' : 'Results'}
+                  {searchResults.length} {t.results}
                 </Badge>
               </div>
               
@@ -214,7 +315,7 @@ export default function AISearch() {
                             <CardTitle className="text-2xl text-[#1e3a5f] mb-1">{result.name}</CardTitle>
                             <div className="flex items-center gap-2 text-sm text-gray-500">
                               <Globe className="w-4 h-4" />
-                              {result.source || (language === 'ar' ? 'مصدر موثق' : 'Verified Source')}
+                              {result.source || t.verifiedSource}
                             </div>
                           </div>
                         </div>
@@ -222,12 +323,10 @@ export default function AISearch() {
                           <Badge className={`px-4 py-1.5 text-sm font-bold rounded-lg ${
                             result.isDirectFactory ? 'bg-green-600 hover:bg-green-700' : 'bg-amber-600 hover:bg-amber-700'
                           }`}>
-                            {result.isDirectFactory 
-                              ? (language === 'ar' ? 'مصنع مباشر' : 'Direct Factory') 
-                              : (language === 'ar' ? 'شركة تجارية/وسيط' : 'Trading Company/Agent')}
+                            {result.isDirectFactory ? t.directFactory : t.tradingCompany}
                           </Badge>
                           <div className="bg-blue-50 text-blue-700 px-4 py-1.5 rounded-lg font-bold text-sm border border-blue-100">
-                            {language === 'ar' ? `نسبة الثقة: ${result.confidence}%` : `Confidence: ${result.confidence}%`}
+                            {t.confidence}: {result.confidence}%
                           </div>
                         </div>
                       </div>
@@ -235,7 +334,7 @@ export default function AISearch() {
                     <CardContent>
                       <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
                         <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">
-                          {language === 'ar' ? 'تحليل الذكاء الاصطناعي' : 'AI Analysis'}
+                          {t.aiAnalysis}
                         </h4>
                         <p className="text-gray-700 leading-relaxed text-lg">
                           {result.reasoning}
@@ -252,7 +351,7 @@ export default function AISearch() {
                   <CardHeader>
                     <CardTitle className="text-2xl flex items-center gap-3">
                       <ShieldCheck className="w-8 h-8 text-[#ff8c42]" />
-                      {language === 'ar' ? 'توصيات الخبراء للاستيراد الآمن' : 'Expert Recommendations for Safe Import'}
+                      {t.expertRecommendations}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -274,12 +373,10 @@ export default function AISearch() {
             <div className="text-center py-24 bg-white rounded-2xl shadow-sm border border-dashed border-gray-300">
               <Search className="w-16 h-16 text-gray-200 mx-auto mb-6" />
               <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                {language === 'ar' ? 'لا توجد نتائج مطابقة' : 'No Matching Results'}
+                {t.noResults}
               </h3>
               <p className="text-gray-500 max-w-md mx-auto">
-                {language === 'ar' 
-                  ? 'حاول تغيير كلمات البحث أو الفئة للحصول على نتائج أفضل من نظام التحقق.' 
-                  : 'Try changing your search terms or category to get better results from the verification system.'}
+                {t.noResultsDesc}
               </p>
             </div>
           ) : (
@@ -288,22 +385,22 @@ export default function AISearch() {
                 <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <Search className="w-8 h-8" />
                 </div>
-                <h4 className="font-bold text-lg mb-3">{language === 'ar' ? 'بحث شامل' : 'Comprehensive Search'}</h4>
-                <p className="text-gray-500 text-sm">{language === 'ar' ? 'نبحث في آلاف السجلات التجارية الصينية لحظياً.' : 'We search thousands of Chinese business records in real-time.'}</p>
+                <h4 className="font-bold text-lg mb-3">{t.comprehensiveSearch}</h4>
+                <p className="text-gray-500 text-sm">{t.comprehensiveSearchDesc}</p>
               </div>
               <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center">
                 <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <ShieldCheck className="w-8 h-8" />
                 </div>
-                <h4 className="font-bold text-lg mb-3">{language === 'ar' ? 'تحقق دقيق' : 'Accurate Verification'}</h4>
-                <p className="text-gray-500 text-sm">{language === 'ar' ? 'نستخدم الذكاء الاصطناعي لكشف الوسطاء والشركات الوهمية.' : 'We use AI to detect intermediaries and shell companies.'}</p>
+                <h4 className="font-bold text-lg mb-3">{t.accurateVerification}</h4>
+                <p className="text-gray-500 text-sm">{t.accurateVerificationDesc}</p>
               </div>
               <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center">
                 <div className="w-14 h-14 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <Factory className="w-8 h-8" />
                 </div>
-                <h4 className="font-bold text-lg mb-3">{language === 'ar' ? 'مصانع مباشرة' : 'Direct Factories'}</h4>
-                <p className="text-gray-500 text-sm">{language === 'ar' ? 'نساعدك في الوصول للمصنع الحقيقي لضمان أفضل سعر.' : 'We help you reach the real factory to ensure the best price.'}</p>
+                <h4 className="font-bold text-lg mb-3">{t.directFactories}</h4>
+                <p className="text-gray-500 text-sm">{t.directFactoriesDesc}</p>
               </div>
             </div>
           )}

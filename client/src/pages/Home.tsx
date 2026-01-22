@@ -96,13 +96,34 @@ export default function Home() {
             {/* Right Side */}
             <div className="flex items-center gap-3">
               {/* Language Switcher */}
-              <button
-                onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors text-sm font-medium"
-              >
-                <Globe className="w-4 h-4" />
-                {language === 'ar' ? 'EN' : 'عربي'}
-              </button>
+              <div className="relative group">
+                <button
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors text-sm font-medium"
+                >
+                  <Globe className="w-4 h-4" />
+                  {language === 'ar' ? 'عربي' : language === 'zh' ? '中文' : 'EN'}
+                </button>
+                <div className="absolute top-full mt-1 end-0 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[100px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                  <button
+                    onClick={() => setLanguage('ar')}
+                    className={`w-full px-4 py-2 text-start text-sm hover:bg-gray-100 ${language === 'ar' ? 'text-[#ff8c42] font-semibold' : 'text-gray-700'}`}
+                  >
+                    العربية
+                  </button>
+                  <button
+                    onClick={() => setLanguage('en')}
+                    className={`w-full px-4 py-2 text-start text-sm hover:bg-gray-100 ${language === 'en' ? 'text-[#ff8c42] font-semibold' : 'text-gray-700'}`}
+                  >
+                    English
+                  </button>
+                  <button
+                    onClick={() => setLanguage('zh')}
+                    className={`w-full px-4 py-2 text-start text-sm hover:bg-gray-100 ${language === 'zh' ? 'text-[#ff8c42] font-semibold' : 'text-gray-700'}`}
+                  >
+                    中文
+                  </button>
+                </div>
+              </div>
 
               {/* Login Button */}
               {!isAuthenticated ? (
