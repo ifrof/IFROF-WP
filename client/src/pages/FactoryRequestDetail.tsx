@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ChatSkeleton } from "@/components/ChatSkeleton";
 import { Loader2, ArrowLeft, ArrowRight, Package, FileText, User } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
@@ -155,6 +156,17 @@ export default function FactoryRequestDetail() {
                 <div className="pt-2">
                   <Badge variant="outline">Dubai, UAE</Badge>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {language === 'ar' ? 'المحادثة مع المشتري' : 'Chat with Buyer'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChatSkeleton recipientName="John Doe" />
               </CardContent>
             </Card>
           </div>

@@ -23,7 +23,9 @@ import {
   Truck,
   DollarSign,
   MessageCircle,
-  AlertTriangle
+  AlertTriangle,
+  Menu,
+  X
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
@@ -45,6 +47,7 @@ export default function Home() {
   // Ensure t is defined even if context fails for some reason
   const safeT = t || ((key: string) => key);
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -96,7 +99,7 @@ export default function Home() {
             {/* Right Side */}
             <div className="flex items-center gap-3">
               {/* Language Switcher */}
-              <div className="relative group">
+              <div className="relative group hidden sm:block">
                 <button
                   className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors text-sm font-medium"
                 >
@@ -128,13 +131,13 @@ export default function Home() {
               {/* Login Button */}
               {!isAuthenticated ? (
                 <Link href="/login">
-                  <Button variant="ghost" className="text-[#1e3a5f] font-medium">
+                  <Button variant="ghost" className="text-[#1e3a5f] font-medium hidden sm:flex">
                     {safeT('nav.login')}
                   </Button>
                 </Link>
               ) : (
                 <Link href={user?.role === 'factory' ? '/dashboard/factory' : '/dashboard/buyer'}>
-                  <Button variant="ghost" className="text-[#1e3a5f] font-medium">
+                  <Button variant="ghost" className="text-[#1e3a5f] font-medium hidden sm:flex">
                     {safeT('nav.dashboard')}
                   </Button>
                 </Link>
@@ -142,14 +145,52 @@ export default function Home() {
 
               {/* CTA Button */}
               <Link href="/import-request">
-                <Button className="bg-[#ff8c42] hover:bg-[#e67a35] text-white font-semibold px-6 shadow-lg shadow-orange-200">
+                <Button className="bg-[#ff8c42] hover:bg-[#e67a35] text-white font-semibold px-4 sm:px-6 shadow-lg shadow-orange-200 text-xs sm:text-sm">
                   {safeT('nav.startImport')}
                   <Arrow className="w-4 h-4 ms-2" />
                 </Button>
               </Link>
+
+              {/* Mobile Menu Toggle */}
+              <button 
+                className="md:hidden p-2 text-gray-600"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100 py-4 px-4 space-y-4 shadow-xl">
+            <a href="#how-it-works" className="block text-gray-600 font-medium" onClick={() => setMobileMenuOpen(false)}>
+              {safeT('nav.howItWorks')}
+            </a>
+            <a href="#pricing" className="block text-gray-600 font-medium" onClick={() => setMobileMenuOpen(false)}>
+              {safeT('nav.pricing')}
+            </a>
+            <Link href="/blog" className="block text-gray-600 font-medium" onClick={() => setMobileMenuOpen(false)}>
+              {language === 'ar' ? 'المدونة' : 'Blog'}
+            </Link>
+            <a href="#support" className="block text-gray-600 font-medium" onClick={() => setMobileMenuOpen(false)}>
+              {safeT('nav.support')}
+            </a>
+            <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setLanguage('ar')}>عربي</Button>
+                <Button variant="outline" size="sm" onClick={() => setLanguage('en')}>EN</Button>
+                <Button variant="outline" size="sm" onClick={() => setLanguage('zh')}>中文</Button>
+              </div>
+              {!isAuthenticated && (
+                <Link href="/login">
+                  <Button variant="ghost" className="w-full justify-start">{safeT('nav.login')}</Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}

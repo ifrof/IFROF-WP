@@ -8,6 +8,8 @@ import { Link } from "wouter";
 import BuyerDashboardLayout from "@/components/BuyerDashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import MetaTags from "../components/SEO/MetaTags";
+import { staticPagesSEO } from "../../../server/config/seo-config";
 
 export default function BuyerRequests() {
   const { language, t } = useLanguage();
@@ -28,6 +30,7 @@ export default function BuyerRequests() {
 
   return (
     <BuyerDashboardLayout>
+      <MetaTags seo={staticPagesSEO['/buyer/requests']} />
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>

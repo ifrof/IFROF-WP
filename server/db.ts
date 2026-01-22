@@ -92,6 +92,20 @@ export function getUsersTable() {
 // USER OPERATIONS
 // ============================================================================
 
+export async function getUserById(id: number): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.select().from(schema.users).where(eq(schema.users.id, id)).limit(1);
+      return result[0] || null;
+    } catch (e) {
+      console.error("[Database] getUserById MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  return dbData.users.find((u: any) => u.id === id) || null;
+}
+
 export async function getUserByEmail(email: string): Promise<any> {
   if (!isJsonMode && _db) {
     try {
@@ -821,6 +835,20 @@ export async function getImportRequestsByFactory(factoryId: number) {
 
   const dbData = readJsonDb();
   return (dbData.importRequests || []).filter((i: any) => i.factoryId === factoryId);
+}
+
+export async function getImportRequestById(id: number) {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.select().from(schema.importRequests).where(eq(schema.importRequests.id, id)).limit(1);
+      return result[0] || null;
+    } catch (e) {
+      console.error("[Database] getImportRequestById MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  return (dbData.importRequests || []).find((i: any) => i.id === id) || null;
 }
 
 export async function createImportRequest(data: any) {

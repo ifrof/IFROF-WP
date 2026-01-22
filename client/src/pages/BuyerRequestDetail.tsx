@@ -5,6 +5,7 @@ import BuyerDashboardLayout from "@/components/BuyerDashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ChatSkeleton } from "@/components/ChatSkeleton";
 import { Loader2, ArrowLeft, ArrowRight, Package, FileText, Factory, CreditCard } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
@@ -138,6 +139,17 @@ export default function BuyerRequestDetail() {
                     ? 'يتم دفع باقي المبلغ للمصنع مباشرة حسب الاتفاق بينكما.'
                     : 'The remaining balance is paid directly to the factory as per your agreement.'}
                 </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {language === 'ar' ? 'المحادثة مع المصنع' : 'Chat with Factory'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChatSkeleton recipientName={language === 'ar' ? 'دعم المصنع' : 'Factory Support'} />
               </CardContent>
             </Card>
           </div>

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { TRPCError } from "@trpc/server";
+import { sendImportRequestUpdateEmail } from "../_core/email-service";
 import { messages } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 
@@ -67,7 +68,24 @@ export const inquiriesRouter = router({
       status: z.enum(["pending", "quoted", "accepted", "paid", "shipped", "cancelled"]),
     }))
     .mutation(async ({ ctx, input }) => {
-      return db.updateImportRequest(input.id, { status: input.status });
+      const updated = await db.updateImportRequest(input.id, { status: input.status });
+      
+      // Send notification to buyer
+      const request = await db.getImportRequestById(input.id);
+      if (request) {
+        const buyer = await db.getUserById(request.buyerId);
+        if (buyer) {
+          await sendImportRequestUpdateEmail(
+            buyer.email,
+            buyer.fullName || buyer.username,
+            input.id.toString(),
+            input.status,
+            request.productName || "Product"
+          );
+        }
+      }
+      
+      return updated;
     }),
 
   // Submit a quote (factory only)
@@ -76,6 +94,22 @@ export const inquiriesRouter = router({
     .mutation(async ({ ctx, input }) => {
       const quote = await db.createQuote(input);
       await db.updateImportRequest(input.requestId, { status: "quoted" });
+      
+      // Send notification to buyer
+      const request = await db.getImportRequestById(input.requestId);
+      if (request) {
+        const buyer = await db.getUserById(request.buyerId);
+        if (buyer) {
+          await sendImportRequestUpdateEmail(
+            buyer.email,
+            buyer.fullName || buyer.username,
+            input.requestId.toString(),
+            "quoted",
+            request.productName || "Product"
+          );
+        }
+      }
+      
       return quote;
     }),
 

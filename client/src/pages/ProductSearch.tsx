@@ -8,6 +8,8 @@ import { Loader2, Search, Filter, MapPin } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LazyImage } from "@/components/LazyImage";
 import { Link } from "wouter";
+import MetaTags from "../components/SEO/MetaTags";
+import { staticPagesSEO } from "../../../server/config/seo-config";
 
 export default function ProductSearch() {
   const { language, dir } = useLanguage();
@@ -19,6 +21,7 @@ export default function ProductSearch() {
     moq: "",
     location: "",
   });
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const { data: products, isLoading } = trpc.products.search.useQuery({
     query: filters.query || undefined,
@@ -33,10 +36,23 @@ export default function ProductSearch() {
 
   return (
     <div className="min-h-screen bg-gray-50" dir={dir}>
+      <MetaTags seo={staticPagesSEO['/search']} />
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row gap-8">
+          {/* Mobile Filter Toggle */}
+          <div className="md:hidden flex justify-between items-center mb-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              className="flex items-center gap-2"
+            >
+              <Filter className="w-4 h-4" />
+              {language === 'ar' ? 'تصفية النتائج' : 'Filters'}
+            </Button>
+          </div>
+
           {/* Filters Sidebar */}
-          <div className="w-full md:w-64 space-y-6">
+          <div className={`w-full md:w-64 space-y-6 ${showMobileFilters ? 'block' : 'hidden md:block'}`}>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

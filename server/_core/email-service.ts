@@ -353,3 +353,45 @@ export async function sendPasswordResetEmail(to: string, name: string, token: st
     return false;
   }
 }
+
+export async function sendImportRequestUpdateEmail(
+  to: string,
+  name: string,
+  requestId: string,
+  status: string,
+  productName: string
+): Promise<boolean> {
+  const transporter = getTransporter();
+  if (!transporter) return false;
+
+  const requestUrl = `${process.env.PUBLIC_URL || 'https://ifrof.com'}/dashboard/requests/${requestId}`;
+  const htmlContent = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px;">
+      <h2 style="color: #2563eb;">Import Request Update</h2>
+      <p>Hi ${name},</p>
+      <p>Your import request for <strong>${productName}</strong> has been updated to: <strong>${status}</strong>.</p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${requestUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">View Request Details</a>
+      </div>
+      <p>Or copy and paste this link into your browser:</p>
+      <p><a href="${requestUrl}">${requestUrl}</a></p>
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+        <p>This is an automated notification from IFROF.</p>
+        <p>&copy; 2026 IFROF. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: emailFrom,
+      to,
+      subject: `Update on your Import Request: ${productName}`,
+      html: htmlContent,
+    });
+    return true;
+  } catch (error) {
+    console.error("[Email Service] Failed to send import request update email:", error);
+    return false;
+  }
+}
