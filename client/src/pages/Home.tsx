@@ -88,8 +88,8 @@ export default function Home() {
               <a href="#support" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
                 {safeT('nav.support')}
               </a>
-              <Link href="/ai-search" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
-                {safeT('nav.smartAssistant')}
+              <Link href="/factory-investigator" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
+                {language === 'ar' ? 'المحقق الذكي' : 'AI Investigator'}
               </Link>
             </div>
 
