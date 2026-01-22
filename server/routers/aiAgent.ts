@@ -31,11 +31,19 @@ export const aiAgentRouter = router({
   searchFactories: publicProcedure
     .input(searchQuerySchema)
     .mutation(async ({ input }): Promise<SearchResult> => {
+      console.log(`[AI Agent] Starting search for: "${input.query}" in ${input.language}`);
       try {
         // 1. Perform real-time search using DuckDuckGo
         const searchQuery = `${input.query} ${input.category || ''} factory manufacturer China business license`;
         const searchResults = await searchDuckDuckGo(searchQuery);
         
+        console.log(`[AI Agent] Search returned ${searchResults.length} results`);
+
+        if (searchResults.length === 0) {
+          console.warn(`[AI Agent] No search results found for query: ${searchQuery}`);
+          // We still continue to let LLM handle the "no results" case or provide general advice
+        }
+
         const searchContext = searchResults.map((r, i) => 
           `Result ${i+1}:
 Title: ${r.title}
@@ -54,7 +62,7 @@ Return results in JSON format only.`;
 
         const userPrompt = input.language === 'ar'
           ? `بناءً على نتائج البحث التالية، استخرج قائمة بـ 5 مصانع محتملة وقم بتقييمها:
-${searchContext}
+${searchContext || 'لا توجد نتائج بحث متاحة حالياً.'}
 
 المطلوب:
 1. اسم المصنع.
@@ -63,7 +71,7 @@ ${searchContext}
 4. التفسير (لماذا تعتقد أنه مصنع أو وسيط).
 5. توصيات عامة للمشتري.`
           : `Based on the following search results, extract a list of 5 potential factories and evaluate them:
-${searchContext}
+${searchContext || 'No search results available currently.'}
 
 Required:
 1. Factory Name.
@@ -72,6 +80,7 @@ Required:
 4. Reasoning (Why you think it's a factory or intermediary).
 5. General recommendations for the buyer.`;
 
+        console.log(`[AI Agent] Invoking LLM for analysis...`);
         const response = await invokeLLM({
           messages: [
             { role: 'system', content: systemPrompt },
@@ -117,14 +126,17 @@ Required:
 
         const content = response.choices[0]?.message.content;
         if (!content || typeof content !== 'string') {
+          console.error(`[AI Agent] LLM returned empty or invalid content`);
           throw new Error('No response from AI');
         }
+        
         const parsed = JSON.parse(content);
+        console.log(`[AI Agent] Successfully parsed ${parsed.results?.length || 0} factory results`);
 
         return {
           query: input.query,
           language: input.language,
-          results: parsed.results.map((r: any) => ({
+          results: (parsed.results || []).map((r: any) => ({
             name: r.name,
             type: r.type,
             confidence: r.confidence,
@@ -134,11 +146,11 @@ Required:
           })),
           recommendations: parsed.recommendations || [],
         };
-      } catch (error) {
-        console.error('AI Agent search error:', error);
+      } catch (error: any) {
+        console.error('[AI Agent] Search error:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to search factories via AI. Please try again later.',
+          message: error.message || 'Failed to search factories via AI. Please try again later.',
         });
       }
     }),
@@ -153,6 +165,7 @@ Required:
       })
     )
     .mutation(async ({ input }): Promise<FactoryVerificationResult> => {
+      console.log(`[AI Agent] Verifying factory: "${input.factoryName}"`);
       try {
         // Real-time verification using search
         const searchQuery = `${input.factoryName} ${input.factoryInfo || ''} factory manufacturer China verification`;
@@ -165,7 +178,7 @@ Required:
 
         const userPrompt = `Verify this factory: ${input.factoryName}
 Context from web search:
-${searchContext}
+${searchContext || 'No search context found.'}
 
 Additional Info: ${input.factoryInfo || 'None'}`;
 
@@ -210,11 +223,11 @@ Additional Info: ${input.factoryInfo || 'None'}`;
           reasoning: parsed.reasoning,
           isDirectFactory: parsed.type === 'direct_manufacturer' && parsed.confidence >= 70,
         };
-      } catch (error) {
-        console.error('Factory verification error:', error);
+      } catch (error: any) {
+        console.error('[AI Agent] Factory verification error:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to verify factory',
+          message: error.message || 'Failed to verify factory',
         });
       }
     }),
