@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, uniqueIndex } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, uniqueIndex, index } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -105,6 +105,14 @@ export const blogPosts = mysqlTable("blog_posts", {
   tags: text("tags"),
   featured: int("featured").default(0),
   published: int("published").default(0),
+  titleAr: text("titleAr"),
+  titleEn: text("titleEn"),
+  contentAr: text("contentAr"),
+  contentEn: text("contentEn"),
+  excerptAr: text("excerptAr"),
+  excerptEn: text("excerptEn"),
+  categoryAr: varchar("categoryAr", { length: 100 }),
+  categoryEn: varchar("categoryEn", { length: 100 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => {
@@ -158,6 +166,11 @@ export const factories = mysqlTable("factories", {
   responseTime: varchar("responseTime", { length: 50 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => {
+  return {
+    nameIdx: index("factories_name_idx").on(table.name),
+    locationIdx: index("factories_location_idx").on(table.location),
+  };
 });
 
 export type Factory = typeof factories.$inferSelect;
@@ -193,6 +206,12 @@ export const products = mysqlTable("products", {
   active: int("active").default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => {
+  return {
+    nameArIdx: index("products_name_ar_idx").on(table.nameAr),
+    nameEnIdx: index("products_name_en_idx").on(table.nameEn),
+    categoryIdx: index("products_category_idx").on(table.category),
+  };
 });
 
 export type Product = typeof products.$inferSelect;
@@ -529,3 +548,22 @@ export const cartItems = mysqlTable("cart_items", {
 
 export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = typeof cartItems.$inferInsert;
+
+/**
+ * Reviews table for buyer reviews of products and factories
+ */
+export const reviews = mysqlTable("reviews", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull().references(() => orders.id),
+  buyerId: int("buyerId").notNull().references(() => users.id),
+  factoryId: int("factoryId").notNull().references(() => factories.id),
+  productId: int("productId").references(() => products.id),
+  rating: int("rating").notNull(), // 1-5
+  comment: text("comment"),
+  images: text("images"), // JSON array of image URLs
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = typeof reviews.$inferInsert;

@@ -17,6 +17,8 @@ import { cartRouter } from "./routers/cart";
 import { checkoutImprovedRouter } from "./routers/checkout-improved";
 import { checkoutRouter } from "./routers/checkout";
 import { reviewsRouter } from "./routers/reviews";
+import { profilesRouter } from "./routers/profiles";
+import { storageRouter } from "./routers/storage";
 import { servicesRouter } from "./routers/services";
 import { supportRouter } from "./routers/support";
 import { dashboardRouter } from "./routers/dashboard";
@@ -54,6 +56,8 @@ export const appRouter = router({
   checkout: checkoutImprovedRouter,
   checkoutOld: checkoutRouter,
   reviews: reviewsRouter,
+  profiles: profilesRouter,
+  storage: storageRouter,
   
   // Additional features
   services: servicesRouter,

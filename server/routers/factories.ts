@@ -56,9 +56,14 @@ export const factoriesRouter = router({
 
   // Search factories (public)
   search: publicProcedure
-    .input(z.object({ query: z.string() }))
+    .input(z.object({ 
+      query: z.string().optional(),
+      location: z.string().optional(),
+      page: z.number().default(1),
+      limit: z.number().default(20),
+    }))
     .query(async ({ input }) => {
-      return db.searchFactories(input.query);
+      return db.searchFactoriesAdvanced(input);
     }),
 
   // Create factory (admin only)
@@ -207,6 +212,8 @@ export const productsRouter = router({
       maxPrice: z.number().optional(),
       moq: z.number().optional(),
       location: z.string().optional(),
+      page: z.number().default(1),
+      limit: z.number().default(20),
     }))
     .query(async ({ input }) => {
       return db.searchProductsAdvanced(input);
@@ -258,4 +265,16 @@ export const productsRouter = router({
 
       throw new TRPCError({ code: "NOT_IMPLEMENTED", message: "Delete not yet implemented" });
     }),
+
+  // Get featured products
+  getFeatured: publicProcedure
+    .input(z.object({ limit: z.number().default(10) }))
+    .query(async ({ input }) => {
+      return db.getFeaturedProducts(input.limit);
+    }),
+
+  // Get categories
+  getCategories: publicProcedure.query(async () => {
+    return db.getProductCategories();
+  }),
 });

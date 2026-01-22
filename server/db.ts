@@ -442,26 +442,58 @@ export async function getFactoryById(id: number) {
 }
 
 export async function searchFactories(query: string) {
+  return searchFactoriesAdvanced({ query });
+}
+
+export async function searchFactoriesAdvanced(filters: {
+  query?: string;
+  location?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const page = filters.page || 1;
+  const limit = filters.limit || 20;
+  const offset = (page - 1) * limit;
+
   if (!isJsonMode && _db) {
     try {
-      return await _db.select().from(schema.factories)
-        .where(or(
-          like(schema.factories.name, `%${query}%`),
-          like(schema.factories.description, `%${query}%`),
-          like(schema.factories.location, `%${query}%`)
+      const conditions = [eq(schema.factories.verificationStatus, "verified")];
+      if (filters.query) {
+        conditions.push(or(
+          like(schema.factories.name, `%${filters.query}%`),
+          like(schema.factories.description, `%${filters.query}%`)
         ));
+      }
+      if (filters.location) {
+        conditions.push(like(schema.factories.location, `%${filters.location}%`));
+      }
+
+      return await _db.select().from(schema.factories)
+        .where(and(...conditions))
+        .limit(limit)
+        .offset(offset);
     } catch (e) {
-      console.error("[Database] searchFactories MySQL error:", e);
+      console.error("[Database] searchFactoriesAdvanced MySQL error:", e);
     }
   }
 
   const dbData = readJsonDb();
-  const lowerQuery = query.toLowerCase();
-  return (dbData.factories || []).filter((f: any) => 
-    f.name?.toLowerCase().includes(lowerQuery) ||
-    f.description?.toLowerCase().includes(lowerQuery) ||
-    f.location?.toLowerCase().includes(lowerQuery)
-  );
+  let results = (dbData.factories || []).filter((f: any) => f.verificationStatus === "verified");
+
+  if (filters.query) {
+    const q = filters.query.toLowerCase();
+    results = results.filter((f: any) => 
+      f.name?.toLowerCase().includes(q) || 
+      f.description?.toLowerCase().includes(q)
+    );
+  }
+
+  if (filters.location) {
+    const loc = filters.location.toLowerCase();
+    results = results.filter((f: any) => f.location?.toLowerCase().includes(loc));
+  }
+
+  return results.slice(offset, offset + limit);
 }
 
 export async function createFactory(data: any) {
@@ -703,10 +735,16 @@ export async function searchProductsAdvanced(filters: {
   maxPrice?: number;
   moq?: number;
   location?: string;
+  page?: number;
+  limit?: number;
 }) {
+  const page = filters.page || 1;
+  const limit = filters.limit || 20;
+  const offset = (page - 1) * limit;
+
   if (!isJsonMode && _db) {
     try {
-      const conditions = [];
+      const conditions = [eq(schema.products.active, 1)];
       if (filters.query) {
         const q = `%${filters.query}%`;
         conditions.push(or(
@@ -732,29 +770,23 @@ export async function searchProductsAdvanced(filters: {
       }
       
       let query = _db.select().from(schema.products);
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions));
-      }
-      
-      const results = await query;
       
       if (filters.location) {
         const loc = `%${filters.location}%`;
-        const matchingFactories = await _db.select({ id: schema.factories.id })
-          .from(schema.factories)
-          .where(like(schema.factories.location, loc));
-        const factoryIds = matchingFactories.map((f: any) => f.id);
-        return results.filter((p: any) => factoryIds.includes(p.factoryId));
+        query = query.innerJoin(schema.factories, eq(schema.products.factoryId, schema.factories.id))
+          .where(and(...conditions, like(schema.factories.location, loc)));
+      } else {
+        query = query.where(and(...conditions));
       }
       
-      return results;
+      return await query.limit(limit).offset(offset);
     } catch (e) {
       console.error("[Database] searchProductsAdvanced MySQL error:", e);
     }
   }
 
   const dbData = readJsonDb();
-  let results = dbData.products || [];
+  let results = (dbData.products || []).filter((p: any) => p.active === 1);
 
   if (filters.query) {
     const q = filters.query.toLowerCase();
@@ -792,7 +824,7 @@ export async function searchProductsAdvanced(filters: {
     results = results.filter((p: any) => factoryIds.includes(p.factoryId));
   }
 
-  return results;
+  return results.slice(offset, offset + limit);
 }
 
 export async function createProduct(data: any) {
