@@ -119,6 +119,17 @@ export function registerStripeWebhook(app: Express) {
                 read: 0,
                 createdAt: new Date(),
               });
+            } else if (session.metadata?.quote_id) {
+              // Handle commission payment for import requests
+              const quoteId = parseInt(session.metadata.quote_id);
+              const requestId = parseInt(session.metadata.request_id);
+              
+              const schema = await import("../../drizzle/schema");
+              await db.update(schema.importRequests)
+                .set({ status: "paid", updatedAt: new Date() })
+                .where(eq(schema.importRequests.id, requestId));
+              
+              console.log(`[Stripe Webhook] Commission paid for quote ${quoteId}, request ${requestId} marked as paid`);
             }
             break;
           }

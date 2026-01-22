@@ -25,6 +25,57 @@ const createCheckoutSchema = z.object({
 });
 
 export const paymentsRouter = router({
+  // Create commission checkout session
+  createCommissionCheckout: protectedProcedure
+    .input(z.object({ quoteId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        throw new TRPCError({
+          code: "SERVICE_UNAVAILABLE",
+          message: "Payment system is currently unavailable.",
+        });
+      }
+
+      const db_instance = await getDb();
+      if (!db_instance) throw new Error("Database not available");
+
+      try {
+        const origin = ctx.req.headers.origin || "https://ifrof.com";
+        
+        // Get quote details
+        const quoteRecords = await db_instance.select().from(schema.quotes).where(eq(schema.quotes.id, input.quoteId));
+        if (quoteRecords.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Quote not found" });
+        const quote = quoteRecords[0];
+
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: `Platform Commission for Quote #${quote.id}`,
+              },
+              unit_amount: quote.commission,
+            },
+            quantity: 1,
+          }],
+          mode: "payment",
+          customer_email: ctx.user.email || undefined,
+          metadata: {
+            quote_id: quote.id.toString(),
+            request_id: quote.requestId.toString(),
+          },
+          success_url: `${origin}/buyer/requests/${quote.requestId}?payment=success`,
+          cancel_url: `${origin}/buyer/requests/${quote.requestId}?payment=cancel`,
+        });
+
+        return { checkoutUrl: session.url };
+      } catch (error) {
+        console.error("Stripe commission checkout error:", error);
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create checkout session" });
+      }
+    }),
+
   // Create checkout session
   createCheckout: protectedProcedure
     .input(createCheckoutSchema)

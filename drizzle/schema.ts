@@ -199,25 +199,38 @@ export type InsertProduct = typeof products.$inferInsert;
 /**
  * Inquiries table for buyer-factory inquiries
  */
-export const inquiries = mysqlTable("inquiries", {
+export const importRequests = mysqlTable("import_requests", {
   id: int("id").autoincrement().primaryKey(),
   buyerId: int("buyerId").notNull().references(() => users.id),
-  factoryId: int("factoryId").notNull().references(() => factories.id),
   productId: int("productId").references(() => products.id),
-  subject: text("subject").notNull(),
-  description: text("description"),
+  factoryId: int("factoryId").references(() => factories.id),
+  productName: text("productName"),
+  category: varchar("category", { length: 100 }),
+  quantity: int("quantity").notNull(),
   specifications: text("specifications"),
-  quantityRequired: int("quantityRequired"),
-  status: mysqlEnum("status", ["pending", "responded", "negotiating", "completed", "cancelled"]).default("pending"),
-  shippingMethod: mysqlEnum("shippingMethod", ["air", "sea", "land", "rail", "multimodal", "other"]),
-  shippingDetails: text("shippingDetails"),
-  shippingCostEstimate: int("shippingCostEstimate"),
+  deliveryDetails: text("deliveryDetails"),
+  status: mysqlEnum("status", ["pending", "quoted", "accepted", "paid", "shipped", "cancelled"]).default("pending").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type Inquiry = typeof inquiries.$inferSelect;
-export type InsertInquiry = typeof inquiries.$inferInsert;
+export type ImportRequest = typeof importRequests.$inferSelect;
+export type InsertImportRequest = typeof importRequests.$inferInsert;
+
+export const quotes = mysqlTable("quotes", {
+  id: int("id").autoincrement().primaryKey(),
+  requestId: int("requestId").notNull().references(() => importRequests.id),
+  factoryId: int("factoryId").notNull().references(() => factories.id),
+  price: int("price").notNull(), // in cents
+  terms: text("terms"),
+  commission: int("commission").notNull(), // 2-3% commission in cents
+  stripeSessionId: varchar("stripeSessionId", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Quote = typeof quotes.$inferSelect;
+export type InsertQuote = typeof quotes.$inferInsert;
 
 /**
  * Messages table for buyer-factory messaging

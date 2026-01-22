@@ -5,16 +5,22 @@ import { TRPCError } from "@trpc/server";
 import { messages } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 
-const inquirySchema = z.object({
-  buyerId: z.number(),
-  factoryId: z.number(),
+const importRequestSchema = z.object({
   productId: z.number().optional(),
-  subject: z.string().min(1),
-  description: z.string().optional(),
+  factoryId: z.number().optional(),
+  productName: z.string().optional(),
+  category: z.string().optional(),
+  quantity: z.number().min(1),
   specifications: z.string().optional(),
-  quantityRequired: z.number().optional(),
-  shippingMethod: z.enum(["air", "sea", "land", "rail", "multimodal", "other"]).optional(),
-  shippingDetails: z.string().optional(),
+  deliveryDetails: z.string().optional(),
+});
+
+const quoteSchema = z.object({
+  requestId: z.number(),
+  factoryId: z.number(),
+  price: z.number().min(1),
+  terms: z.string().optional(),
+  commission: z.number(),
 });
 
 const messageSchema = z.object({
@@ -26,57 +32,58 @@ const messageSchema = z.object({
 });
 
 export const inquiriesRouter = router({
-  // Get inquiries for a factory (factory owner only)
+  // Get import requests for a factory
   getByFactory: protectedProcedure
     .input(z.object({ factoryId: z.number() }))
     .query(async ({ ctx, input }) => {
-      // In a real app, verify the user owns this factory
-      return db.getInquiriesByFactory(input.factoryId);
+      return db.getImportRequestsByFactory(input.factoryId);
     }),
 
-  // Get inquiries for a buyer (buyer only)
+  // Get import requests for a buyer
   getByBuyer: protectedProcedure
     .input(z.object({ buyerId: z.number() }))
     .query(async ({ ctx, input }) => {
       if (ctx.user.id !== input.buyerId && ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Cannot view other buyer's inquiries" });
+        throw new TRPCError({ code: "FORBIDDEN", message: "Cannot view other buyer's requests" });
       }
-      return db.getInquiriesByBuyer(input.buyerId);
+      return db.getImportRequestsByBuyer(input.buyerId);
     }),
 
-  // Create inquiry (buyers only)
+  // Create import request
   create: protectedProcedure
-    .input(inquirySchema)
+    .input(importRequestSchema)
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role === "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Admins cannot create inquiries" });
-      }
-
-      const result = await db.createInquiry({
+      return db.createImportRequest({
         ...input,
         buyerId: ctx.user.id,
+        status: "pending",
       });
-
-      return result;
     }),
 
-  // Update inquiry status (factory owner or admin)
+  // Update request status
   updateStatus: protectedProcedure
     .input(z.object({ 
       id: z.number(), 
-      status: z.enum(["pending", "responded", "negotiating", "completed", "cancelled"]),
-      shippingCostEstimate: z.number().optional(),
+      status: z.enum(["pending", "quoted", "accepted", "paid", "shipped", "cancelled"]),
     }))
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "admin" && ctx.user.role !== "factory") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only factory owners can update inquiry status" });
-      }
+      return db.updateImportRequest(input.id, { status: input.status });
+    }),
 
-      const result = await db.updateInquiry(input.id, { 
-        status: input.status,
-        shippingCostEstimate: input.shippingCostEstimate,
-      });
-      return result;
+  // Submit a quote (factory only)
+  submitQuote: protectedProcedure
+    .input(quoteSchema)
+    .mutation(async ({ ctx, input }) => {
+      const quote = await db.createQuote(input);
+      await db.updateImportRequest(input.requestId, { status: "quoted" });
+      return quote;
+    }),
+
+  // Get quotes for a request
+  getQuotes: protectedProcedure
+    .input(z.object({ requestId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      return db.getQuotesByRequest(input.requestId);
     }),
 });
 

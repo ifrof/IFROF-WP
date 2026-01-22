@@ -8,6 +8,7 @@ import BlogEditor from "@/pages/BlogEditor";
 import AISearch from "@/pages/AISearch";
 import ImportRequest from "@/pages/ImportRequest";
 import Marketplace from "@/pages/Marketplace";
+import ProductSearch from "@/pages/ProductSearch";
 import ProductDetail from "@/pages/ProductDetail";
 import Services from "@/pages/Services";
 import Cart from "@/pages/Cart";
@@ -17,6 +18,7 @@ import OrderDetail from "@/pages/OrderDetail";
 import FactoryDashboard from "@/pages/FactoryDashboard";
 import BuyerDashboard from "@/pages/BuyerDashboard";
 import BuyerRequests from "@/pages/BuyerRequests";
+import BuyerRequestDetail from "@/pages/BuyerRequestDetail";
 import BuyerOrders from "@/pages/BuyerOrders";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminUsers from "@/pages/AdminUsers";
@@ -24,6 +26,7 @@ import AdminFactories from "@/pages/AdminFactories";
 import AdminRequests from "@/pages/AdminRequests";
 import FactoryListings from "@/pages/FactoryListings";
 import FactoryOrders from "@/pages/FactoryOrders";
+import FactoryRequestDetail from "@/pages/FactoryRequestDetail";
 import FactoryVerification from "@/pages/FactoryVerification";
 import PublicFactoryListings from "@/pages/PublicFactoryListings";
 import Support from "@/pages/Support";
@@ -81,6 +84,7 @@ function Router() {
       <Route path={"/factory-investigator"} component={AISearch} />
       <Route path={"/import-request"} component={ImportRequest} />
       <Route path={"/marketplace"} component={Marketplace} />
+      <Route path={"/products"} component={ProductSearch} />
       <Route path={"/factories"} component={PublicFactoryListings} />
       <Route path={"/products/:id"} component={ProductDetail} />
       <Route path={"/services"} component={Services} />
@@ -92,11 +96,13 @@ function Router() {
       <Route path={"/factory"} component={FactoryDashboard} />
       <Route path={"/factory/listings"} component={FactoryListings} />
       <Route path={"/factory/orders"} component={FactoryOrders} />
+      <Route path={"/factory/requests/:id"} component={FactoryRequestDetail} />
       <Route path={"/factory/verification"} component={FactoryVerification} />
       <Route path={"/factory/profile"} component={Profile} />
       <Route path={"/dashboard/buyer"} component={BuyerDashboard} />
       <Route path={"/buyer"} component={BuyerDashboard} />
       <Route path={"/buyer/requests"} component={BuyerRequests} />
+      <Route path={"/buyer/requests/:id"} component={BuyerRequestDetail} />
       <Route path={"/buyer/orders"} component={BuyerOrders} />
       <Route path={"/buyer/profile"} component={Profile} />
       <Route path={"/dashboard/admin"} component={AdminDashboard} />

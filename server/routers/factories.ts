@@ -200,9 +200,16 @@ export const productsRouter = router({
 
   // Search products (public)
   search: publicProcedure
-    .input(z.object({ query: z.string() }))
+    .input(z.object({ 
+      query: z.string().optional(),
+      category: z.string().optional(),
+      minPrice: z.number().optional(),
+      maxPrice: z.number().optional(),
+      moq: z.number().optional(),
+      location: z.string().optional(),
+    }))
     .query(async ({ input }) => {
-      return db.searchProducts(input.query);
+      return db.searchProductsAdvanced(input);
     }),
 
   // Create product (admin only)
