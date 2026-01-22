@@ -261,6 +261,75 @@ export async function deleteSession(id: string): Promise<void> {
 }
 
 // ============================================================================
+// BUYER PROFILE OPERATIONS
+// ============================================================================
+
+export async function createBuyerProfile(data: any): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.insert(schema.buyerProfiles).values(data);
+      return { id: result.insertId, ...data };
+    } catch (e) {
+      console.error("[Database] createBuyerProfile MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  if (!dbData.buyerProfiles) dbData.buyerProfiles = [];
+  const newProfile = {
+    id: dbData.buyerProfiles.length + 1,
+    ...data,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  dbData.buyerProfiles.push(newProfile);
+  writeJsonDb(dbData);
+  return newProfile;
+}
+
+export async function getBuyerProfileByUserId(userId: number): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.select().from(schema.buyerProfiles).where(eq(schema.buyerProfiles.userId, userId)).limit(1);
+      return result[0] || null;
+    } catch (e) {
+      console.error("[Database] getBuyerProfileByUserId MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  if (!dbData.buyerProfiles) return null;
+  return dbData.buyerProfiles.find((p: any) => p.userId === userId) || null;
+}
+
+export async function updateBuyerProfile(userId: number, data: any): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      await _db.update(schema.buyerProfiles)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(schema.buyerProfiles.userId, userId));
+      return { userId, ...data };
+    } catch (e) {
+      console.error("[Database] updateBuyerProfile MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  if (!dbData.buyerProfiles) return null;
+  const index = dbData.buyerProfiles.findIndex((p: any) => p.userId === userId);
+  if (index >= 0) {
+    dbData.buyerProfiles[index] = { 
+      ...dbData.buyerProfiles[index], 
+      ...data, 
+      updatedAt: new Date().toISOString() 
+    };
+    writeJsonDb(dbData);
+    return dbData.buyerProfiles[index];
+  }
+  return null;
+}
+
+// ============================================================================
 // FACTORY OPERATIONS
 // ============================================================================
 

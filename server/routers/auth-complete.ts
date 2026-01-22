@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { publicProcedure, router, protectedProcedure } from "../_core/trpc";
-import { getDb, getUserByEmail, upsertUser, getUserByVerificationToken, getUserByResetToken, createSession, deleteSession } from "../db";
+import { getDb, getUserByEmail, upsertUser, getUserByVerificationToken, getUserByResetToken, createSession, deleteSession, createBuyerProfile } from "../db";
 import { eq } from "drizzle-orm";
 import { users } from "../../drizzle/schema";
 import { COOKIE_NAME } from "@shared/const";
@@ -44,6 +44,16 @@ const changePasswordSchema = z.object({
     .regex(/[^a-zA-Z0-9]/),
 });
 
+const buyerProfileSchema = z.object({
+  companyName: z.string().optional(),
+  businessType: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  country: z.string().optional(),
+  zipCode: z.string().optional(),
+  interests: z.string().optional(),
+});
+
 export const authRouter = router({
   // Get current user
   me: publicProcedure.query(async ({ ctx }) => {
@@ -79,6 +89,13 @@ export const authRouter = router({
 
       if (!newUser) {
         throw new Error("Failed to create user / فشل إنشاء الحساب");
+      }
+
+      // Create empty buyer profile if role is buyer
+      if (input.role === "buyer") {
+        await createBuyerProfile({
+          userId: newUser.id,
+        });
       }
 
       // Send verification email
@@ -278,4 +295,29 @@ export const authRouter = router({
     ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
     return { success: true };
   }),
+
+  // Get Buyer Profile
+  getBuyerProfile: protectedProcedure
+    .query(async ({ ctx }) => {
+      const { id, role } = ctx.user;
+      if (role !== "buyer") {
+        throw new Error("User is not a buyer / المستخدم ليس مشترياً");
+      }
+      
+      const profile = await db.getBuyerProfileByUserId(id);
+      return profile || null;
+    }),
+
+  // Update Buyer Profile
+  updateBuyerProfile: protectedProcedure
+    .input(buyerProfileSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { id, role } = ctx.user;
+      if (role !== "buyer") {
+        throw new Error("User is not a buyer / المستخدم ليس مشترياً");
+      }
+
+      const updatedProfile = await db.updateBuyerProfile(id, input);
+      return { success: true, profile: updatedProfile };
+    }),
 });

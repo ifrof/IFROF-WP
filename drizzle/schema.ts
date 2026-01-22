@@ -27,6 +27,26 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 /**
+ * Buyer profiles table for storing additional buyer information
+ */
+export const buyerProfiles = mysqlTable("buyer_profiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique().references(() => users.id),
+  companyName: text("companyName"),
+  businessType: text("businessType"),
+  address: text("address"),
+  city: text("city"),
+  country: text("country"),
+  zipCode: varchar("zipCode", { length: 20 }),
+  interests: text("interests"), // JSON array of product categories
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BuyerProfile = typeof buyerProfiles.$inferSelect;
+export type InsertBuyerProfile = typeof buyerProfiles.$inferInsert;
+
+/**
  * Sessions table for managing user login sessions
  */
 export const sessions = mysqlTable("sessions", {
