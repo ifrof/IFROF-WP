@@ -1,4 +1,5 @@
-FROM node:20-slim
+# Build stage
+FROM node:20-slim AS builder
 
 # Install build dependencies for native modules (like better-sqlite3)
 RUN apt-get update && apt-get install -y \
@@ -25,8 +26,41 @@ COPY . .
 # Build the project
 RUN pnpm build
 
+# Production stage
+FROM node:20-slim AS production
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+COPY patches ./patches
+
+# Install production dependencies only
+RUN pnpm install --frozen-lockfile --prod
+
+# Copy built files from builder stage
+COPY --from=builder /app/dist ./dist
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
+
 # Expose port
 EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/api/health || exit 1
 
 # Start the server
 CMD ["pnpm", "start"]
