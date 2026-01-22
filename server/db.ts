@@ -405,6 +405,7 @@ export async function getAllFactories(limit: number = 50, offset: number = 0) {
         name: schema.factories.name,
         location: schema.factories.location,
         logoUrl: schema.factories.logoUrl,
+        certificationProofs: schema.factories.certificationProofs,
         verificationStatus: schema.factories.verificationStatus,
         rating: schema.factories.rating,
       })

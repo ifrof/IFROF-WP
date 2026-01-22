@@ -25,6 +25,7 @@ import AdminRequests from "@/pages/AdminRequests";
 import FactoryListings from "@/pages/FactoryListings";
 import FactoryOrders from "@/pages/FactoryOrders";
 import FactoryVerification from "@/pages/FactoryVerification";
+import PublicFactoryListings from "@/pages/PublicFactoryListings";
 import Support from "@/pages/Support";
 import Maps from "@/pages/Maps";
 import HowItWorks from "@/pages/HowItWorks";
@@ -80,6 +81,7 @@ function Router() {
       <Route path={"/factory-investigator"} component={AISearch} />
       <Route path={"/import-request"} component={ImportRequest} />
       <Route path={"/marketplace"} component={Marketplace} />
+      <Route path={"/factories"} component={PublicFactoryListings} />
       <Route path={"/products/:id"} component={ProductDetail} />
       <Route path={"/services"} component={Services} />
       <Route path={"/cart"} component={Cart} />

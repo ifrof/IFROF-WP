@@ -150,6 +150,7 @@ export const factories = mysqlTable("factories", {
   minimumOrderQuantity: int("minimumOrderQuantity"),
   logoUrl: text("logoUrl"),
   bannerUrl: text("bannerUrl"),
+  certificationProofs: text("certificationProofs"), // JSON array of certification proof URLs or objects
   verificationStatus: mysqlEnum("verificationStatus", ["pending", "verified", "rejected"]).default("pending"),
   rating: int("rating").default(0),
   responseTime: varchar("responseTime", { length: 50 }),
