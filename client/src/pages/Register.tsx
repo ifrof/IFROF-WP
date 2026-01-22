@@ -9,7 +9,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { Loader2, UserPlus, Mail, Lock, User, Phone, Home } from "lucide-react";
+import { Loader2, UserPlus, Mail, Lock, User, Phone, Home, ShieldCheck } from "lucide-react";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email format / تنسيق البريد الإلكتروني غير صحيح"),
@@ -34,12 +34,14 @@ export default function Register() {
   // Simple language detection
   const language = typeof window !== "undefined" && window.location.pathname.startsWith("/ar") ? "ar" : "en";
 
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       role: "buyer",
     }
   });
+
+  const role = watch("role");
 
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: () => {
@@ -138,6 +140,16 @@ export default function Register() {
                   <span>Factory / مصنع</span>
                 </label>
               </div>
+              {role === "factory" && (
+                <div className="mt-2">
+                  <Link to="/verify-factory">
+                    <Button type="button" variant="outline" size="sm" className="w-full border-blue-200 text-blue-700 hover:bg-blue-50">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Verify your factory status (Optional)
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
 
             <Button type="submit" className="w-full" disabled={registerMutation.isPending}>

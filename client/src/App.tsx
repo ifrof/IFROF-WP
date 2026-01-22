@@ -26,6 +26,7 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Terms from "@/pages/Terms";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import VerifyFactory from "@/pages/VerifyFactory";
 import VerifyEmail from "@/pages/VerifyEmail";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
@@ -88,6 +89,7 @@ function Router() {
       <Route path={"/terms"} component={Terms} />
       <Route path={"/login"} component={Login} />
       <Route path={"/register"} component={Register} />
+      <Route path={"/verify-factory"} component={VerifyFactory} />
       <Route path={"/verify-email/:token"} component={VerifyEmail} />
       <Route path={"/forgot-password"} component={ForgotPassword} />
       <Route path={"/reset-password/:token"} component={ResetPassword} />
