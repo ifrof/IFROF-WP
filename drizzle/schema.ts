@@ -169,15 +169,24 @@ export type InsertFactory = typeof factories.$inferInsert;
 export const products = mysqlTable("products", {
   id: int("id").autoincrement().primaryKey(),
   factoryId: int("factoryId").notNull().references(() => factories.id),
-  name: text("name").notNull(),
-  description: text("description"),
+  // Multilingual name
+  nameAr: text("nameAr").notNull(),
+  nameEn: text("nameEn").notNull(),
+  nameZh: text("nameZh"),
+  // Multilingual description
+  descriptionAr: text("descriptionAr"),
+  descriptionEn: text("descriptionEn"),
+  descriptionZh: text("descriptionZh"),
   category: varchar("category", { length: 100 }),
   tags: text("tags"),
   specifications: text("specifications"),
-  basePrice: int("basePrice").notNull(),
-  pricingTiers: text("pricingTiers"),
+  // Price range (stored in cents)
+  minPrice: int("minPrice").notNull(),
+  maxPrice: int("maxPrice"),
+  currency: varchar("currency", { length: 10 }).default("USD").notNull(),
+  pricingTiers: text("pricingTiers"), // JSON array for bulk pricing
   minimumOrderQuantity: int("minimumOrderQuantity").default(1),
-  imageUrls: text("imageUrls"),
+  imageUrls: text("imageUrls"), // JSON array of image URLs
   featured: int("featured").default(0),
   active: int("active").default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

@@ -541,9 +541,13 @@ export async function getAllProducts(limit: number = 50, offset: number = 0) {
     try {
       return await _db.select({
         id: schema.products.id,
-        name: schema.products.name,
+        nameAr: schema.products.nameAr,
+        nameEn: schema.products.nameEn,
+        nameZh: schema.products.nameZh,
         category: schema.products.category,
-        basePrice: schema.products.basePrice,
+        minPrice: schema.products.minPrice,
+        maxPrice: schema.products.maxPrice,
+        currency: schema.products.currency,
         imageUrls: schema.products.imageUrls,
         factoryId: schema.products.factoryId,
         minimumOrderQuantity: schema.products.minimumOrderQuantity,
@@ -692,8 +696,12 @@ export async function searchProducts(query: string) {
     try {
       return await _db.select().from(schema.products)
         .where(or(
-          like(schema.products.name, `%${query}%`),
-          like(schema.products.description, `%${query}%`),
+          like(schema.products.nameAr, `%${query}%`),
+          like(schema.products.nameEn, `%${query}%`),
+          like(schema.products.nameZh, `%${query}%`),
+          like(schema.products.descriptionAr, `%${query}%`),
+          like(schema.products.descriptionEn, `%${query}%`),
+          like(schema.products.descriptionZh, `%${query}%`),
           like(schema.products.category, `%${query}%`)
         ));
     } catch (e) {
@@ -704,8 +712,12 @@ export async function searchProducts(query: string) {
   const dbData = readJsonDb();
   const lowerQuery = query.toLowerCase();
   return (dbData.products || []).filter((p: any) => 
-    p.name?.toLowerCase().includes(lowerQuery) ||
-    p.description?.toLowerCase().includes(lowerQuery) ||
+    p.nameAr?.toLowerCase().includes(lowerQuery) ||
+    p.nameEn?.toLowerCase().includes(lowerQuery) ||
+    p.nameZh?.toLowerCase().includes(lowerQuery) ||
+    p.descriptionAr?.toLowerCase().includes(lowerQuery) ||
+    p.descriptionEn?.toLowerCase().includes(lowerQuery) ||
+    p.descriptionZh?.toLowerCase().includes(lowerQuery) ||
     p.category?.toLowerCase().includes(lowerQuery)
   );
 }

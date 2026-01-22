@@ -20,12 +20,18 @@ const factorySchema = z.object({
 });
 
 const productSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
+  nameAr: z.string().min(1),
+  nameEn: z.string().min(1),
+  nameZh: z.string().optional(),
+  descriptionAr: z.string().optional(),
+  descriptionEn: z.string().optional(),
+  descriptionZh: z.string().optional(),
   category: z.string().optional(),
   tags: z.string().optional(),
   specifications: z.string().optional(),
-  basePrice: z.number().min(0),
+  minPrice: z.number().min(0),
+  maxPrice: z.number().optional(),
+  currency: z.string().default("USD"),
   pricingTiers: z.string().optional(),
   minimumOrderQuantity: z.number().default(1),
   imageUrls: z.string().optional(),
@@ -211,7 +217,8 @@ export const productsRouter = router({
       const result = await db.createProduct({
         factoryId,
         ...data,
-        basePrice: Math.round(data.basePrice * 100), // Convert to cents
+        minPrice: Math.round(data.minPrice * 100), // Convert to cents
+        maxPrice: data.maxPrice ? Math.round(data.maxPrice * 100) : null,
       });
 
       return result;
@@ -228,7 +235,8 @@ export const productsRouter = router({
       const { id, ...data } = input;
       await db.updateProduct(id, {
         ...data,
-        basePrice: Math.round(data.basePrice * 100), // Convert to cents
+        minPrice: Math.round(data.minPrice * 100), // Convert to cents
+        maxPrice: data.maxPrice ? Math.round(data.maxPrice * 100) : null,
       });
       return db.getProductById(id);
     }),
