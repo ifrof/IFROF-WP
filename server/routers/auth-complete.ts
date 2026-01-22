@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { publicProcedure, router, protectedProcedure } from "../_core/trpc";
-import { getDb, getUserByEmail, upsertUser, getUserByVerificationToken, getUserByResetToken, createSession, deleteSession, createBuyerProfile } from "../db";
+import { getDb, getUserByEmail, upsertUser, getUserByVerificationToken, getUserByResetToken, createSession, deleteSession, createBuyerProfile, createAdminProfile, createAdminPermission } from "../db";
 import { eq } from "drizzle-orm";
 import { users } from "../../drizzle/schema";
 import { COOKIE_NAME } from "@shared/const";
@@ -16,7 +16,7 @@ const registerSchema = z.object({
     .regex(/[^a-zA-Z0-9]/, "Password must contain a special character / يجب أن تحتوي كلمة المرور على رمز خاص"),
   name: z.string().min(2, "Name is too short / الاسم قصير جداً"),
   phone: z.string().optional(),
-  role: z.enum(["buyer", "factory"]).default("buyer"),
+  role: z.enum(["buyer", "factory", "admin"]).default("buyer"),
 });
 
 const loginSchema = z.object({
@@ -68,6 +68,11 @@ const factoryProfileSchema = z.object({
   bannerUrl: z.string().url().optional(),
 });
 
+const adminProfileSchema = z.object({
+  department: z.string().optional(),
+  accessLevel: z.number().optional(),
+});
+
 export const authRouter = router({
   // Get current user
   me: publicProcedure.query(async ({ ctx }) => {
@@ -116,6 +121,24 @@ export const authRouter = router({
           name: newUser.name || "New Factory",
           verificationStatus: "pending",
         });
+      } else if (input.role === "admin") {
+        const adminProfile = await createAdminProfile({
+          userId: newUser.id,
+          department: "General",
+          accessLevel: 1,
+        });
+        
+        // Default restricted permissions
+        const modules = ["users", "products", "orders", "factories"];
+        for (const module of modules) {
+          await createAdminPermission({
+            adminId: adminProfile.id,
+            module,
+            canRead: 1,
+            canWrite: 0,
+            canDelete: 0,
+          });
+        }
       }
 
       // Send verification email
@@ -375,6 +398,52 @@ export const authRouter = router({
       await db_instance.update(factories)
         .set({ ...input, updatedAt: new Date() })
         .where(eq(factories.userId, id));
+        
+      return { success: true };
+    }),
+
+  // Get Admin Profile and Permissions
+  getAdminProfile: protectedProcedure
+    .query(async ({ ctx }) => {
+      const { id, role } = ctx.user;
+      if (role !== "admin") {
+        throw new Error("User is not an admin / المستخدم ليس مسؤولاً");
+      }
+      
+      const profile = await db.getAdminProfileByUserId(id);
+      if (!profile) return null;
+
+      const { adminPermissions } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
+      const db_instance = await db.getDb();
+      if (!db_instance) return { profile, permissions: [] };
+
+      const permissions = await db_instance.select().from(adminPermissions).where(eq(adminPermissions.adminId, profile.id));
+      
+      return { profile, permissions };
+    }),
+
+  // Update Admin Profile (Restricted)
+  updateAdminProfile: protectedProcedure
+    .input(adminProfileSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { id, role } = ctx.user;
+      if (role !== "admin") {
+        throw new Error("User is not an admin / المستخدم ليس مسؤولاً");
+      }
+
+      const { adminProfiles } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
+      const db_instance = await db.getDb();
+      if (!db_instance) throw new Error("Database connection failed");
+
+      // Admins can only update their own department, accessLevel is restricted to superadmins
+      const { accessLevel, ...rest } = input;
+      const updateData: any = { ...rest, updatedAt: new Date() };
+      
+      await db_instance.update(adminProfiles)
+        .set(updateData)
+        .where(eq(adminProfiles.userId, id));
         
       return { success: true };
     }),

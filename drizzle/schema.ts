@@ -47,6 +47,37 @@ export type BuyerProfile = typeof buyerProfiles.$inferSelect;
 export type InsertBuyerProfile = typeof buyerProfiles.$inferInsert;
 
 /**
+ * Admin profiles table for storing administrative user information
+ */
+export const adminProfiles = mysqlTable("admin_profiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique().references(() => users.id),
+  department: varchar("department", { length: 100 }),
+  accessLevel: int("accessLevel").default(1).notNull(), // 1: standard, 2: superadmin
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AdminProfile = typeof adminProfiles.$inferSelect;
+export type InsertAdminProfile = typeof adminProfiles.$inferInsert;
+
+/**
+ * Admin permissions table for granular access control
+ */
+export const adminPermissions = mysqlTable("admin_permissions", {
+  id: int("id").autoincrement().primaryKey(),
+  adminId: int("adminId").notNull().references(() => adminProfiles.id),
+  module: varchar("module", { length: 100 }).notNull(), // e.g., "users", "products", "orders"
+  canRead: int("canRead").default(1).notNull(),
+  canWrite: int("canWrite").default(0).notNull(),
+  canDelete: int("canDelete").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AdminPermission = typeof adminPermissions.$inferSelect;
+export type InsertAdminPermission = typeof adminPermissions.$inferInsert;
+
+/**
  * Sessions table for managing user login sessions
  */
 export const sessions = mysqlTable("sessions", {

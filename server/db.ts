@@ -330,6 +330,70 @@ export async function updateBuyerProfile(userId: number, data: any): Promise<any
 }
 
 // ============================================================================
+// ADMIN PROFILE OPERATIONS
+// ============================================================================
+
+export async function createAdminProfile(data: any): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.insert(schema.adminProfiles).values(data);
+      return { id: result.insertId, ...data };
+    } catch (e) {
+      console.error("[Database] createAdminProfile MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  if (!dbData.adminProfiles) dbData.adminProfiles = [];
+  const newProfile = {
+    id: dbData.adminProfiles.length + 1,
+    ...data,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  dbData.adminProfiles.push(newProfile);
+  writeJsonDb(dbData);
+  return newProfile;
+}
+
+export async function getAdminProfileByUserId(userId: number): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.select().from(schema.adminProfiles).where(eq(schema.adminProfiles.userId, userId)).limit(1);
+      return result[0] || null;
+    } catch (e) {
+      console.error("[Database] getAdminProfileByUserId MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  if (!dbData.adminProfiles) return null;
+  return dbData.adminProfiles.find((p: any) => p.userId === userId) || null;
+}
+
+export async function createAdminPermission(data: any): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.insert(schema.adminPermissions).values(data);
+      return { id: result.insertId, ...data };
+    } catch (e) {
+      console.error("[Database] createAdminPermission MySQL error:", e);
+    }
+  }
+
+  const dbData = readJsonDb();
+  if (!dbData.adminPermissions) dbData.adminPermissions = [];
+  const newPermission = {
+    id: dbData.adminPermissions.length + 1,
+    ...data,
+    createdAt: new Date().toISOString()
+  };
+  dbData.adminPermissions.push(newPermission);
+  writeJsonDb(dbData);
+  return newPermission;
+}
+
+// ============================================================================
 // FACTORY OPERATIONS
 // ============================================================================
 
