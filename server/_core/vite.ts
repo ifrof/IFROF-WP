@@ -5,10 +5,10 @@ import { nanoid } from "nanoid";
 import path from "path";
 import { cacheHeaders } from "./cache-headers";
 
-export async function setupVite(app: Express, server: Server) {
-  const { createServer: createViteServer } = await import("vite");
-  const viteConfig = (await import("../../vite.config")).default;
+import { createServer as createViteServer } from "vite";
+import viteConfig from "../../vite.config";
 
+export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
