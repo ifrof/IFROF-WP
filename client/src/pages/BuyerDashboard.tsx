@@ -6,6 +6,7 @@ import { trpc } from "@/lib/trpc";
 import { Loader2, Package, FileText, MessageSquare, CheckCircle2, AlertCircle, Truck } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
+import BuyerDashboardLayout from "@/components/BuyerDashboardLayout";
 
 export default function BuyerDashboard() {
   const { t } = useLanguage();
@@ -45,16 +46,14 @@ export default function BuyerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-green-600 to-green-800 text-white py-8 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold">{t("dashboard.buyer.title")}</h1>
-          <p className="text-green-100 mt-2">{t("dashboard.buyer.subtitle")}</p>
+    <BuyerDashboardLayout>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.buyer.title")}</h1>
+          <p className="text-muted-foreground">{t("dashboard.buyer.subtitle")}</p>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div>
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card>
@@ -267,7 +266,7 @@ export default function BuyerDashboard() {
         </Tabs>
 
         {/* KYC Verification Notice */}
-        <Card className="mt-8 border-yellow-200 bg-yellow-50">
+        <Card className="border-yellow-200 bg-yellow-50">
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
               <AlertCircle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
@@ -286,6 +285,6 @@ export default function BuyerDashboard() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </BuyerDashboardLayout>
   );
 }

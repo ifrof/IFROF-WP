@@ -16,6 +16,8 @@ import Orders from "@/pages/Orders";
 import OrderDetail from "@/pages/OrderDetail";
 import FactoryDashboard from "@/pages/FactoryDashboard";
 import BuyerDashboard from "@/pages/BuyerDashboard";
+import BuyerRequests from "@/pages/BuyerRequests";
+import BuyerOrders from "@/pages/BuyerOrders";
 import AdminDashboard from "@/pages/AdminDashboard";
 import Support from "@/pages/Support";
 import Maps from "@/pages/Maps";
@@ -80,6 +82,10 @@ function Router() {
       <Route path={"/orders/:orderId"} component={OrderDetail} />
       <Route path={"/dashboard/factory"} component={FactoryDashboard} />
       <Route path={"/dashboard/buyer"} component={BuyerDashboard} />
+      <Route path={"/buyer"} component={BuyerDashboard} />
+      <Route path={"/buyer/requests"} component={BuyerRequests} />
+      <Route path={"/buyer/orders"} component={BuyerOrders} />
+      <Route path={"/buyer/profile"} component={Profile} />
       <Route path={"/dashboard/admin"} component={AdminDashboard} />
       <Route path={"/support"} component={Support} />
       <Route path={"/maps"} component={Maps} />
