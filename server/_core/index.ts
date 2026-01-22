@@ -6,7 +6,7 @@ import compression from "compression";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStripeWebhook } from "./stripe-webhook";
-import { appRouter } from "../routers";
+import { appRouter } from "../routers.js";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { apiLimiter, sanitizeInput, securityHeaders } from "./middleware";
