@@ -299,17 +299,20 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 relative">
             {[
-              { step: '1', icon: Package },
-              { step: '2', icon: Bot },
-              { step: '3', icon: MessageCircle },
-              { step: '4', icon: Truck },
+              { step: '1', icon: Package, ...t('howItWorks.steps.step1') as any },
+              { step: '2', icon: Bot, ...t('howItWorks.steps.step2') as any },
+              { step: '3', icon: MessageCircle, ...t('howItWorks.steps.step3') as any },
+              { step: '4', icon: Truck, ...t('howItWorks.steps.step4') as any },
             ].map((item, index) => (
               <div key={index} className="relative group">
-                <div className="bg-white border border-gray-100 rounded-2xl p-8 h-full shadow-sm hover:shadow-md transition-all duration-300 flex flex-center justify-center items-center min-h-[180px]">
-                  <div className="w-16 h-16 bg-[#1e3a5f] rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <div className="bg-white border border-gray-100 rounded-2xl p-8 h-full shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-center items-center min-h-[240px] text-center">
+                  <div className="w-16 h-16 bg-[#1e3a5f] rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 mb-4">
                     <item.icon className="w-8 h-8 text-white" />
                   </div>
                   
+                  <h3 className="font-bold text-[#1e3a5f] mb-2">{item.title}</h3>
+                  <p className="text-gray-500 text-xs px-2">{item.desc}</p>
+
                   {/* Step Number Badge */}
                   <div className="absolute -top-3 -right-3 w-8 h-8 bg-[#ff8c42] rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg z-10">
                     {item.step}
@@ -318,7 +321,7 @@ export default function Home() {
 
                 {/* Connector Arrow (Hidden on mobile, shown on desktop) */}
                 {index < 3 && (
-                  <div className={`hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-20 ${language === 'ar' ? 'rotate-180' : ''}`}>
+                  <div className={`hidden md:block absolute top-1/3 -right-4 transform -translate-y-1/2 z-20 ${language === 'ar' ? 'rotate-180' : ''}`}>
                     <ArrowLeft className="w-6 h-6 text-gray-200" />
                   </div>
                 )}
