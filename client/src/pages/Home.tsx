@@ -120,7 +120,7 @@ export default function Home() {
 	                  </Button>
 	                </Link>
 	              ) : (
-	                <Link href={user?.role === 'admin' ? '/admin' : (user?.role === 'factory' ? '/factory' : '/dashboard/buyer')}>
+	                <Link href={user?.role === 'admin' ? '/admin' : (user?.role === 'factory' ? '/my-factory' : '/dashboard/buyer')}>
 	                  <Button variant="ghost" className="hidden sm:flex">
 	                    {safeT('nav.dashboard')}
 	                  </Button>

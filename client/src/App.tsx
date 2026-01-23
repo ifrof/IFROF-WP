@@ -97,7 +97,7 @@ function Router() {
       <Route path={"/checkout"} component={CheckoutImproved} />
       <Route path={"/orders"} component={Orders} />
       <Route path={"/orders/:orderId"} component={OrderDetail} />
-      <Route path={"/factory"} component={FactoryDashboard} />
+      <Route path={"/my-factory"} component={FactoryDashboard} />
       <Route path={"/factory/listings"} component={FactoryListings} />
       <Route path={"/factory/orders"} component={FactoryOrders} />
       <Route path={"/factory/requests/:id"} component={FactoryRequestDetail} />
