@@ -37,8 +37,8 @@ function AppContent() {
   const { dir, language } = useLanguage();
   
   useEffect(() => {
-    document.documentElement.dir = dir;
-    document.documentElement.lang = language;
+    document.documentElement.dir = dir || 'ltr';
+    document.documentElement.lang = language || 'en';
   }, [dir, language]);
 
   return (
@@ -47,7 +47,6 @@ function AppContent() {
       <GTM />
       <Toaster />
       <Switch>
-        {/* Public Routes */}
         <Route path="/" component={Home} />
         <Route path="/blog" component={Blog} />
         <Route path="/blog/:slug" component={BlogPostDetail} />
@@ -60,14 +59,10 @@ function AppContent() {
         <Route path="/contact" component={Contact} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
-        
-        {/* Protected Routes - Unified and Clean */}
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/my-factory" component={FactoryDashboard} />
         <Route path="/buyer" component={BuyerDashboard} />
         <Route path="/profile" component={Profile} />
-        
-        {/* Fallback */}
         <Route component={NotFound} />
       </Switch>
       <AIChat />
