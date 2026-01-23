@@ -181,7 +181,7 @@ export default function AISearch() {
                   {t.manufacturers}
                 </Button>
               </Link>
-              <Link href="/factory-investigator">
+              <Link href="/ai-search">
                 <Button variant="outline" size="sm">
                   {language === 'ar' ? 'المحقق الذكي' : 'AI Investigator'}
                 </Button>

@@ -85,7 +85,6 @@ function Router() {
       <Route path={"/blog"} component={Blog} />
       <Route path={"/blog/:slug"} component={BlogPostDetail} />
       <Route path={"/blog-editor"} component={BlogEditor} />
-      <Route path={"/factory-investigator"} component={AISearch} />
       <Route path={"/ai-search"} component={AISearch} />
       <Route path={"/import-request"} component={ImportRequest} />
       <Route path={"/marketplace"} component={Marketplace} />

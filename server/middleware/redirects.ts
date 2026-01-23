@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 const redirects: Record<string, string> = {
   '/old-products': '/shop/products',
   '/manufacturers': '/marketplace',
-  '/ai-search': '/factory-investigator'
+  '/factory-investigator': '/ai-search'
 };
 
 export function redirectMiddleware(req: Request, res: Response, next: NextFunction) {
