@@ -94,6 +94,9 @@ export default function Home() {
               <Link href="/marketplace" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
                 {language === 'ar' ? 'السوق' : 'Marketplace'}
               </Link>
+              <Link href="/factory-investigator" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
+                {language === 'ar' ? 'المحقق الذكي' : 'AI Investigator'}
+              </Link>
               <Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
                 {language === 'ar' ? 'المدونة' : 'Blog'}
               </Link>

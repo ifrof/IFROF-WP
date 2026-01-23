@@ -43,7 +43,7 @@ export default function Blog() {
             <a href="/#how-it-works" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
               {language === 'ar' ? 'كيف يعمل' : 'How It Works'}
             </a>
-            <Link href="/ai-search" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
+            <Link href="/factory-investigator" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
               {language === 'ar' ? 'المحقق الذكي' : 'Smart Investigator'}
             </Link>
             
