@@ -14,6 +14,12 @@ export const users = mysqlTable("users", {
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin", "factory", "buyer"]).default("buyer").notNull(),
   emailVerified: int("emailVerified").default(0).notNull(),
+  twoFactorEnabled: int("twoFactorEnabled").default(0).notNull(),
+  twoFactorSecret: varchar("twoFactorSecret", { length: 255 }),
+  twoFactorBackupCodes: text("twoFactorBackupCodes"),
+  isBlocked: int("isBlocked").default(0).notNull(),
+  blockedReason: text("blockedReason"),
+  blockedAt: timestamp("blockedAt"),
   verificationToken: varchar("verificationToken", { length: 255 }),
   verificationTokenExpires: timestamp("verificationTokenExpires"),
   resetPasswordToken: varchar("resetPasswordToken", { length: 255 }),
@@ -365,10 +371,15 @@ export const orders = mysqlTable("orders", {
   orderNumber: varchar("orderNumber", { length: 50 }).notNull().unique(),
   items: text("items").notNull(),
   totalAmount: int("totalAmount").notNull(),
+  commission: int("commission").default(0),
   status: mysqlEnum("status", ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]).default("pending"),
   paymentStatus: mysqlEnum("paymentStatus", ["pending", "completed", "failed", "refunded"]).default("pending"),
   stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
   shippingAddress: text("shippingAddress"),
+  shippingDetails: text("shippingDetails"),
+  trackingNumber: varchar("trackingNumber", { length: 100 }),
+  carrier: varchar("carrier", { length: 100 }),
+  estimatedDelivery: timestamp("estimatedDelivery"),
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -567,3 +578,98 @@ export const reviews = mysqlTable("reviews", {
 
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = typeof reviews.$inferInsert;
+
+/**
+ * Order status history table for tracking status updates
+ */
+export const orderStatusHistory = mysqlTable("order_status_history", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull().references(() => orders.id),
+  status: mysqlEnum("status", ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]).notNull(),
+  notes: text("notes"),
+  updatedBy: int("updatedBy").references(() => users.id),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => {
+  return {
+    orderIdx: index("order_status_history_order_idx").on(table.orderId),
+  };
+});
+
+export type OrderStatusHistory = typeof orderStatusHistory.$inferSelect;
+export type InsertOrderStatusHistory = typeof orderStatusHistory.$inferInsert;
+
+/**
+ * User blocks table for blocking functionality
+ */
+export const userBlocks = mysqlTable("user_blocks", {
+  id: int("id").autoincrement().primaryKey(),
+  blockerId: int("blockerId").notNull().references(() => users.id),
+  blockedId: int("blockedId").notNull().references(() => users.id),
+  reason: text("reason"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => {
+  return {
+    blockerIdx: index("user_blocks_blocker_idx").on(table.blockerId),
+    blockedIdx: index("user_blocks_blocked_idx").on(table.blockedId),
+  };
+});
+
+export type UserBlock = typeof userBlocks.$inferSelect;
+export type InsertUserBlock = typeof userBlocks.$inferInsert;
+
+/**
+ * User reports table for reporting system
+ */
+export const userReports = mysqlTable("user_reports", {
+  id: int("id").autoincrement().primaryKey(),
+  reporterId: int("reporterId").notNull().references(() => users.id),
+  reportedId: int("reportedId").notNull().references(() => users.id),
+  reportType: mysqlEnum("reportType", ["spam", "harassment", "fraud", "inappropriate", "other"]).notNull(),
+  description: text("description").notNull(),
+  status: mysqlEnum("status", ["pending", "reviewed", "resolved", "dismissed"]).default("pending").notNull(),
+  adminNotes: text("adminNotes"),
+  reviewedBy: int("reviewedBy").references(() => users.id),
+  reviewedAt: timestamp("reviewedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => {
+  return {
+    reporterIdx: index("user_reports_reporter_idx").on(table.reporterId),
+    reportedIdx: index("user_reports_reported_idx").on(table.reportedId),
+    statusIdx: index("user_reports_status_idx").on(table.status),
+  };
+});
+
+export type UserReport = typeof userReports.$inferSelect;
+export type InsertUserReport = typeof userReports.$inferInsert;
+
+/**
+ * Invoices table for invoice generation
+ */
+export const invoices = mysqlTable("invoices", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull().references(() => orders.id),
+  invoiceNumber: varchar("invoiceNumber", { length: 50 }).notNull().unique(),
+  buyerId: int("buyerId").notNull().references(() => users.id),
+  factoryId: int("factoryId").notNull().references(() => factories.id),
+  totalAmount: int("totalAmount").notNull(),
+  commission: int("commission").notNull(),
+  currency: varchar("currency", { length: 10 }).default("USD").notNull(),
+  status: mysqlEnum("status", ["draft", "issued", "paid", "cancelled"]).default("draft").notNull(),
+  issuedAt: timestamp("issuedAt"),
+  paidAt: timestamp("paidAt"),
+  dueDate: timestamp("dueDate"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => {
+  return {
+    orderIdx: index("invoices_order_idx").on(table.orderId),
+    buyerIdx: index("invoices_buyer_idx").on(table.buyerId),
+    factoryIdx: index("invoices_factory_idx").on(table.factoryId),
+    statusIdx: index("invoices_status_idx").on(table.status),
+  };
+});
+
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoice = typeof invoices.$inferInsert;

@@ -56,6 +56,10 @@ stripeWebhookRouter.post("/webhook", async (req: Request, res: Response) => {
         if (orderRecords.length > 0) {
           const order = orderRecords[0];
 
+          // Calculate commission (2-3% from factory)
+          const commissionRate = 0.025; // 2.5% default
+          const commissionAmount = Math.round(order.totalAmount * commissionRate);
+
           await db
             .update(orders)
             .set({
@@ -64,6 +68,8 @@ stripeWebhookRouter.post("/webhook", async (req: Request, res: Response) => {
               updatedAt: new Date(),
             })
             .where(eq(orders.id, order.id));
+
+          console.log(`[Stripe Webhook] Commission calculated: $${(commissionAmount / 100).toFixed(2)} (${(commissionRate * 100)}%)`);
 
           console.log(`[Stripe Webhook] Order ${order.orderNumber} payment confirmed`);
 
@@ -132,6 +138,18 @@ stripeWebhookRouter.post("/webhook", async (req: Request, res: Response) => {
             createdAt: new Date(),
           });
         }
+        break;
+      }
+
+      case "payment_intent.succeeded": {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        console.log("[Stripe Webhook] Payment intent succeeded:", paymentIntent.id);
+        break;
+      }
+
+      case "payment_intent.payment_failed": {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        console.log("[Stripe Webhook] Payment intent failed:", paymentIntent.id);
         break;
       }
 
