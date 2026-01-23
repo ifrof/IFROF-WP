@@ -102,7 +102,7 @@ export type InsertSession = typeof sessions.$inferInsert;
 export const blogPosts = mysqlTable("blog_posts", {
   id: int("id").autoincrement().primaryKey(),
   title: text("title").notNull(),
-  lang: mysqlEnum("lang", ["ar", "en"]).notNull().default("ar"),
+  lang: mysqlEnum("lang", ["ar", "en", "zh"]).notNull().default("ar"),
   slug: varchar("slug", { length: 255 }).notNull(),
   content: text("content").notNull(),
   excerpt: text("excerpt"),
@@ -111,19 +111,36 @@ export const blogPosts = mysqlTable("blog_posts", {
   tags: text("tags"),
   featured: int("featured").default(0),
   published: int("published").default(0),
+  status: mysqlEnum("status", ["draft", "published", "archived"]).default("draft"),
+  // Arabic fields
   titleAr: text("titleAr"),
-  titleEn: text("titleEn"),
   contentAr: text("contentAr"),
-  contentEn: text("contentEn"),
   excerptAr: text("excerptAr"),
-  excerptEn: text("excerptEn"),
   categoryAr: varchar("categoryAr", { length: 100 }),
+  // English fields
+  titleEn: text("titleEn"),
+  contentEn: text("contentEn"),
+  excerptEn: text("excerptEn"),
   categoryEn: varchar("categoryEn", { length: 100 }),
+  // Chinese fields
+  titleZh: text("titleZh"),
+  contentZh: text("contentZh"),
+  excerptZh: text("excerptZh"),
+  categoryZh: varchar("categoryZh", { length: 100 }),
+  // SEO fields
+  metaDescription: varchar("metaDescription", { length: 160 }),
+  metaKeywords: text("metaKeywords"),
+  featuredImage: text("featuredImage"),
+  viewCount: int("viewCount").default(0),
+  publishedAt: timestamp("publishedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => {
   return {
     langSlugIdx: uniqueIndex("blog_posts_lang_slug_idx").on(table.lang, table.slug),
+    publishedIdx: index("blog_posts_published_idx").on(table.published),
+    categoryIdx: index("blog_posts_category_idx").on(table.category),
+    authorIdx: index("blog_posts_author_idx").on(table.authorId),
   };
 });
 
