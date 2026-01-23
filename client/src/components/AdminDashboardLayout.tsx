@@ -45,16 +45,14 @@ export default function AdminDashboardLayout({
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
   }, [sidebarWidth]);
 
-  if (loading) return <DashboardLayoutSkeleton />;
+  useEffect(() => {
+    if (!loading && (!user || user.role !== 'admin')) {
+      setLocation("/login");
+    }
+  }, [user, loading, setLocation]);
 
-  if (!user || user.role !== 'admin') {
-    useEffect(() => {
-      if (!loading && (!user || user.role !== 'admin')) {
-        setLocation("/login");
-      }
-    }, [user, loading, setLocation]);
-    return null;
-  }
+  if (loading) return <DashboardLayoutSkeleton />;
+  if (!user || user.role !== 'admin') return null;
 
   return (
     <SidebarProvider style={{ "--sidebar-width": `${sidebarWidth}px` } as CSSProperties}>
