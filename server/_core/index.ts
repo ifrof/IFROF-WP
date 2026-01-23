@@ -11,6 +11,8 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { apiLimiter, sanitizeInput, securityHeaders } from "./middleware";
 import { authRateLimiter } from "./auth-rate-limiter";
+import { errorHandler } from "../middleware/error-handler";
+import { apiLimiter as newApiLimiter, authLimiter } from "../middleware/rate-limiter";
 import { ensureCsrfToken, getCsrfTokenHandler } from "./csrf";
 import { httpsRedirect } from "./https-redirect";
 import cookieParser from "cookie-parser";
@@ -92,10 +94,12 @@ async function startServer() {
   app.use(performanceMonitor);
   app.use(ensureCsrfToken);
   app.use("/api", apiLimiter);
+  app.use("/api/v2", newApiLimiter);
   
   // Stricter rate limiting for auth endpoints
   app.use("/api/oauth", authRateLimiter);
   app.use("/api/trpc/auth", authRateLimiter);
+  app.use("/api/trpc/twoFactorAuth", authLimiter);
   
   // CSRF token endpoint
   app.get("/api/csrf-token", getCsrfTokenHandler);
@@ -127,6 +131,7 @@ async function startServer() {
   
   // Error tracking middleware (must be last)
   app.use(errorTracker);
+  app.use(errorHandler);
 
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);
