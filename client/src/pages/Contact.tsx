@@ -32,7 +32,7 @@ export default function Contact() {
             </div>
             <div>
               <h3 className="font-bold">{language === "ar" ? "الهاتف" : "Phone"}</h3>
-              <p className="text-muted-foreground">+86 123 4567 890</p>
+              <p className="text-muted-foreground">{language === "ar" ? "متاح عبر البريد الإلكتروني" : "Available via email"}</p>
             </div>
           </div>
 

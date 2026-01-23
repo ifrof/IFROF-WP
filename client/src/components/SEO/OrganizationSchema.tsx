@@ -10,7 +10,7 @@ export default function OrganizationSchema() {
     description: 'Direct import platform connecting global buyers with verified Chinese manufacturers.',
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+86-400-XXX-XXXX',
+      // telephone: '+86-XXX-XXXX-XXXX',
       contactType: 'Customer Service',
       email: 'support@ifrof.com',
       availableLanguage: ['English', 'Arabic', 'Chinese']
