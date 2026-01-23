@@ -3,6 +3,7 @@ import MetaTags from '../components/SEO/MetaTags';
 import BreadcrumbSchema from '../components/SEO/BreadcrumbSchema';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from "@/contexts/LanguageContext";
+import { BackButton } from "@/components/BackButton";
 import {
   Accordion,
   AccordionContent,
@@ -60,6 +61,7 @@ export default function FAQ() {
 
   return (
     <div className="container mx-auto px-4 py-12">
+      <BackButton />
       <MetaTags seo={seo} />
       <BreadcrumbSchema items={[
         { name: language === 'ar' ? 'الرئيسية' : 'Home', url: 'https://ifrof.com' },

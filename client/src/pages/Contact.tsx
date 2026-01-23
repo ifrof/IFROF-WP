@@ -3,12 +3,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Mail, Phone, MapPin } from "lucide-react";
+import { BackButton } from "@/components/BackButton";
 
 export default function Contact() {
   const { language } = useLanguage();
 
   return (
     <div className="container mx-auto px-4 py-12">
+      <BackButton />
       <h1 className="text-4xl font-bold mb-8 text-center">
         {language === "ar" ? "اتصل بنا" : "Contact Us"}
       </h1>

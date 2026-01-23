@@ -22,10 +22,13 @@ import {
 import { OAuthLoginButton } from "@/components/OAuthLoginButton";
 import { getOAuthLoginUrl, isOAuthConfigured } from "@/config/env";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, ArrowLeft, ArrowRight, Moon, Sun } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
+import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Button } from "@/components/ui/button";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Page 1", path: "/" },
@@ -110,6 +113,8 @@ function DashboardLayoutContent({
   setSidebarWidth,
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const { language, dir } = useLanguage();
   const [location, setLocation] = useLocation();
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -260,7 +265,24 @@ function DashboardLayoutContent({
             </div>
           </div>
         )}
-        <main className="flex-1 p-4">{children}</main>
+        <main className="flex-1 p-4">
+          <div className="flex items-center justify-between mb-6">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => window.history.back()}
+              className="flex items-center gap-2"
+            >
+              {dir === "rtl" ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
+              <span>{language === "ar" ? "رجوع" : "Back"}</span>
+            </Button>
+            
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full">
+              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+          </div>
+          {children}
+        </main>
       </SidebarInset>
     </>
   );

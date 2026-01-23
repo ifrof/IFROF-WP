@@ -118,7 +118,13 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
+  
+  /* Ensure dark mode applies to all elements */
+  .dark body {
+    background-color: var(--background);
+    color: var(--foreground);
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),

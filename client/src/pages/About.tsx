@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Globe, Users, Zap, Shield, Target } from "lucide-react";
 import { Link } from "wouter";
+import { BackButton } from "@/components/BackButton";
 
 export default function About() {
   const { t, language, dir } = useLanguage();
@@ -32,6 +33,9 @@ export default function About() {
 
   return (
     <div className="min-h-screen bg-background" dir={dir}>
+      <div className="max-w-6xl mx-auto px-4 pt-6">
+        <BackButton />
+      </div>
       {/* Hero */}
       <div className="bg-gradient-to-r from-[#1e3a5f] to-[#2a4a6f] text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
