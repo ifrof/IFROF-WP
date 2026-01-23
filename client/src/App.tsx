@@ -37,6 +37,7 @@ import Pricing from "@/pages/Pricing";
 import About from "@/pages/About";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Terms from "@/pages/Terms";
+import Contact from "@/pages/Contact";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import VerifyFactory from "@/pages/VerifyFactory";
@@ -119,6 +120,7 @@ function Router() {
       <Route path={"/about"} component={About} />
       <Route path={"/privacy"} component={PrivacyPolicy} />
       <Route path={"/terms"} component={Terms} />
+      <Route path={"/contact"} component={Contact} />
       <Route path={"/login"} component={Login} />
       <Route path={"/register"} component={Register} />
       <Route path={"/verify-factory"} component={VerifyFactory} />
