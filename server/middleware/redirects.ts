@@ -3,7 +3,8 @@ import { Request, Response, NextFunction } from 'express';
 // Simple in-memory redirects for now, can be extended to use DB
 const redirects: Record<string, string> = {
   '/old-products': '/shop/products',
-  '/manufacturers': '/marketplace'
+  '/manufacturers': '/marketplace',
+  '/ai-search': '/factory-investigator'
 };
 
 export function redirectMiddleware(req: Request, res: Response, next: NextFunction) {
