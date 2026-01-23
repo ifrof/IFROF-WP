@@ -15,8 +15,8 @@ const pageTranslations = {
     manufacturers: 'المصانع',
     importRequest: 'طلب استيراد',
     poweredByAI: 'مدعوم بالذكاء الاصطناعي',
-    title: 'نظام التحقق الذكي من المصانع',
-    subtitle: 'ابحث عن الموردين الصينيين وتحقق من هويتهم الحقيقية (مصنع مباشر أم شركة تجارية) في ثوانٍ معدودة.',
+    title: 'ابحث عن المصنع الحقيقي (تجاوز الوسطاء)',
+    subtitle: 'توقف عن دفع العمولات للوسطاء. نستخدم الذكاء الاصطناعي للوصول إلى المصنع الصيني الحقيقي مباشرة.',
     productOrFactory: 'اسم المنتج أو المصنع',
     productPlaceholder: 'مثال: مصنع أثاث مكتبي في فوشان...',
     category: 'الفئة الصناعية',
@@ -48,8 +48,8 @@ const pageTranslations = {
     manufacturers: 'Manufacturers',
     importRequest: 'Import Request',
     poweredByAI: 'Powered by AI',
-    title: 'AI Factory Verification System',
-    subtitle: 'Search for Chinese suppliers and verify their true identity (direct factory or trading company) in seconds.',
+    title: 'Find Real Factory (Kill the Middleman)',
+    subtitle: 'Stop paying middleman commissions. We use AI to reach the real Chinese factory directly.',
     productOrFactory: 'Product or Factory Name',
     productPlaceholder: 'Example: Office furniture factory in Foshan...',
     category: 'Industrial Category',
@@ -181,9 +181,9 @@ export default function AISearch() {
                   {t.manufacturers}
                 </Button>
               </Link>
-              <Link href="/ai-search">
+              <Link href="/find-factory">
                 <Button variant="outline" size="sm">
-                  {language === 'ar' ? 'المحقق الذكي' : 'AI Investigator'}
+                  {language === 'ar' ? 'ابحث عن المصنع الحقيقي' : 'Find Real Factory'}
                 </Button>
               </Link>
               <Link href="/import-request">

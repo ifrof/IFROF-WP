@@ -94,8 +94,8 @@ export default function Home() {
               <Link href="/marketplace" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
                 {language === 'ar' ? 'السوق' : 'Marketplace'}
               </Link>
-              <Link href="/ai-search" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
-                {language === 'ar' ? 'المحقق الذكي' : 'AI Investigator'}
+              <Link href="/find-factory" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
+                {language === 'ar' ? 'ابحث عن المصنع الحقيقي' : 'Find Real Factory'}
               </Link>
               <Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
                 {language === 'ar' ? 'المدونة' : 'Blog'}
@@ -113,19 +113,19 @@ export default function Home() {
               <ThemeToggle />
               <LanguageSwitcher />
               
-              {!isAuthenticated ? (
-                <Link href="/login">
-                  <Button variant="ghost" className="hidden sm:flex">
-                    {safeT('nav.login')}
-                  </Button>
-                </Link>
-              ) : (
-                <Link href={user?.role === 'factory' ? '/dashboard/factory' : '/dashboard/buyer'}>
-                  <Button variant="ghost" className="hidden sm:flex">
-                    {safeT('nav.dashboard')}
-                  </Button>
-                </Link>
-              )}
+	              {!isAuthenticated ? (
+	                <Link href="/login">
+	                  <Button variant="ghost" className="hidden sm:flex">
+	                    {safeT('nav.login')}
+	                  </Button>
+	                </Link>
+	              ) : (
+	                <Link href={user?.role === 'admin' ? '/admin' : (user?.role === 'factory' ? '/factory' : '/dashboard/buyer')}>
+	                  <Button variant="ghost" className="hidden sm:flex">
+	                    {safeT('nav.dashboard')}
+	                  </Button>
+	                </Link>
+	              )}
 
               <Link href="/import-request">
                 <Button className="bg-[#ff8c42] hover:bg-[#e67a35] text-white font-semibold shadow-lg shadow-orange-200/20">

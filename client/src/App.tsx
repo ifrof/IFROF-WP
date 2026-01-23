@@ -85,7 +85,7 @@ function Router() {
       <Route path={"/blog"} component={Blog} />
       <Route path={"/blog/:slug"} component={BlogPostDetail} />
       <Route path={"/blog-editor"} component={BlogEditor} />
-      <Route path={"/ai-search"} component={AISearch} />
+      <Route path={"/find-factory"} component={AISearch} />
       <Route path={"/import-request"} component={ImportRequest} />
       <Route path={"/marketplace"} component={Marketplace} />
       <Route path={"/products"} component={ProductSearch} />
@@ -97,7 +97,6 @@ function Router() {
       <Route path={"/checkout"} component={CheckoutImproved} />
       <Route path={"/orders"} component={Orders} />
       <Route path={"/orders/:orderId"} component={OrderDetail} />
-      <Route path={"/dashboard/factory"} component={FactoryDashboard} />
       <Route path={"/factory"} component={FactoryDashboard} />
       <Route path={"/factory/listings"} component={FactoryListings} />
       <Route path={"/factory/orders"} component={FactoryOrders} />
@@ -110,7 +109,6 @@ function Router() {
       <Route path={"/buyer/requests/:id"} component={BuyerRequestDetail} />
       <Route path={"/buyer/orders"} component={BuyerOrders} />
       <Route path={"/buyer/profile"} component={Profile} />
-      <Route path={"/dashboard/admin"} component={AdminDashboard} />
       <Route path={"/admin"} component={AdminDashboard} />
       <Route path={"/admin/users"} component={AdminUsers} />
       <Route path={"/admin/factories"} component={AdminFactories} />
