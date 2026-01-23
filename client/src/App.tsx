@@ -144,7 +144,7 @@ function App() {
   return (
     <ErrorBoundary>
       <HelmetProvider>
-        <ThemeProvider defaultTheme="light">
+        <ThemeProvider defaultTheme="light" switchable={true}>
           <LanguageProvider>
             <AppContent />
           </LanguageProvider>

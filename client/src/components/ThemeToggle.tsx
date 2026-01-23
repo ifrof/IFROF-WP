@@ -4,7 +4,7 @@ import { Moon, Sun } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const { language } = useLanguage();
 
   return (
@@ -12,7 +12,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       className="w-10 h-10 rounded-full"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={toggleTheme}
       aria-label={
         language === "ar"
           ? "تبديل الوضع الليلي"
