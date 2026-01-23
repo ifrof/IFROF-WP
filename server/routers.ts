@@ -26,6 +26,8 @@ import { mapsRouter } from "./routers/maps";
 import { adminRouter } from "./routers/admin";
 import { factoryVerificationRouter } from "./routers/factoryVerification";
 import { twoFactorAuthRouter } from "./routers/two-factor-auth";
+import { newsletterRouter } from "./routers/newsletter";
+import { adminActionsRouter } from "./routers/admin-actions";
 
 export const appRouter = router({
   system: systemRouter,
@@ -68,6 +70,8 @@ export const appRouter = router({
   admin: adminRouter,
   factoryVerification: factoryVerificationRouter,
   twoFactorAuth: twoFactorAuthRouter,
+  newsletter: newsletterRouter,
+  adminActions: adminActionsRouter,
 });
 
 export type AppRouter = typeof appRouter;
