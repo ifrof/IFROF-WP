@@ -29,6 +29,7 @@ import BreadcrumbSchema from "../components/SEO/BreadcrumbSchema";
 import { staticPagesSEO } from "../../../server/config/seo-config";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Footer } from "@/components/Footer";
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
@@ -235,30 +236,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-card border-t py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">IF</span>
-            </div>
-            <span className="font-bold text-lg">IFROF</span>
-          </div>
-          <p className="text-muted-foreground text-sm mb-8 max-w-md mx-auto">
-            {language === "ar" 
-              ? "المنصة الرائدة لربط المشترين العالميين بالمصانع الصينية الموثوقة." 
-              : "The leading platform connecting global buyers with verified Chinese manufacturers."}
-          </p>
-          <div className="flex justify-center gap-6 text-sm font-medium mb-8">
-            <Link href="/about" className="hover:text-primary">{language === "ar" ? "عن المنصة" : "About"}</Link>
-            <Link href="/terms" className="hover:text-primary">{language === "ar" ? "الشروط" : "Terms"}</Link>
-            <Link href="/privacy" className="hover:text-primary">{language === "ar" ? "الخصوصية" : "Privacy"}</Link>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} IFROF. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

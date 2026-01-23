@@ -24,6 +24,8 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import AdminUsers from "@/pages/AdminUsers";
 import AdminFactories from "@/pages/AdminFactories";
 import AdminRequests from "@/pages/AdminRequests";
+import AdminUserManagement from "@/pages/AdminUserManagement";
+import AdminFactoryVerification from "@/pages/AdminFactoryVerification";
 import FactoryListings from "@/pages/FactoryListings";
 import FactoryOrders from "@/pages/FactoryOrders";
 import FactoryRequestDetail from "@/pages/FactoryRequestDetail";
@@ -113,6 +115,8 @@ function Router() {
       <Route path={"/admin/users"} component={AdminUsers} />
       <Route path={"/admin/factories"} component={AdminFactories} />
       <Route path={"/admin/requests"} component={AdminRequests} />
+      <Route path={"/admin/users-manage"} component={AdminUserManagement} />
+      <Route path={"/admin/factory-verification"} component={AdminFactoryVerification} />
       <Route path={"/support"} component={Support} />
       <Route path={"/maps"} component={Maps} />
       <Route path={"/how-it-works"} component={HowItWorks} />
