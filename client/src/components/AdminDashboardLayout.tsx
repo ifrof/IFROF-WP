@@ -21,8 +21,8 @@ import {
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/useMobile";
 import { LayoutDashboard, LogOut, PanelLeft, Users, Factory, FileText, Settings, Home, ShieldCheck } from "lucide-react";
-import { CSSProperties, useEffect, useRef, useState } from "react";
-import { useLocation, Link } from "wouter";
+import { CSSProperties, useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -38,9 +38,11 @@ export default function AdminDashboardLayout({
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
+  
   const { loading, user } = useAuth();
   const [, setLocation] = useLocation();
 
+  // Always run effects at the top level
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
   }, [sidebarWidth]);
@@ -51,8 +53,15 @@ export default function AdminDashboardLayout({
     }
   }, [user, loading, setLocation]);
 
-  if (loading) return <DashboardLayoutSkeleton />;
-  if (!user || user.role !== 'admin') return null;
+  // Use a single return for the loading state to keep hook order consistent
+  if (loading) {
+    return <DashboardLayoutSkeleton />;
+  }
+
+  // If not admin, don't render content but still maintain hook consistency by not returning early before hooks
+  if (!user || user.role !== 'admin') {
+    return null;
+  }
 
   return (
     <SidebarProvider style={{ "--sidebar-width": `${sidebarWidth}px` } as CSSProperties}>
@@ -75,16 +84,16 @@ function AdminDashboardLayoutContent({
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
   const isMobile = useIsMobile();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "Overview", path: "/admin" },
-    { icon: Users, label: "Manage Users", path: "/admin/users" },
-    { icon: Factory, label: "Manage Factories", path: "/admin/factories" },
-    { icon: FileText, label: "Manage Requests", path: "/admin/requests" },
-    { icon: ShieldCheck, label: "Permissions", path: "/admin/permissions" },
-    { icon: Settings, label: "System Settings", path: "/admin/settings" },
-    { icon: Home, label: t("nav.home"), path: "/" },
+    { icon: LayoutDashboard, label: language === 'ar' ? "نظرة عامة" : "Overview", path: "/admin" },
+    { icon: Users, label: language === 'ar' ? "إدارة المستخدمين" : "Manage Users", path: "/admin/users" },
+    { icon: Factory, label: language === 'ar' ? "إدارة المصانع" : "Manage Factories", path: "/admin/factories" },
+    { icon: FileText, label: language === 'ar' ? "إدارة الطلبات" : "Manage Requests", path: "/admin/requests" },
+    { icon: ShieldCheck, label: language === 'ar' ? "الصلاحيات" : "Permissions", path: "/admin/permissions" },
+    { icon: Settings, label: language === 'ar' ? "إعدادات النظام" : "Settings", path: "/admin/settings" },
+    { icon: Home, label: language === 'ar' ? "الرئيسية" : "Home", path: "/" },
   ];
 
   const activeMenuItem = menuItems.find(item => location === item.path);
