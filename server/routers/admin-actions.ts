@@ -48,21 +48,21 @@ export const adminActionsRouter = router({
   getPendingVerifications: adminProcedure.query(async () => {
     const db = await getDb();
     return await db.select()
-      .from(schema.factoryProfiles)
-      .where(eq(schema.factoryProfiles.verificationStatus, "pending"));
+      .from(schema.factories)
+      .where(eq(schema.factories.verificationStatus, "pending"));
   }),
 
   approveFactory: adminProcedure
     .input(z.object({ factoryId: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      await db.update(schema.factoryProfiles)
+      await db.update(schema.factories)
         .set({ 
           verificationStatus: "verified", 
           verifiedAt: new Date(),
           updatedAt: new Date() 
         })
-        .where(eq(schema.factoryProfiles.id, input.factoryId));
+        .where(eq(schema.factories.id, input.factoryId));
       return { success: true };
     }),
 });

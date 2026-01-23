@@ -1,11 +1,13 @@
-import { TRPCError } from "@trpc/server";
-import { middleware } from "./trpc";
+import { TRPCError, initTRPC } from "@trpc/server";
+import type { TrpcContext } from "./context";
+
+const t = initTRPC.context<TrpcContext>().create();
 
 /**
  * Strict Role-Based Access Control Middleware
  */
 export const isRole = (roles: ("admin" | "factory" | "buyer")[]) => 
-  middleware(async ({ ctx, next }) => {
+  t.middleware(async ({ ctx, next }) => {
     if (!ctx.user) {
       throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be logged in" });
     }
