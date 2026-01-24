@@ -23,6 +23,7 @@ import path from "path";
 import fs from "fs";
 import { performanceMonitor, errorTracker } from "./performance-monitor";
 import { healthCheck, metricsEndpoint } from "./health-check";
+import { aiRateLimiter, aiDailyCap, requireAuth } from "../middleware/ai-guardrails"; // NEW
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -101,6 +102,9 @@ async function startServer() {
   app.use("/api/trpc/auth", authRateLimiter);
   app.use("/api/trpc/twoFactorAuth", authLimiter);
   
+  // AI Guardrails: Auth, Rate Limit, Daily Cap
+  app.use("/api/trpc/aiAgent", requireAuth, aiRateLimiter, aiDailyCap); // NEW
+
   // CSRF token endpoint
   app.get("/api/csrf-token", getCsrfTokenHandler);
   
