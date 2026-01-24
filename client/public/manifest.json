@@ -24,7 +24,15 @@
     }
   ],
   "dir": "auto",
-  "lang": "en-US",
+  "lang": "ar",
   "orientation": "any",
-  "categories": ["business", "shopping"]
+  "categories": ["business", "shopping"],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "label": "IFROF Platform Home"
+    }
+  ]
 }
