@@ -70,7 +70,7 @@ export default function Home() {
             </div>
 
             <div className="hidden md:flex items-center gap-6">
-              <Link href="/marketplace" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
+              <Link href="/factory" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
                 {language === 'ar' ? 'السوق' : 'Marketplace'}
               </Link>
               <Link href="/find-factory" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">

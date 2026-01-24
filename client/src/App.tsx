@@ -32,6 +32,14 @@ const Contact = lazy(() => import("@/pages/Contact"));
 const Login = lazy(() => import("@/pages/Login"));
 const Register = lazy(() => import("@/pages/Register"));
 const Profile = lazy(() => import("@/pages/Profile"));
+const About = lazy(() => import("@/pages/About"));
+const Terms = lazy(() => import("@/pages/Terms"));
+const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
+const PublicFactoryListings = lazy(() => import("@/pages/PublicFactoryListings"));
+const FactoryPublicProfile = lazy(() => import("@/pages/FactoryPublicProfile"));
+const VerifyFactory = lazy(() => import("@/pages/VerifyFactory"));
+const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
+const Cart = lazy(() => import("@/pages/Cart"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 function AppContent() {
@@ -54,7 +62,7 @@ function AppContent() {
           <Route path="/blog/:slug" component={BlogPostDetail} />
           <Route path="/find-factory" component={AISearch} />
           <Route path="/import-request" component={ImportRequest} />
-          <Route path="/marketplace" component={Marketplace} />
+          <Route path="/factory" component={Marketplace} />
           <Route path="/products" component={ProductSearch} />
           <Route path="/products/:id" component={ProductDetail} />
           <Route path="/faq" component={FAQ} />
@@ -65,6 +73,14 @@ function AppContent() {
           <Route path="/my-factory" component={FactoryDashboard} />
           <Route path="/buyer" component={BuyerDashboard} />
           <Route path="/profile" component={Profile} />
+          <Route path="/about" component={About} />
+          <Route path="/terms" component={Terms} />
+          <Route path="/privacy" component={PrivacyPolicy} />
+          <Route path="/factories" component={PublicFactoryListings} />
+          <Route path="/factories/:id" component={FactoryPublicProfile} />
+          <Route path="/verify-factory" component={VerifyFactory} />
+          <Route path="/forgot-password" component={ForgotPassword} />
+          <Route path="/cart" component={Cart} />
           <Route component={NotFound} />
         </Switch>
       </Suspense>

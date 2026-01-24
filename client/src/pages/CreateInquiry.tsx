@@ -186,7 +186,7 @@ export default function CreateInquiry() {
               </div>
 
               <div className="flex gap-2 justify-end pt-4">
-                <Button type="button" variant="outline" onClick={() => navigate("/marketplace")}>
+                <Button type="button" variant="outline" onClick={() => navigate("/factory")}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={createInquiryMutation.isPending}>

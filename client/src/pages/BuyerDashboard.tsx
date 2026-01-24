@@ -115,7 +115,7 @@ export default function BuyerDashboard() {
             </Card>
           </Link>
 
-          <Link href="/marketplace">
+          <Link href="/factory">
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardContent className="pt-6 text-center">
                 <Package className="w-12 h-12 mx-auto text-green-600 mb-2" />
@@ -124,7 +124,7 @@ export default function BuyerDashboard() {
             </Card>
           </Link>
 
-          <Link href="/ai-search">
+          <Link href="/find-factory">
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardContent className="pt-6 text-center">
                 <MessageSquare className="w-12 h-12 mx-auto text-purple-600 mb-2" />
@@ -195,7 +195,7 @@ export default function BuyerDashboard() {
                   <div className="text-center py-8">
                     <Package className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                     <p className="text-muted-foreground mb-4">{t("dashboard.buyer.noOrders")}</p>
-                    <Link href="/marketplace">
+                    <Link href="/factory">
                       <Button>{t("dashboard.buyer.startShopping")}</Button>
                     </Link>
                   </div>

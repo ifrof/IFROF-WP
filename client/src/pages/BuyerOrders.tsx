@@ -18,7 +18,7 @@ export default function BuyerOrders() {
               Track and manage your orders from Chinese manufacturers.
             </p>
           </div>
-          <Link href="/marketplace">
+          <Link href="/factory">
             <Button className="gap-2">
               <ShoppingBag className="h-4 w-4" />
               {t("dashboard.buyer.browseProducts")}
@@ -35,7 +35,7 @@ export default function BuyerOrders() {
             <p className="text-muted-foreground max-w-xs mx-auto mb-6">
               Your order history is empty. Browse the marketplace to find products and start your first order.
             </p>
-            <Link href="/marketplace">
+            <Link href="/factory">
               <Button variant="outline">{t("dashboard.buyer.startShopping")}</Button>
             </Link>
           </CardContent>

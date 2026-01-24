@@ -51,7 +51,7 @@ export default function Marketplace() {
               </div>
             </Link>
             <div className="flex items-center gap-3">
-              <Link href="/ai-search">
+              <Link href="/find-factory">
                 <Button variant="outline" size="sm">
                   {language === 'ar' ? 'محقق المصانع' : 'Factory Investigator'}
                 </Button>

@@ -272,7 +272,7 @@ export default function Profile() {
                       <ShoppingBag className="mx-auto h-12 w-12 text-gray-300 mb-4" />
                       <p className="text-gray-500">You haven't placed any orders yet.</p>
                       <Button asChild variant="link" className="mt-2">
-                        <Link to="/marketplace">Start Shopping</Link>
+                        <Link to="/factory">Start Shopping</Link>
                       </Button>
                     </div>
                   )}
