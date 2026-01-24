@@ -38,7 +38,7 @@ async function secureAdminPurge() {
     // 2. Generate high-entropy credentials
     const newAdminEmail = `admin_${crypto.randomBytes(4).toString('hex')}@ifrof.com`;
     const newAdminPassword = crypto.randomBytes(24).toString('base64'); // Extremely strong password
-    const hashedPassword = await bcrypt.hash(newAdminPassword, 12); // Higher salt rounds for better security
+    const hashedPassword = await bcrypt.hash(newAdminPassword, 10); // Standard salt rounds used in auth-complete.ts
     const openId = crypto.randomBytes(32).toString('hex'); // High entropy OpenID
 
     console.log("[Security] Creating new secure admin account...");
