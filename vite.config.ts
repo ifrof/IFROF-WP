@@ -5,14 +5,13 @@ import fs from "node:fs";
 import path from "path";
 import { defineConfig } from "vite";
 import viteCompression from 'vite-plugin-compression';
-import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
+
 
 
 const plugins = [
   react(), 
   tailwindcss(), 
   jsxLocPlugin(), 
-  vitePluginManusRuntime(),
   viteCompression({
     algorithm: 'brotliCompress',
     ext: '.br',
