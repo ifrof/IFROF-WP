@@ -55,6 +55,10 @@ async function startServer() {
   // Trust the first proxy hop so rate limiting uses the real client IP.
   app.set("trust proxy", 1);
   
+  // Health check endpoint - MUST be first for Railway deployment
+  app.get("/api/health", healthCheck);
+  app.get("/api/metrics", metricsEndpoint);
+  
   // Force HTTPS in production
   app.use(httpsRedirect);
 
@@ -130,10 +134,6 @@ async function startServer() {
 
   // CSRF token endpoint
   app.get("/api/csrf-token", getCsrfTokenHandler);
-  
-  // Health check and metrics endpoints
-  app.get("/api/health", healthCheck);
-  app.get("/api/metrics", metricsEndpoint);
   
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
