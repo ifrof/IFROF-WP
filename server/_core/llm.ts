@@ -211,13 +211,8 @@ const normalizeToolChoice = (
 
 /**
  * Resolves the API URL and key based on available environment variables.
- * Priority:
- * 1. Forge API (BUILT_IN_FORGE_API_URL + BUILT_IN_FORGE_API_KEY)
- * 2. Groq API (GROQ_API_KEY) - Free tier
- * 3. OpenAI API (OPENAI_API_KEY)
  */
 const resolveApiConfig = (): { url: string; key: string; model: string } => {
-  // 1. Try Forge API first (internal)
   if (ENV.forgeApiUrl && ENV.forgeApiKey) {
     return {
       url: `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`,
@@ -226,17 +221,15 @@ const resolveApiConfig = (): { url: string; key: string; model: string } => {
     };
   }
 
-  // 2. Try Groq API (free tier)
   const groqKey = process.env.GROQ_API_KEY;
   if (groqKey) {
     return {
       url: "https://api.groq.com/openai/v1/chat/completions",
       key: groqKey,
-      model: "llama-3.3-70b-versatile", // Free tier model with good capabilities
+      model: "llama-3.3-70b-versatile",
     };
   }
 
-  // 3. Try OpenAI API
   const openaiKey = process.env.OPENAI_API_KEY;
   if (openaiKey) {
     return {
@@ -308,6 +301,8 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     output_schema,
     responseFormat,
     response_format,
+    maxTokens,
+    max_tokens,
   } = params;
 
   const payload: Record<string, unknown> = {
@@ -327,9 +322,9 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 8192;
+  // Guard: Dynamic max_tokens enforcement
+  payload.max_tokens = maxTokens || max_tokens || 1000;
 
-  // Handle response format - Groq supports json_object but not json_schema
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
     response_format,
@@ -338,10 +333,8 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   });
 
   if (normalizedResponseFormat) {
-    // For Groq, convert json_schema to json_object since Groq doesn't support json_schema
     if (normalizedResponseFormat.type === "json_schema" && apiConfig.url.includes("groq.com")) {
       payload.response_format = { type: "json_object" };
-      // Add schema instructions to the system message
       const schemaInstructions = `\n\nYou MUST respond with valid JSON that matches this exact schema:\n${JSON.stringify(normalizedResponseFormat.json_schema.schema, null, 2)}`;
       const systemMsg = payload.messages as any[];
       if (systemMsg.length > 0 && systemMsg[0].role === 'system') {
@@ -374,6 +367,10 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   }
 
   const result = (await response.json()) as InvokeResult;
-  console.log(`[LLM] Success: ${result.usage?.total_tokens || 'N/A'} tokens used`);
+  
+  // Guard: Detailed token logging
+  const usage = result.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+  console.log(`[LLM] Success: ${usage.total_tokens} tokens used (In: ${usage.prompt_tokens}, Out: ${usage.completion_tokens})`);
+  
   return result;
 }
