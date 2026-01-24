@@ -18,13 +18,30 @@ export async function validateConfig() {
   // 2. Redis Validation
   const redis = getRedisClient();
   if (!redis) {
-    throw new Error("FATAL: Redis connection failed or REDIS_URL missing");
-  }
-  try {
-    await redis.ping();
-    console.log("[Hardening] Redis connected + rate limiter active");
-  } catch (err) {
-    throw new Error(`FATAL: Redis ping failed: ${err}`);
+    console.warn("[Hardening] REDIS_URL is missing. Rate limiting will be disabled.");
+  } else {
+    try {
+      // Wait for connection if it's still connecting
+      if (redis.status === 'connecting' || redis.status === 'wait') {
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => reject(new Error("Redis connection timeout")), 5000);
+          redis.once('ready', () => {
+            clearTimeout(timeout);
+            resolve(true);
+          });
+          redis.once('error', (err) => {
+            clearTimeout(timeout);
+            reject(err);
+          });
+        });
+      }
+      await redis.ping();
+      console.log("[Hardening] Redis connected + rate limiter active");
+    } catch (err) {
+      console.error(`[Hardening] Redis validation failed: ${err}. Rate limiting will be disabled.`);
+      // We don't throw here to allow the server to start if Redis is temporarily down, 
+      // but the rate limiter middleware will handle the null client.
+    }
   }
 
   // 3. Stripe Validation
@@ -58,19 +75,22 @@ export async function validateConfig() {
   // 4. Database Hardening Validation
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
-    throw new Error("FATAL: DATABASE_URL is missing");
-  }
+    console.warn("[Hardening] DATABASE_URL is missing. Using JSON mode.");
+  } else {
+    if (dbUrl.includes('user=root') || dbUrl.includes(':root@') || dbUrl.includes('//root:')) {
+      throw new Error("FATAL: DATABASE_URL uses root user. High privileges detected.");
+    }
 
-  if (dbUrl.includes('user=root') || dbUrl.includes(':root@') || dbUrl.includes('//root:')) {
-    throw new Error("FATAL: DATABASE_URL uses root user. High privileges detected.");
-  }
-
-  try {
-    const db = await getDb();
-    if (!db) throw new Error("Database connection returned null");
-    console.log("[Hardening] DB user is not root + connection successful");
-  } catch (err) {
-    throw new Error(`FATAL: Database connection failed: ${err}`);
+    try {
+      const db = await getDb();
+      if (!db) {
+        console.warn("[Hardening] Database connection failed, falling back to JSON mode.");
+      } else {
+        console.log("[Hardening] DB user is not root + connection successful");
+      }
+    } catch (err) {
+      console.error(`[Hardening] Database validation error: ${err}. Falling back to JSON mode.`);
+    }
   }
 
   // 5. CORS Validation
