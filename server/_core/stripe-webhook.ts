@@ -6,11 +6,14 @@ import { eq } from "drizzle-orm";
 import express from "express";
 import { sendOrderConfirmationEmail, sendPaymentFailedEmail } from "./email-service";
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripeMode = process.env.STRIPE_MODE || 'test';
+const stripeSecretKey = stripeMode === 'live' 
+  ? process.env.STRIPE_SECRET_KEY_LIVE 
+  : process.env.STRIPE_SECRET_KEY_TEST;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 if (!stripeSecretKey) {
-  console.warn("WARNING: STRIPE_SECRET_KEY is not set");
+  console.warn(`WARNING: STRIPE_SECRET_KEY_${stripeMode.toUpperCase()} is not set`);
 }
 
 if (!webhookSecret) {

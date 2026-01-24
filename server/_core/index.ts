@@ -24,6 +24,8 @@ import fs from "fs";
 import { performanceMonitor, errorTracker } from "./performance-monitor";
 import { healthCheck, metricsEndpoint } from "./health-check";
 import { aiRateLimiter, aiDailyCap, requireAuth } from "../middleware/ai-guardrails"; // NEW
+import { validateConfig, redisRateLimiter } from "./hardening";
+import cors from "cors";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -45,6 +47,9 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
+  // Run startup validation
+  await validateConfig();
+
   const app = express();
   const server = createServer(app);
   // Trust the first proxy hop so rate limiting uses the real client IP.
@@ -90,6 +95,15 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use(cookieParser());
+  
+  // Hardened CORS
+  app.use(cors({
+    origin: process.env.CORS_ORIGIN || "https://ifrof.com",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "X-CSRF-Token"],
+  }));
+
   app.use(securityHeaders);
   app.use(sanitizeInput);
   app.use(performanceMonitor);
@@ -97,6 +111,15 @@ async function startServer() {
   app.use("/api", apiLimiter);
   app.use("/api/v2", newApiLimiter);
   
+  // Redis-backed Rate Limiting for sensitive routes (10 req/min/IP)
+  const sensitiveRateLimiter = redisRateLimiter({ windowMs: 60 * 1000, maxRequests: 10 });
+  
+  app.use("/api/trpc/aiAgent", sensitiveRateLimiter);
+  app.use("/api/trpc/storage", sensitiveRateLimiter);
+  app.use("/api/trpc/auth", sensitiveRateLimiter);
+  app.use("/api/trpc/payments", sensitiveRateLimiter);
+  app.use("/api/stripe/webhook", sensitiveRateLimiter);
+
   // Stricter rate limiting for auth endpoints
   app.use("/api/oauth", authRateLimiter);
   app.use("/api/trpc/auth", authRateLimiter);
