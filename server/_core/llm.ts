@@ -1,9 +1,33 @@
 import { ENV } from "./env";
-import { TRPCError } from "@trpc/server"; // Import TRPCError for structured error handling
+import { TRPCError } from "@trpc/server";
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
-// ... (Type definitions remain the same) ...
+export type Message = {
+  role: Role;
+  content: string | any[];
+  name?: string;
+  tool_call_id?: string;
+  tool_calls?: any[];
+};
+
+export type Tool = {
+  type: "function";
+  function: {
+    name: string;
+    description?: string;
+    parameters?: any;
+  };
+};
+
+export type ToolChoice = "none" | "auto" | { type: "function"; function: { name: string } };
+
+export type OutputSchema = any;
+
+export type ResponseFormat = {
+  type: "text" | "json_object" | "json_schema";
+  json_schema?: any;
+};
 
 export type InvokeParams = {
   messages: Message[];
@@ -16,15 +40,54 @@ export type InvokeParams = {
   output_schema?: OutputSchema;
   responseFormat?: ResponseFormat;
   response_format?: ResponseFormat;
-  timeoutMs?: number; // NEW: Timeout in milliseconds
+  timeoutMs?: number;
 };
 
-// ... (InvokeResult and other types remain the same) ...
+export type InvokeResult = {
+  choices: {
+    message: Message;
+    finish_reason: string;
+    index: number;
+  }[];
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+};
 
-// ... (Utility functions like ensureArray, normalizeContentPart, normalizeMessage, normalizeToolChoice, resolveApiConfig, normalizeResponseFormat remain the same) ...
+const normalizeMessage = (m: Message) => ({
+  role: m.role,
+  content: m.content,
+  ...(m.name ? { name: m.name } : {}),
+  ...(m.tool_call_id ? { tool_call_id: m.tool_call_id } : {}),
+  ...(m.tool_calls ? { tool_calls: m.tool_calls } : {}),
+});
+
+const normalizeToolChoice = (choice: any, tools?: Tool[]) => {
+  if (!choice) return undefined;
+  if (typeof choice === "string") return choice;
+  return choice;
+};
+
+const normalizeResponseFormat = (params: any) => {
+  const format = params.responseFormat || params.response_format;
+  if (format) return format;
+  const schema = params.outputSchema || params.output_schema;
+  if (schema) {
+    return {
+      type: "json_schema",
+      json_schema: {
+        name: "output",
+        strict: true,
+        schema,
+      },
+    };
+  }
+  return undefined;
+};
 
 const resolveApiConfig = (): { url: string; key: string; model: string } => {
-  // 1. Try Forge API first (internal)
   if (ENV.forgeApiUrl && ENV.forgeApiKey) {
     return {
       url: `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`,
@@ -33,17 +96,15 @@ const resolveApiConfig = (): { url: string; key: string; model: string } => {
     };
   }
 
-  // 2. Try Groq API (free tier)
   const groqKey = process.env.GROQ_API_KEY;
   if (groqKey) {
     return {
       url: "https://api.groq.com/openai/v1/chat/completions",
       key: groqKey,
-      model: "llama-3.3-70b-versatile", // Free tier model with good capabilities
+      model: "llama-3.3-70b-versatile",
     };
   }
 
-  // 3. Try OpenAI API
   const openaiKey = process.env.OPENAI_API_KEY;
   if (openaiKey) {
     return {
@@ -53,14 +114,12 @@ const resolveApiConfig = (): { url: string; key: string; model: string } => {
     };
   }
 
-  throw new Error(
-    "No LLM API key configured. Please set GROQ_API_KEY (free) or OPENAI_API_KEY in environment variables."
-  );
+  throw new Error("No LLM API key configured.");
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   const apiConfig = resolveApiConfig();
-  const startTime = Date.now(); // Start timer
+  const startTime = Date.now();
 
   const {
     messages,
@@ -73,7 +132,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     response_format,
     maxTokens,
     max_tokens,
-    timeoutMs = 20000, // Default LLM timeout to 20s
+    timeoutMs = 20000,
   } = params;
 
   const payload: Record<string, unknown> = {
@@ -85,16 +144,12 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tools = tools;
   }
 
-  const normalizedToolChoice = normalizeToolChoice(
-    toolChoice || tool_choice,
-    tools
-  );
+  const normalizedToolChoice = normalizeToolChoice(toolChoice || tool_choice, tools);
   if (normalizedToolChoice) {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  // Guard: Dynamic max_tokens enforcement
-  payload.max_tokens = maxTokens || max_tokens || 1500; // Default to 1500 tokens
+  payload.max_tokens = maxTokens || max_tokens || 1500;
 
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
@@ -131,7 +186,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
         authorization: `Bearer ${apiConfig.key}`,
       },
       body: JSON.stringify(payload),
-      signal: controller.signal, // AbortController signal
+      signal: controller.signal,
     });
 
     if (!response.ok) {
@@ -147,7 +202,6 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     const duration = Date.now() - startTime;
     const usage = result.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
     
-    // Structured Logging for Cost/Performance
     console.log(JSON.stringify({
       level: 'info',
       message: 'LLM_INVOKE_SUCCESS',
@@ -156,7 +210,6 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
       input_tokens: usage.prompt_tokens,
       output_tokens: usage.completion_tokens,
       total_tokens: usage.total_tokens,
-      cost_estimate: (usage.total_tokens / 1000) * 0.0005, // Hardcoded cost for gpt-4o-mini equivalent
     }));
 
     return result;

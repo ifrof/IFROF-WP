@@ -14,11 +14,19 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE);
   const [mounted, setMounted] = useState(false);
 
-  // Initialize language from localStorage
+  // Initialize language from URL or localStorage
   useEffect(() => {
-    const stored = localStorage.getItem('language') as Language | null;
-    if (stored && (stored === 'ar' || stored === 'en' || stored === 'zh')) {
-      setLanguageState(stored);
+    const params = new URLSearchParams(window.location.search);
+    const langParam = params.get('lang') as Language | null;
+    
+    if (langParam && (langParam === 'ar' || langParam === 'en' || langParam === 'zh')) {
+      setLanguageState(langParam);
+      localStorage.setItem('language', langParam);
+    } else {
+      const stored = localStorage.getItem('language') as Language | null;
+      if (stored && (stored === 'ar' || stored === 'en' || stored === 'zh')) {
+        setLanguageState(stored);
+      }
     }
     setMounted(true);
   }, []);

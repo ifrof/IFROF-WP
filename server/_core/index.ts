@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
-import compression from "compression";
+import shrinkRay from "shrink-ray-current";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStripeWebhook } from "./stripe-webhook";
@@ -80,15 +80,15 @@ async function startServer() {
   // Initialize SEO Cron Jobs
   initializeCronJobs();
   
-  // Enable compression for all responses
-  app.use(compression({
+  // Enable Brotli/Gzip compression for all responses
+  app.use(shrinkRay({
     filter: (req, res) => {
       if (req.headers['x-no-compression']) {
         return false;
       }
-      return compression.filter(req, res);
+      return true;
     },
-    level: 6,
+    threshold: 1024,
   }));
   
   // Configure body parser with larger size limit for file uploads

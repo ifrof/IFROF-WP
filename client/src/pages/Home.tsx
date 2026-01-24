@@ -24,6 +24,7 @@ import {
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import MetaTags from "../components/SEO/MetaTags";
+import { generateStructuredData } from "@/lib/seo";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
@@ -43,13 +44,26 @@ export default function Home() {
 
   const Arrow = dir === 'rtl' ? ArrowLeft : ArrowRight;
 
+  const homeSEO = {
+    title: "IFROF - Verified Chinese Manufacturers & Suppliers",
+    titleAr: "IFROF - مصانع وموردين صينيين موثقين",
+    description: "Connect with verified Chinese manufacturers and suppliers. Find factories, products, and services with confidence.",
+    descriptionAr: "تواصل مع مصانع وموردين صينيين موثقين. ابحث عن المصانع والمنتجات والخدمات بكل ثقة.",
+    keywords: ["Chinese manufacturers", "verified suppliers", "factory verification", "B2B marketplace"],
+    keywordsAr: ["مصانع صينية", "موردين موثقين", "التحقق من المصانع", "سوق B2B"],
+    ogImage: "https://ifrof.com/og-image.png",
+    canonical: "https://ifrof.com/",
+    structuredData: generateStructuredData("Organization", {})
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground" dir={dir}>
+      <MetaTags seo={homeSEO} />
       <nav className={`sticky top-0 z-50 bg-background/95 backdrop-blur-sm transition-shadow ${scrolled ? 'shadow-lg' : 'shadow-sm'} border-b`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#1e3a5f] to-[#ff8c42] rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#1e3a5f] to-[#ff8c42] rounded-xl flex items-center justify-center shadow-lg" role="img" aria-label="IFROF Logo">
                 <span className="text-white font-bold text-lg">IF</span>
               </div>
               <span className="font-bold text-xl text-primary">IFROF</span>

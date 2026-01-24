@@ -119,6 +119,11 @@
   }
   body {
     @apply bg-background text-foreground transition-colors duration-300;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  body.rtl {
+    font-family: 'Noto Sans Arabic', sans-serif;
   }
   
   /* Ensure dark mode applies to all elements */

@@ -6,6 +6,7 @@ import * as schema from "../drizzle/schema";
 import { ENV } from './_core/env';
 import path from "path";
 import fs from "fs";
+import { getCached } from "./utils/cache";
 
 let _db: any = null;
 let isJsonMode = false;
@@ -574,35 +575,37 @@ export async function getProductById(id: number) {
 }
 
 export async function getAllProducts(limit: number = 50, offset: number = 0) {
-  if (!isJsonMode && _db) {
-    try {
-      return await _db.select({
-        id: schema.products.id,
-        nameAr: schema.products.nameAr,
-        nameEn: schema.products.nameEn,
-        nameZh: schema.products.nameZh,
-        category: schema.products.category,
-        minPrice: schema.products.minPrice,
-        maxPrice: schema.products.maxPrice,
-        currency: schema.products.currency,
-        imageUrls: schema.products.imageUrls,
-        factoryId: schema.products.factoryId,
-        minimumOrderQuantity: schema.products.minimumOrderQuantity,
-        featured: schema.products.featured,
-      })
-      .from(schema.products)
-      .where(eq(schema.products.active, 1))
-      .limit(limit)
-      .offset(offset);
-    } catch (e) {
-      console.error("[Database] getAllProducts MySQL error:", e);
+  return getCached(`products:${limit}:${offset}`, async () => {
+    if (!isJsonMode && _db) {
+      try {
+        return await _db.select({
+          id: schema.products.id,
+          nameAr: schema.products.nameAr,
+          nameEn: schema.products.nameEn,
+          nameZh: schema.products.nameZh,
+          category: schema.products.category,
+          minPrice: schema.products.minPrice,
+          maxPrice: schema.products.maxPrice,
+          currency: schema.products.currency,
+          imageUrls: schema.products.imageUrls,
+          factoryId: schema.products.factoryId,
+          minimumOrderQuantity: schema.products.minimumOrderQuantity,
+          featured: schema.products.featured,
+        })
+        .from(schema.products)
+        .where(eq(schema.products.active, 1))
+        .limit(limit)
+        .offset(offset);
+      } catch (e) {
+        console.error("[Database] getAllProducts MySQL error:", e);
+      }
     }
-  }
 
-  const dbData = readJsonDb();
-  return (dbData.products || [])
-    .filter((p: any) => p.active === 1)
-    .slice(offset, offset + limit);
+    const dbData = readJsonDb();
+    return (dbData.products || [])
+      .filter((p: any) => p.active === 1)
+      .slice(offset, offset + limit);
+  }, 3600); // Cache for 1 hour
 }
 
 export async function getProductsByFactory(factoryId: number) {
@@ -1243,22 +1246,24 @@ export async function updateForumAnswer(id: number, data: any) {
 // ============================================================================
 
 export async function getBlogPosts(limit: number, offset: number) {
-  if (!isJsonMode && _db) {
-    try {
-      return await _db.select().from(schema.blogPosts)
-        .where(eq(schema.blogPosts.published, 1))
-        .orderBy(desc(schema.blogPosts.createdAt))
-        .limit(limit)
-        .offset(offset);
-    } catch (e) {
-      console.error("[Database] getBlogPosts MySQL error:", e);
+  return getCached(`blog_posts:${limit}:${offset}`, async () => {
+    if (!isJsonMode && _db) {
+      try {
+        return await _db.select().from(schema.blogPosts)
+          .where(eq(schema.blogPosts.published, 1))
+          .orderBy(desc(schema.blogPosts.createdAt))
+          .limit(limit)
+          .offset(offset);
+      } catch (e) {
+        console.error("[Database] getBlogPosts MySQL error:", e);
+      }
     }
-  }
 
-  const dbData = readJsonDb();
-  return (dbData.blogPosts || [])
-    .filter((p: any) => p.published === 1)
-    .slice(offset, offset + limit);
+    const dbData = readJsonDb();
+    return (dbData.blogPosts || [])
+      .filter((p: any) => p.published === 1)
+      .slice(offset, offset + limit);
+  }, 3600); // Cache for 1 hour
 }
 
 export async function getBlogPostBySlug(slug: string) {

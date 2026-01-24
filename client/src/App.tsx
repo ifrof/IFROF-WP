@@ -12,26 +12,27 @@ import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import GA4 from "./components/Analytics/GA4";
 import GTM from "./components/Analytics/GTM";
-import AIChat from "./components/AIChat";
+import { lazy, Suspense } from "react";
+const AIChat = lazy(() => import("./components/AIChat"));
 
 // Pages
-import Home from "@/pages/Home";
-import Blog from "@/pages/Blog";
-import BlogPostDetail from "@/pages/BlogPostDetail";
-import AISearch from "@/pages/AISearch";
-import ImportRequest from "@/pages/ImportRequest";
-import Marketplace from "@/pages/Marketplace";
-import ProductSearch from "@/pages/ProductSearch";
-import ProductDetail from "@/pages/ProductDetail";
-import FactoryDashboard from "@/pages/FactoryDashboard";
-import BuyerDashboard from "@/pages/BuyerDashboard";
-import AdminDashboard from "@/pages/AdminDashboard";
-import FAQ from "@/pages/FAQ";
-import Contact from "@/pages/Contact";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
-import Profile from "@/pages/Profile";
-import NotFound from "@/pages/NotFound";
+const Home = lazy(() => import("@/pages/Home"));
+const Blog = lazy(() => import("@/pages/Blog"));
+const BlogPostDetail = lazy(() => import("@/pages/BlogPostDetail"));
+const AISearch = lazy(() => import("@/pages/AISearch"));
+const ImportRequest = lazy(() => import("@/pages/ImportRequest"));
+const Marketplace = lazy(() => import("@/pages/Marketplace"));
+const ProductSearch = lazy(() => import("@/pages/ProductSearch"));
+const ProductDetail = lazy(() => import("@/pages/ProductDetail"));
+const FactoryDashboard = lazy(() => import("@/pages/FactoryDashboard"));
+const BuyerDashboard = lazy(() => import("@/pages/BuyerDashboard"));
+const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
+const FAQ = lazy(() => import("@/pages/FAQ"));
+const Contact = lazy(() => import("@/pages/Contact"));
+const Login = lazy(() => import("@/pages/Login"));
+const Register = lazy(() => import("@/pages/Register"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
 
 function AppContent() {
   const { dir, language } = useLanguage();
@@ -46,26 +47,30 @@ function AppContent() {
       <GA4 />
       <GTM />
       <Toaster />
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/blog" component={Blog} />
-        <Route path="/blog/:slug" component={BlogPostDetail} />
-        <Route path="/find-factory" component={AISearch} />
-        <Route path="/import-request" component={ImportRequest} />
-        <Route path="/marketplace" component={Marketplace} />
-        <Route path="/products" component={ProductSearch} />
-        <Route path="/products/:id" component={ProductDetail} />
-        <Route path="/faq" component={FAQ} />
-        <Route path="/contact" component={Contact} />
-        <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
-        <Route path="/admin" component={AdminDashboard} />
-        <Route path="/my-factory" component={FactoryDashboard} />
-        <Route path="/buyer" component={BuyerDashboard} />
-        <Route path="/profile" component={Profile} />
-        <Route component={NotFound} />
-      </Switch>
-      <AIChat />
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/blog" component={Blog} />
+          <Route path="/blog/:slug" component={BlogPostDetail} />
+          <Route path="/find-factory" component={AISearch} />
+          <Route path="/import-request" component={ImportRequest} />
+          <Route path="/marketplace" component={Marketplace} />
+          <Route path="/products" component={ProductSearch} />
+          <Route path="/products/:id" component={ProductDetail} />
+          <Route path="/faq" component={FAQ} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/my-factory" component={FactoryDashboard} />
+          <Route path="/buyer" component={BuyerDashboard} />
+          <Route path="/profile" component={Profile} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
+      <Suspense fallback={null}>
+        <AIChat />
+      </Suspense>
     </TooltipProvider>
   );
 }
