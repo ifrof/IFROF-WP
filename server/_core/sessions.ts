@@ -4,6 +4,7 @@ import type { Request, Response } from "express";
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import type { User } from "../../drizzle/schema";
 import { getSessionCookieOptions } from "./cookies";
+import { lucia } from "./lucia";
 import * as db from "../db";
 
 const getCookieValue = (req: Request, name: string) => {
@@ -23,7 +24,15 @@ export async function createUserSession(
   const maxAgeMs = options.maxAgeMs ?? ONE_YEAR_MS;
   const cookieOptions = getSessionCookieOptions(req);
 
-  // Store sessions in the existing DB-backed sessions table.
+  if (lucia) {
+    const session = await lucia.createSession(String(userId), {});
+    res.cookie(COOKIE_NAME, session.id, {
+      ...cookieOptions,
+      maxAge: maxAgeMs,
+    });
+    return session.id;
+  }
+
   const sessionToken = crypto.randomBytes(32).toString("hex");
   await db.createSession({
     id: sessionToken,
@@ -43,6 +52,10 @@ export async function clearUserSession(req: Request, res: Response) {
     return;
   }
 
+  if (lucia) {
+    await lucia.invalidateSession(sessionId);
+  }
+
   await db.deleteSession(sessionId);
 
   const cookieOptions = getSessionCookieOptions(req);
@@ -53,6 +66,19 @@ export async function getAuthenticatedUser(req: Request): Promise<User | null> {
   const sessionId = getSessionIdFromRequest(req);
   if (!sessionId) {
     return null;
+  }
+
+  if (lucia) {
+    const { session } = await lucia.validateSession(sessionId);
+    if (session?.userId) {
+      const userId = Number(session.userId);
+      if (!Number.isNaN(userId)) {
+        const user = await db.getUserById(userId);
+        if (user) {
+          return user;
+        }
+      }
+    }
   }
 
   const dbSession = await db.getSession(sessionId);

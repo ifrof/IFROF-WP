@@ -1,48 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { trpc } from "@/lib/trpc";
 import { Loader2, Send, Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { nanoid } from "nanoid";
 import { Streamdown } from "streamdown";
+import { useAiChat } from "@/hooks/useAiChat";
 
 export default function Chatbot() {
   const { user, loading: authLoading } = useAuth();
-  const [sessionId, setSessionId] = useState<string>("");
-  const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
-  const [input, setInput] = useState("");
+  const { messages, input, isLoading, setInput, sendMessage, reset } = useAiChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const sendMessageMutation = trpc.chatbot.sendMessage.useMutation();
-  const clearHistoryMutation = trpc.chatbot.clearHistory.useMutation();
-  const { data: chatHistory, refetch: refetchHistory } = trpc.chatbot.getHistory.useQuery(
-    { sessionId },
-    { enabled: !!sessionId }
-  );
-
-  // Initialize session
-  useEffect(() => {
-    if (!sessionId) {
-      setSessionId(nanoid());
-    }
-  }, [sessionId]);
-
-  // Load chat history
-  useEffect(() => {
-    if (chatHistory) {
-      setMessages(
-        chatHistory.map((msg: any) => ({
-          role: msg.role,
-          content: msg.content,
-        }))
-      );
-    }
-  }, [chatHistory]);
-
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -66,41 +35,7 @@ export default function Chatbot() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!input.trim() || !sessionId) return;
-
-    const userMessage = input;
-    setInput("");
-
-    // Add user message to UI immediately
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
-
-    try {
-      const response = await sendMessageMutation.mutateAsync({
-        content: userMessage,
-        sessionId,
-      });
-
-      // Add AI response
-      setMessages((prev) => [...prev, { role: "assistant", content: response.aiResponse }]);
-      refetchHistory();
-    } catch (error) {
-      toast.error("Failed to send message");
-      console.error(error);
-      // Remove the user message if sending failed
-      setMessages((prev) => prev.slice(0, -1));
-    }
-  };
-
-  const handleClearHistory = async () => {
-    try {
-      await clearHistoryMutation.mutateAsync({ sessionId });
-      setMessages([]);
-      setSessionId(nanoid());
-      toast.success("Chat history cleared");
-    } catch (error) {
-      toast.error("Failed to clear history");
-    }
+    await sendMessage();
   };
 
   return (
@@ -116,7 +51,7 @@ export default function Chatbot() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleClearHistory}
+                onClick={reset}
                 className="gap-2"
               >
                 <Trash2 className="w-4 h-4" />
@@ -165,7 +100,7 @@ export default function Chatbot() {
                     </div>
                   </div>
                 ))}
-                {sendMessageMutation.isPending && (
+                {isLoading && (
                   <div className="flex justify-start">
                     <div className="bg-gray-200 text-black px-4 py-2 rounded-lg rounded-bl-none">
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -183,14 +118,14 @@ export default function Chatbot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask me anything..."
-                disabled={sendMessageMutation.isPending}
+                disabled={isLoading}
               />
               <Button
                 type="submit"
-                disabled={sendMessageMutation.isPending || !input.trim()}
+                disabled={isLoading || !input.trim()}
                 className="gap-2"
               >
-                {sendMessageMutation.isPending ? (
+                {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Send className="w-4 h-4" />

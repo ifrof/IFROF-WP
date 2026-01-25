@@ -9,8 +9,9 @@ Required production variables:
 
 - `VITE_OAUTH_PORTAL_URL` (must be a valid `https://` URL)
 - `VITE_APP_ID`
-- `DATABASE_URL` (MySQL, required for production)
-- `OPENAI_API_KEY` (required for AI features)
+- `DATABASE_URL` (MySQL, required for Lucia sessions)
+- `OPENAI_API_KEY` (required for Vercel AI SDK streaming chat)
+- `AI_MODEL` (optional, defaults to `gpt-4o-mini`)
 
 See [`.env.example`](./.env.example) for a template.
 
@@ -19,22 +20,3 @@ See [`.env.example`](./.env.example) for a template.
 ```bash
 pnpm install
 pnpm build
-```
-
-### Admin dashboard
-
-The admin console is available at `/admin`. It uses the existing tRPC admin stats endpoints to provide a quick overview.
-
-### AI features
-
-AI interactions use the existing tRPC `aiAgent` routes, so ensure `OPENAI_API_KEY` (or the forge key) is present server-side.
-
-## Deployment checklist
-
-- [ ] Configure production environment variables (`VITE_OAUTH_PORTAL_URL`, `VITE_APP_ID`).
-- [ ] Verify `VITE_OAUTH_PORTAL_URL` uses **HTTPS** to avoid mixed-content or protocol errors.
-- [ ] Rebuild the client after any `VITE_` environment change.
-- [ ] Deploy the rebuilt client and server artifacts together.
-- [ ] Smoke test login flow in production.
-
-For a more detailed checklist, see [docs/DEPLOYMENT_CHECKLIST.md](./docs/DEPLOYMENT_CHECKLIST.md).
