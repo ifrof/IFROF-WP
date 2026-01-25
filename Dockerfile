@@ -31,9 +31,6 @@ FROM node:20-slim AS production
 
 # Install runtime dependencies including curl for healthcheck
 RUN apt-get update && apt-get install -y \
-    python3 \
-    make \
-    g++ \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -50,8 +47,6 @@ COPY patches ./patches
 RUN pnpm install --frozen-lockfile --prod
 
 # Copy built files from builder stage
-# The server is built into /app/dist/index.js
-# The client is built into /app/dist/public/
 COPY --from=builder /app/dist ./dist
 
 # Set environment variables
@@ -66,4 +61,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:3000/api/health || exit 1
 
 # Start the server
-CMD ["pnpm", "start"]
+CMD ["node", "dist/index.js"]
