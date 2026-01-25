@@ -1,8 +1,9 @@
 # Build stage
-FROM node:20-slim AS builder
+FROM node:20-bookworm-slim AS builder
 
 # Install build dependencies for native modules (like better-sqlite3)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
     python3 \
     make \
     g++ \
@@ -27,11 +28,11 @@ COPY . .
 RUN pnpm build
 
 # Production stage
-FROM node:20-slim AS production
+FROM node:20-bookworm-slim AS production
 
 # Install runtime dependencies including curl for healthcheck
-RUN apt-get update && apt-get install -y \
-    curl \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
