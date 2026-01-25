@@ -50,10 +50,9 @@ COPY patches ./patches
 RUN pnpm install --frozen-lockfile --prod
 
 # Copy built files from builder stage
+# The server is built into /app/dist/index.js
+# The client is built into /app/dist/public/
 COPY --from=builder /app/dist ./dist
-
-# Copy public directory if it exists
-COPY --from=builder /app/client/dist ./client/dist
 
 # Set environment variables
 ENV NODE_ENV=production
