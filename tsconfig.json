@@ -4,15 +4,26 @@
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
+
     "noEmit": true,
-    "module": "ESNext",
+
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+
     "strict": true,
-    "lib": ["esnext", "dom", "dom.iterable"],
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+
     "jsx": "preserve",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+
     "baseUrl": ".",
     "types": ["node", "vite/client"],
     "paths": {

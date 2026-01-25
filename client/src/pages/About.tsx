@@ -124,7 +124,7 @@ export default function About() {
               : "Join thousands of importers who trust IFROF to reach the best Chinese factories."}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/marketplace">
+            <Link href="/factory">
               <Button size="lg" className="bg-white text-primary hover:bg-blue-50">{language === "ar" ? "تصفح السوق" : "Explore Marketplace"}</Button>
             </Link>
             <Link href="/contact">

@@ -120,7 +120,7 @@ export default function ProductDetail() {
               {t("nav.home")}
             </Link>
             <span className="text-muted-foreground">/</span>
-            <Link href="/marketplace" className="text-muted-foreground hover:text-foreground">
+            <Link href="/factory" className="text-muted-foreground hover:text-foreground">
               {t("nav.manufacturers")}
             </Link>
             <span className="text-muted-foreground">/</span>
@@ -130,7 +130,7 @@ export default function ProductDetail() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <Link href="/marketplace">
+        <Link href="/factory">
           <Button variant="ghost" className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t("common.back")}

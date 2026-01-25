@@ -10,6 +10,7 @@ interface PageSEO {
   titleAr?: string;
   descriptionAr?: string;
   keywordsAr?: string[];
+  structuredData?: any;
 }
 
 interface MetaTagsProps {
@@ -41,6 +42,17 @@ export default function MetaTags({ seo, type = 'website' }: MetaTagsProps) {
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={seo.ogImage} />
+      
+      <link rel="alternate" href={`${seo.canonical}?lang=ar`} hrefLang="ar" />
+      <link rel="alternate" href={`${seo.canonical}?lang=en`} hrefLang="en" />
+      <link rel="alternate" href={`${seo.canonical}?lang=zh`} hrefLang="zh" />
+      <link rel="alternate" href={seo.canonical} hrefLang="x-default" />
+      
+      {seo.structuredData && (
+        <script type="application/ld+json">
+          {JSON.stringify(seo.structuredData)}
+        </script>
+      )}
     </Helmet>
   );
 }

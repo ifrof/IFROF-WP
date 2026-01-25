@@ -17,7 +17,7 @@ export function cacheHeaders(req: Request, res: Response, next: NextFunction) {
   }
   // Images - cache for 1 year with revalidation
   else if (path.match(/\.(jpg|jpeg|png|gif|svg|webp|ico|avif)$/)) {
-    res.setHeader('Cache-Control', 'public, max-age=31536000, must-revalidate');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   }
   // Fonts - cache for 1 year
   else if (path.match(/\.(woff2?|ttf|eot|otf)$/)) {

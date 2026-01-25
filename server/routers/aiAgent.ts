@@ -1,18 +1,18 @@
-import { z } from 'zod';
-import { publicProcedure, router } from '../_core/trpc';
-import { invokeLLM } from '../_core/llm';
-import { TRPCError } from '@trpc/server';
-import { searchDuckDuckGo } from '../utils/search';
+import { z } from "zod";
+import { publicProcedure, router } from "../_core/trpc";
+import { invokeLLM } from "../_core/llm";
+import { TRPCError } from "@trpc/server";
+import { searchDuckDuckGo } from "../utils/search";
 
 const searchQuerySchema = z.object({
-  query: z.string().min(3, 'Query must be at least 3 characters'),
-  language: z.enum(['ar', 'en', 'zh']).default('ar'),
+  query: z.string().min(3, "Query must be at least 3 characters"),
+  language: z.enum(["ar", "en", "zh"]).default("ar"),
   category: z.string().optional(),
 });
 
 interface FactoryVerificationResult {
   name: string;
-  type: 'direct_manufacturer' | 'trader' | 'commercial_company' | 'unknown';
+  type: "direct_manufacturer" | "trader" | "commercial_company" | "unknown";
   confidence: number; // 0-100
   reasoning: string;
   isDirectFactory: boolean;
@@ -31,11 +31,17 @@ const withTimeout = <T>(promise: Promise<T>, ms: number, label: string): Promise
   return Promise.race([
     promise,
     new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new TRPCError({
-        code: 'TIMEOUT',
-        message: `${label} timed out after ${ms}ms`
-      })), ms)
-    )
+      setTimeout(
+        () =>
+          reject(
+            new TRPCError({
+              code: "TIMEOUT",
+              message: `${label} timed out after ${ms}ms`,
+            })
+          ),
+        ms
+      )
+    ),
   ]);
 };
 
@@ -43,36 +49,42 @@ export const aiAgentRouter = router({
   // Search for factories with real-time AI verification
   searchFactories: publicProcedure
     .input(searchQuerySchema)
-    .mutation(async ({ input }): Promise<SearchResult> => {
+    .mutation(async ({ input, ctx }): Promise<SearchResult> => {
       console.log(`[AI Agent] Starting search for: "${input.query}" in ${input.language}`);
-      
+
       try {
-        // 1. Perform real-time search using DuckDuckGo (completely free)
-        const searchQuery = `${input.query} ${input.category || ''} factory manufacturer China supplier`;
-        const searchResults = await withTimeout(searchDuckDuckGo(searchQuery), 15000, 'Web Search');
-        
+        // 1. Perform real-time search using DuckDuckGo (with timeout)
+        const searchQuery = `${input.query} ${input.category || ""} factory manufacturer China supplier`;
+        const searchResults = await withTimeout(searchDuckDuckGo(searchQuery), 15000, "Web Search");
+
         console.log(`[AI Agent] DuckDuckGo returned ${searchResults.length} results`);
 
         // Build search context for LLM - Optimization: Limit to top 3 results and truncate
-        let searchContext = '';
+        let searchContext = "";
         if (searchResults.length > 0) {
-          searchContext = searchResults.slice(0, 3).map((r, i) => 
-            `Result ${i+1}:
+          searchContext = searchResults
+            .slice(0, 3)
+            .map(
+              (r, i) => `Result ${i + 1}:
 Title: ${r.title}
 Link: ${r.link}
 Snippet: ${r.snippet}`
-          ).join('\n\n').substring(0, 2000); // Guard: Max 2000 chars for context
+            )
+            .join("\n\n")
+            .substring(0, 2000); // Guard: Max 2000 chars for context
         } else {
-          searchContext = 'No search results were found. Please provide general guidance based on the query.';
+          searchContext = "No search results were found. Please provide general guidance based on the query.";
         }
 
         // 2. Use LLM to analyze search results and identify real factories
-        const systemPrompt = input.language === 'ar'
-          ? `أنت محقق ذكي متخصص في البحث عن المصانع الصينية المباشرة. حلل النتائج وحدد المصانع الحقيقية. أرجع JSON فقط.`
-          : `You are an AI investigator specialized in finding direct Chinese manufacturers. Analyze results and identify real factories. Return JSON only.`;
+        const systemPrompt =
+          input.language === "ar"
+            ? `أنت محقق ذكي متخصص في البحث عن المصانع الصينية المباشرة. حلل النتائج وحدد المصانع الحقيقية. أرجع JSON فقط.`
+            : `You are an AI investigator specialized in finding direct Chinese manufacturers. Analyze results and identify real factories. Return JSON only.`;
 
-        const userPrompt = input.language === 'ar'
-          ? `بناءً على نتائج البحث التالية عن "${input.query}"، استخرج قائمة بـ 5 مصانع/موردين محتملين وقم بتقييمها:
+        const userPrompt =
+          input.language === "ar"
+            ? `بناءً على نتائج البحث التالية عن "${input.query}"، استخرج قائمة بـ 5 مصانع/موردين محتملين وقم بتقييمها:
 
 ${searchContext}
 
@@ -89,7 +101,7 @@ ${searchContext}
   ],
   "recommendations": ["توصية 1", "توصية 2"]
 }`
-          : `Based on the following search results for "${input.query}", extract a list of 5 potential factories/suppliers and evaluate them:
+            : `Based on the following search results for "${input.query}", extract a list of 5 potential factories/suppliers and evaluate them:
 
 ${searchContext}
 
@@ -108,55 +120,65 @@ Return in JSON format:
 }`;
 
         console.log(`[AI Agent] Invoking LLM for analysis...`);
-        
-        const response = await withTimeout(invokeLLM({
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-          ],
-          max_tokens: 1500, // Guard: Limit output tokens
-          response_format: {
-            type: 'json_schema',
-            json_schema: {
-              name: 'factory_search_results',
-              strict: true,
-              schema: {
-                type: 'object',
-                properties: {
-                  results: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        name: { type: 'string' },
-                        type: {
-                          type: 'string',
-                          enum: ['direct_manufacturer', 'trader', 'commercial_company', 'unknown'],
+
+        const response = await withTimeout(
+          invokeLLM({
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt },
+            ],
+            max_tokens: 1500, // Guard: Limit output tokens
+            timeoutMs: 20000, // 20s timeout for LLM
+            response_format: {
+              type: "json_schema",
+              json_schema: {
+                name: "factory_search_results",
+                strict: true,
+                schema: {
+                  type: "object",
+                  properties: {
+                    results: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          name: { type: "string" },
+                          type: {
+                            type: "string",
+                            enum: ["direct_manufacturer", "trader", "commercial_company", "unknown"],
+                          },
+                          confidence: { type: "number" },
+                          reasoning: { type: "string" },
+                          source: { type: "string" },
                         },
-                        confidence: { type: 'number' },
-                        reasoning: { type: 'string' },
-                        source: { type: 'string' },
+                        required: ["name", "type", "confidence", "reasoning"],
                       },
-                      required: ['name', 'type', 'confidence', 'reasoning'],
+                    },
+                    recommendations: {
+                      type: "array",
+                      items: { type: "string" },
                     },
                   },
-                  recommendations: {
-                    type: 'array',
-                    items: { type: 'string' },
-                  },
+                  required: ["results", "recommendations"],
                 },
-                required: ['results', 'recommendations'],
               },
             },
-          },
-        }), 30000, 'AI Analysis');
+          }),
+          30000,
+          "AI Analysis"
+        );
+
+        // Track cost after successful LLM call
+        if ((ctx.req as any).trackAiCost && response.usage?.total_tokens) {
+          await (ctx.req as any).trackAiCost(response.usage.total_tokens);
+        }
 
         const content = response.choices[0]?.message.content;
-        if (!content || typeof content !== 'string') {
+        if (!content || typeof content !== "string") {
           console.error(`[AI Agent] LLM returned empty or invalid content`);
-          throw new Error('No response from AI');
+          throw new Error("No response from AI");
         }
-        
+
         const parsed = JSON.parse(content);
         console.log(`[AI Agent] Successfully parsed ${parsed.results?.length || 0} factory results`);
 
@@ -168,16 +190,16 @@ Return in JSON format:
             type: r.type,
             confidence: r.confidence,
             reasoning: r.reasoning,
-            isDirectFactory: r.type === 'direct_manufacturer',
+            isDirectFactory: r.type === "direct_manufacturer",
             source: r.source,
           })),
           recommendations: parsed.recommendations || [],
         };
       } catch (error: any) {
-        console.error('[AI Agent] Search error:', error.message || error);
+        console.error("[AI Agent] Search error:", error?.message || error);
         throw new TRPCError({
-          code: error.code || 'INTERNAL_SERVER_ERROR',
-          message: error.message || 'Failed to search factories via AI. Please try again later.',
+          code: error?.code === "TIMEOUT" ? "TIMEOUT" : "INTERNAL_SERVER_ERROR",
+          message: error?.message || "Failed to search factories via AI. Please try again later.",
         });
       }
     }),
@@ -188,26 +210,33 @@ Return in JSON format:
       z.object({
         factoryName: z.string(),
         factoryInfo: z.string().optional(),
-        language: z.enum(['ar', 'en', 'zh']).default('ar'),
+        language: z.enum(["ar", "en", "zh"]).default("ar"),
       })
     )
-    .mutation(async ({ input }): Promise<FactoryVerificationResult> => {
+    .mutation(async ({ input, ctx }): Promise<FactoryVerificationResult> => {
       console.log(`[AI Agent] Verifying factory: "${input.factoryName}"`);
-      try {
-        // Real-time verification using search
-        const searchQuery = `${input.factoryName} ${input.factoryInfo || ''} factory manufacturer China`;
-        const searchResults = await withTimeout(searchDuckDuckGo(searchQuery), 10000, 'Web Search');
-        const searchContext = searchResults.slice(0, 3).map((r, i) => `[${i+1}] ${r.title}: ${r.snippet}`).join('\n').substring(0, 1000);
 
-        const systemPrompt = input.language === 'ar'
-          ? `أنت خبير في التحقق من المصانع الصينية. حلل البيانات وقرر ما إذا كان المصنع حقيقياً أم وسيطاً. أرجع JSON.`
-          : `You are an expert in verifying Chinese factories. Analyze the data and decide if the factory is real or an intermediary. Return JSON.`;
+      try {
+        // Real-time verification using search (with timeout)
+        const searchQuery = `${input.factoryName} ${input.factoryInfo || ""} factory manufacturer China`;
+        const searchResults = await withTimeout(searchDuckDuckGo(searchQuery), 10000, "Web Search");
+
+        const searchContext = searchResults
+          .slice(0, 3)
+          .map((r, i) => `[${i + 1}] ${r.title}: ${r.snippet}`)
+          .join("\n")
+          .substring(0, 1000);
+
+        const systemPrompt =
+          input.language === "ar"
+            ? `أنت خبير في التحقق من المصانع الصينية. حلل البيانات وقرر ما إذا كان المصنع حقيقياً أم وسيطاً. أرجع JSON.`
+            : `You are an expert in verifying Chinese factories. Analyze the data and decide if the factory is real or an intermediary. Return JSON.`;
 
         const userPrompt = `Verify this factory: ${input.factoryName}
 Context from web search:
-${searchContext || 'No search context found.'}
+${searchContext || "No search context found."}
 
-Additional Info: ${input.factoryInfo || 'None'}
+Additional Info: ${input.factoryInfo || "None"}
 
 Return JSON:
 {
@@ -216,36 +245,46 @@ Return JSON:
   "reasoning": "explanation"
 }`;
 
-        const response = await withTimeout(invokeLLM({
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-          ],
-          max_tokens: 500, // Guard: Small limit for verification
-          response_format: {
-            type: 'json_schema',
-            json_schema: {
-              name: 'factory_verification',
-              strict: true,
-              schema: {
-                type: 'object',
-                properties: {
-                  type: {
-                    type: 'string',
-                    enum: ['direct_manufacturer', 'trader', 'commercial_company', 'unknown'],
+        const response = await withTimeout(
+          invokeLLM({
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt },
+            ],
+            max_tokens: 500, // Guard: Small limit for verification
+            timeoutMs: 15000, // 15s timeout for LLM
+            response_format: {
+              type: "json_schema",
+              json_schema: {
+                name: "factory_verification",
+                strict: true,
+                schema: {
+                  type: "object",
+                  properties: {
+                    type: {
+                      type: "string",
+                      enum: ["direct_manufacturer", "trader", "commercial_company", "unknown"],
+                    },
+                    confidence: { type: "number" },
+                    reasoning: { type: "string" },
                   },
-                  confidence: { type: 'number' },
-                  reasoning: { type: 'string' },
+                  required: ["type", "confidence", "reasoning"],
                 },
-                required: ['type', 'confidence', 'reasoning'],
               },
             },
-          },
-        }), 20000, 'AI Verification');
+          }),
+          20000,
+          "AI Verification"
+        );
+
+        // Track cost after successful LLM call
+        if ((ctx.req as any).trackAiCost && response.usage?.total_tokens) {
+          await (ctx.req as any).trackAiCost(response.usage.total_tokens);
+        }
 
         const content = response.choices[0]?.message.content;
-        if (!content || typeof content !== 'string') {
-          throw new Error('No response from AI');
+        if (!content || typeof content !== "string") {
+          throw new Error("No response from AI");
         }
 
         const parsed = JSON.parse(content);
@@ -255,13 +294,13 @@ Return JSON:
           type: parsed.type,
           confidence: parsed.confidence,
           reasoning: parsed.reasoning,
-          isDirectFactory: parsed.type === 'direct_manufacturer' && parsed.confidence >= 70,
+          isDirectFactory: parsed.type === "direct_manufacturer" && parsed.confidence >= 70,
         };
       } catch (error: any) {
-        console.error('[AI Agent] Factory verification error:', error.message || error);
+        console.error("[AI Agent] Factory verification error:", error?.message || error);
         throw new TRPCError({
-          code: error.code || 'INTERNAL_SERVER_ERROR',
-          message: error.message || 'Failed to verify factory',
+          code: error?.code === "TIMEOUT" ? "TIMEOUT" : "INTERNAL_SERVER_ERROR",
+          message: error?.message || "Failed to verify factory",
         });
       }
     }),

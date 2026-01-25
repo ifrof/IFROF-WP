@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { TRPCError } from '@trpc/server';
 
 export interface SearchResult {
   title: string;
@@ -13,6 +14,12 @@ export interface SearchResult {
 export async function searchDuckDuckGo(query: string): Promise<SearchResult[]> {
   console.log(`[Search] Starting DuckDuckGo search for: "${query}"`);
   
+  const controller = new AbortController();
+  const timeoutMs = 10000; // Hard timeout 10 seconds
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
+
   try {
     // Using the direct HTML endpoint which is more stable for scraping
     const response = await axios.get(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`, {
@@ -22,8 +29,11 @@ export async function searchDuckDuckGo(query: string): Promise<SearchResult[]> {
         'Accept-Language': 'en-US,en;q=0.5',
         'Referer': 'https://html.duckduckgo.com/',
       },
-      timeout: 15000
+      timeout: timeoutMs, // Axios timeout
+      signal: controller.signal, // AbortController signal
     });
+
+    clearTimeout(timeout);
 
     const html = response.data;
     const results: SearchResult[] = [];
@@ -109,6 +119,13 @@ export async function searchDuckDuckGo(query: string): Promise<SearchResult[]> {
     console.log(`[Search] Found ${results.length} results`);
     return results;
   } catch (error: any) {
+    clearTimeout(timeout);
+    if (axios.isCancel(error) || error.name === 'AbortError') {
+      throw new TRPCError({
+        code: 'TIMEOUT',
+        message: `Web search timed out after ${timeoutMs}ms.`,
+      });
+    }
     console.error('[Search] DuckDuckGo scraper error:', error.message);
     return [];
   }

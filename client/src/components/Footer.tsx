@@ -37,7 +37,7 @@ export function Footer() {
             <h3 className="font-bold text-lg mb-6">{language === "ar" ? "روابط سريعة" : "Quick Links"}</h3>
             <ul className="space-y-4 text-sm">
               <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">{language === "ar" ? "عن المنصة" : "About Us"}</Link></li>
-              <li><Link href="/marketplace" className="text-muted-foreground hover:text-primary transition-colors">{language === "ar" ? "سوق المنتجات" : "Marketplace"}</Link></li>
+              <li><Link href="/factory" className="text-muted-foreground hover:text-primary transition-colors">{language === "ar" ? "سوق المنتجات" : "Marketplace"}</Link></li>
               <li><Link href="/factories" className="text-muted-foreground hover:text-primary transition-colors">{language === "ar" ? "المصانع" : "Factories"}</Link></li>
               <li><Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors">{language === "ar" ? "المدونة" : "Blog"}</Link></li>
             </ul>

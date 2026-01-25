@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
-import compression from "compression";
+import shrinkRay from "shrink-ray-current";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStripeWebhook } from "./stripe-webhook";
@@ -23,6 +23,9 @@ import path from "path";
 import fs from "fs";
 import { performanceMonitor, errorTracker } from "./performance-monitor";
 import { healthCheck, metricsEndpoint } from "./health-check";
+import { aiRateLimiter, aiDailyCap, requireAuth } from "../middleware/ai-guardrails"; // NEW
+import { validateConfig, redisRateLimiter } from "./hardening";
+import cors from "cors";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -44,10 +47,17 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
+  // Run startup validation
+  await validateConfig();
+
   const app = express();
   const server = createServer(app);
   // Trust the first proxy hop so rate limiting uses the real client IP.
   app.set("trust proxy", 1);
+  
+  // Health check endpoint - MUST be first for Railway deployment
+  app.get("/api/health", healthCheck);
+  app.get("/api/metrics", metricsEndpoint);
   
   // Force HTTPS in production
   app.use(httpsRedirect);
@@ -74,21 +84,30 @@ async function startServer() {
   // Initialize SEO Cron Jobs
   initializeCronJobs();
   
-  // Enable compression for all responses
-  app.use(compression({
+  // Enable Brotli/Gzip compression for all responses
+  app.use(shrinkRay({
     filter: (req, res) => {
       if (req.headers['x-no-compression']) {
         return false;
       }
-      return compression.filter(req, res);
+      return true;
     },
-    level: 6,
+    threshold: 1024,
   }));
   
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use(cookieParser());
+  
+  // Hardened CORS
+  app.use(cors({
+    origin: process.env.CORS_ORIGIN || "https://ifrof.com",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "X-CSRF-Token"],
+  }));
+
   app.use(securityHeaders);
   app.use(sanitizeInput);
   app.use(performanceMonitor);
@@ -96,17 +115,25 @@ async function startServer() {
   app.use("/api", apiLimiter);
   app.use("/api/v2", newApiLimiter);
   
+  // Redis-backed Rate Limiting for sensitive routes (10 req/min/IP)
+  const sensitiveRateLimiter = redisRateLimiter({ windowMs: 60 * 1000, maxRequests: 10 });
+  
+  app.use("/api/trpc/aiAgent", sensitiveRateLimiter);
+  app.use("/api/trpc/storage", sensitiveRateLimiter);
+  app.use("/api/trpc/auth", sensitiveRateLimiter);
+  app.use("/api/trpc/payments", sensitiveRateLimiter);
+  app.use("/api/stripe/webhook", sensitiveRateLimiter);
+
   // Stricter rate limiting for auth endpoints
   app.use("/api/oauth", authRateLimiter);
   app.use("/api/trpc/auth", authRateLimiter);
   app.use("/api/trpc/twoFactorAuth", authLimiter);
   
+  // AI Guardrails: Auth, Rate Limit, Daily Cap
+  app.use("/api/trpc/aiAgent", requireAuth, aiRateLimiter, aiDailyCap); // NEW
+
   // CSRF token endpoint
   app.get("/api/csrf-token", getCsrfTokenHandler);
-  
-  // Health check and metrics endpoints
-  app.get("/api/health", healthCheck);
-  app.get("/api/metrics", metricsEndpoint);
   
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
@@ -133,15 +160,9 @@ async function startServer() {
   app.use(errorTracker);
   app.use(errorHandler);
 
-  const preferredPort = parseInt(process.env.PORT || "3000");
-  const port = await findAvailablePort(preferredPort);
-
-  if (port !== preferredPort) {
-    console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
-  }
-
-  server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}/`);
+  const port = parseInt(process.env.PORT || "3000");
+  server.listen(port, "0.0.0.0", () => {
+    console.log(`Server running on http://0.0.0.0:${port}/`);
   });
 }
 

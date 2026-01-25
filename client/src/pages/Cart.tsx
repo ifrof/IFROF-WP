@@ -117,7 +117,7 @@ export default function Cart() {
               <ShoppingCart className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
               <p className="text-xl font-medium mb-2">{t("cart.empty")}</p>
               <p className="text-muted-foreground mb-4">{t("cart.emptyDescription")}</p>
-              <Link href="/marketplace">
+              <Link href="/factory">
                 <Button className="bg-orange-500 hover:bg-orange-600">
                   {t("cart.continueShopping")}
                 </Button>
@@ -276,7 +276,7 @@ export default function Cart() {
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
 
-                  <Link href="/marketplace">
+                  <Link href="/factory">
                     <Button variant="outline" className="w-full">
                       {t("cart.continueShopping")}
                     </Button>

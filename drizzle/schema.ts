@@ -124,6 +124,8 @@ export const blogPosts = mysqlTable("blog_posts", {
 }, (table) => {
   return {
     langSlugIdx: uniqueIndex("blog_posts_lang_slug_idx").on(table.lang, table.slug),
+    publishedIdx: index("blog_posts_published_idx").on(table.published),
+    createdAtIdx: index("blog_posts_created_at_idx").on(table.createdAt),
   };
 });
 
@@ -217,6 +219,9 @@ export const products = mysqlTable("products", {
     nameArIdx: index("products_name_ar_idx").on(table.nameAr),
     nameEnIdx: index("products_name_en_idx").on(table.nameEn),
     categoryIdx: index("products_category_idx").on(table.category),
+    activeIdx: index("products_active_idx").on(table.active),
+    featuredIdx: index("products_featured_idx").on(table.featured),
+    factoryIdIdx: index("products_factory_id_idx").on(table.factoryId),
   };
 });
 

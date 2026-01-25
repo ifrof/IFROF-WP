@@ -8,12 +8,13 @@ router.get('/sitemap.xml', async (req, res) => {
   try {
     const baseUrl = 'https://ifrof.com';
     const today = new Date().toISOString().split('T')[0];
+    const langs = ['ar', 'en', 'zh'];
 
     // Static pages
     const staticPages = [
       '',
       '/marketplace',
-      '/search',
+      '/find-factory',
       '/faq',
       '/about',
       '/contact',
@@ -22,41 +23,53 @@ router.get('/sitemap.xml', async (req, res) => {
     ];
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">`;
 
-    // Add static pages
+    // Add static pages for each language
     staticPages.forEach(page => {
-      xml += `
+      langs.forEach(lang => {
+        const url = `${baseUrl}${page}${page.includes('?') ? '&' : '?'}lang=${lang}`;
+        xml += `
   <url>
-    <loc>${baseUrl}${page}</loc>
+    <loc>${url}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>${page === '' ? '1.0' : '0.8'}</priority>
+    ${langs.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${baseUrl}${page}${page.includes('?') ? '&' : '?'}lang=${l}"/>`).join('\n    ')}
   </url>`;
+      });
     });
 
     // Add dynamic products
     const allProducts = await db.getAllProducts(100, 0);
     (allProducts || []).forEach((product: any) => {
-      xml += `
+      langs.forEach(lang => {
+        const url = `${baseUrl}/products/${product.id}?lang=${lang}`;
+        xml += `
   <url>
-    <loc>${baseUrl}/products/${product.id}</loc>
+    <loc>${url}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+    ${langs.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${baseUrl}/products/${product.id}?lang=${l}"/>`).join('\n    ')}
   </url>`;
+      });
     });
 
     // Add dynamic blog posts
     const allPosts = await db.getBlogPosts(100, 0);
     (allPosts || []).forEach((post: any) => {
-      xml += `
+      langs.forEach(lang => {
+        const url = `${baseUrl}/blog/${post.slug}?lang=${lang}`;
+        xml += `
   <url>
-    <loc>${baseUrl}/blog/${post.slug}</loc>
+    <loc>${url}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
+    ${langs.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${baseUrl}/blog/${post.slug}?lang=${l}"/>`).join('\n    ')}
   </url>`;
+      });
     });
 
     // Add dynamic factories

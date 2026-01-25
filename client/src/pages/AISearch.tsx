@@ -141,7 +141,7 @@ export default function AISearch() {
               </div>
             </Link>
             <div className="flex items-center gap-3">
-              <Link href="/marketplace">
+              <Link href="/factory">
                 <Button variant="outline" size="sm">
                   {t.manufacturers}
                 </Button>

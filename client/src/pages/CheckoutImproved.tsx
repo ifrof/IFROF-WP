@@ -141,7 +141,7 @@ export default function CheckoutImproved() {
           <CardContent className="pt-6 text-center">
             <Package className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <p className="text-xl font-medium mb-2">Cart is Empty</p>
-            <Button onClick={() => setLocation("/marketplace")} className="mt-4">
+            <Button onClick={() => setLocation("/factory")} className="mt-4">
               Continue Shopping
             </Button>
           </CardContent>

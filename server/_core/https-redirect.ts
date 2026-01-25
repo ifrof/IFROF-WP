@@ -21,8 +21,8 @@ export const httpsRedirect = (req: Request, res: Response, next: NextFunction) =
                   req.headers["x-forwarded-proto"] === "https" ||
                   req.headers["x-forwarded-ssl"] === "on";
 
-  // Skip redirect for health check endpoint to avoid Railway healthcheck failures
-  if (req.path === "/api/health") {
+  // Skip redirect for health check and metrics endpoints to avoid Railway healthcheck failures
+  if (req.path === "/api/health" || req.path === "/api/metrics") {
     return next();
   }
 
