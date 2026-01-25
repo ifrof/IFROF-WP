@@ -9,8 +9,22 @@ Required production variables:
 
 - `VITE_OAUTH_PORTAL_URL` (must be a valid `https://` URL)
 - `VITE_APP_ID`
+- `DATABASE_URL` (MySQL, required for production)
+- `OPENAI_API_KEY` (required for AI features)
 
 See [`.env.example`](./.env.example) for a template.
+
+## Local setup
+
+```bash
+pnpm install
+pnpm build
+```
+
+### Admin dashboard
+
+The admin console is available at `/admin`. It uses the existing tRPC admin stats endpoints to provide a quick overview.
+
 
 ## Deployment checklist
 

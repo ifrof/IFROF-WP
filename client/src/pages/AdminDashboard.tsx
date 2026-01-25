@@ -10,13 +10,13 @@ export default function AdminDashboard() {
   const { language } = useLanguage();
   const auth = useAuth();
   const [, setLocation] = useLocation();
-  const statsQuery = trpc.admin.getStats.useQuery(undefined, { 
-    enabled: !!auth.user && auth.user.role === "admin" 
+  const statsQuery = trpc.admin.getStats.useQuery(undefined, {
+    enabled: !!auth.user && auth.user.role === "admin",
   });
 
   // 2. Navigation effect
   useEffect(() => {
-    if (!auth.loading && (!auth.user || auth.user.role !== 'admin')) {
+    if (!auth.loading && (!auth.user || auth.user.role !== "admin")) {
       setLocation("/login");
     }
   }, [auth.user, auth.loading, setLocation]);
@@ -30,7 +30,7 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!auth.user || auth.user.role !== 'admin') {
+  if (!auth.user || auth.user.role !== "admin") {
     return null;
   }
 
