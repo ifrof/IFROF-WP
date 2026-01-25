@@ -29,7 +29,6 @@ The admin console is available at `/admin`. It uses the existing tRPC admin stat
 
 AI interactions use the existing tRPC `aiAgent` routes, so ensure `OPENAI_API_KEY` (or the forge key) is present server-side.
 
-
 ## Deployment checklist
 
 - [ ] Configure production environment variables (`VITE_OAUTH_PORTAL_URL`, `VITE_APP_ID`).
