@@ -40,6 +40,7 @@ const FactoryPublicProfile = lazy(() => import("@/pages/FactoryPublicProfile"));
 const VerifyFactory = lazy(() => import("@/pages/VerifyFactory"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
 const Cart = lazy(() => import("@/pages/Cart"));
+const Chatbot = lazy(() => import("@/pages/Chatbot"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 function AppContent() {
@@ -71,6 +72,7 @@ function AppContent() {
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
           <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/:rest*" component={AdminDashboard} />
           <Route path="/my-factory" component={FactoryDashboard} />
           <Route path="/buyer" component={BuyerDashboard} />
           <Route path="/profile" component={Profile} />
@@ -82,6 +84,7 @@ function AppContent() {
           <Route path="/verify-factory" component={VerifyFactory} />
           <Route path="/forgot-password" component={ForgotPassword} />
           <Route path="/cart" component={Cart} />
+          <Route path="/chat" component={Chatbot} />
           <Route component={NotFound} />
         </Switch>
       </Suspense>

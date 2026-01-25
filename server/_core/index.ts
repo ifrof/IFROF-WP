@@ -26,6 +26,8 @@ import { healthCheck, metricsEndpoint } from "./health-check";
 import { aiRateLimiter, aiDailyCap, requireAuth } from "../middleware/ai-guardrails"; // NEW
 import { validateConfig, redisRateLimiter } from "./hardening";
 import cors from "cors";
+import { registerAiChatRoutes } from "../routes/ai-chat";
+import { attachAuthUser } from "../middleware/auth-session";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -99,6 +101,7 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use(cookieParser());
+  app.use(attachAuthUser);
   
   // Hardened CORS
   app.use(cors({
@@ -137,6 +140,9 @@ async function startServer() {
   
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+
+  // AI streaming chat endpoint
+  registerAiChatRoutes(app);
   
   // Stripe webhook endpoint (must be before CSRF check)
   registerStripeWebhook(app);

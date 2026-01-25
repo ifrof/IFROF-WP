@@ -6,6 +6,7 @@ import type { Request } from "express";
 import { SignJWT, jwtVerify } from "jose";
 import type { User } from "../../drizzle/schema";
 import * as db from "../db";
+import { getAuthenticatedUser } from "./sessions";
 import { ENV } from "./env";
 import type {
   ExchangeTokenRequest,
@@ -257,25 +258,19 @@ class SDKServer {
   }
 
   async authenticateRequest(req: Request): Promise<User> {
+    const userFromSession = await getAuthenticatedUser(req);
+    if (userFromSession) {
+      return userFromSession;
+    }
+
+    // 2. Fallback to regular OAuth authentication flow (Legacy/Manus OAuth)
     const cookies = this.parseCookies(req.headers.cookie);
     const sessionToken = cookies.get(COOKIE_NAME);
-    
+
     if (!sessionToken) {
       throw ForbiddenError("Missing session cookie");
     }
 
-    // 1. Check database sessions first (Email/Password & New OAuth)
-    const dbSession = await db.getSession(sessionToken);
-    if (dbSession) {
-      if (new Date() > new Date(dbSession.expiresAt)) {
-        await db.deleteSession(sessionToken);
-        throw ForbiddenError("Session expired");
-      }
-      const user = await db.getUserById(dbSession.userId);
-      if (user) return user;
-    }
-
-    // 2. Fallback to regular OAuth authentication flow (Legacy/Manus OAuth)
     const session = await this.verifySession(sessionToken);
 
     if (!session) {

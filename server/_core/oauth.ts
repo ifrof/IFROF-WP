@@ -1,9 +1,8 @@
-import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import { ONE_YEAR_MS } from "@shared/const";
 import type { Express, Request, Response } from "express";
 import * as db from "../db";
-import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
-import crypto from "crypto";
+import { createUserSession } from "./sessions";
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
@@ -46,18 +45,7 @@ export function registerOAuthRoutes(app: Express) {
         emailVerified: 1, // OAuth emails are considered verified
       });
 
-      // Create a database session
-      const sessionToken = crypto.randomBytes(32).toString("hex");
-      const expiresAt = new Date(Date.now() + ONE_YEAR_MS);
-      
-      await db.createSession({
-        id: sessionToken,
-        userId: user.id,
-        expiresAt,
-      });
-
-      const cookieOptions = getSessionCookieOptions(req);
-      res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+      await createUserSession(user.id, req, res, { maxAgeMs: ONE_YEAR_MS });
 
       res.redirect(302, "/");
     } catch (error) {

@@ -1,10 +1,9 @@
 import { z } from "zod";
 import { publicProcedure, router, protectedProcedure } from "../_core/trpc";
-import { getDb, getUserByEmail, upsertUser, getUserByVerificationToken, getUserByResetToken, createSession, deleteSession, createBuyerProfile, createAdminProfile, createAdminPermission } from "../db";
+import { getDb, getUserByEmail, upsertUser, getUserByVerificationToken, getUserByResetToken, createBuyerProfile, createAdminProfile, createAdminPermission } from "../db";
 import { eq } from "drizzle-orm";
 import { users } from "../../drizzle/schema";
-import { COOKIE_NAME } from "@shared/const";
-import { getSessionCookieOptions } from "../_core/cookies";
+import { createUserSession, clearUserSession } from "../_core/sessions";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../_core/email-service";
@@ -156,20 +155,7 @@ export const authRouter = router({
       }
 
       // Set session cookie (auto-login)
-      const sessionToken = crypto.randomBytes(32).toString("hex");
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-      
-      await createSession({
-        id: sessionToken,
-        userId: newUser.id,
-        expiresAt,
-      });
-
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.cookie(COOKIE_NAME, sessionToken, {
-        ...cookieOptions,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+      await createUserSession(newUser.id, ctx.req, ctx.res, {\n        maxAgeMs: 7 * 24 * 60 * 60 * 1000,\n      });
 
       return { user: newUser, success: true };
     }),
@@ -218,20 +204,7 @@ export const authRouter = router({
       }
 
       const maxAge = (input.rememberMe ? 30 : 7) * 24 * 60 * 60 * 1000;
-      const sessionToken = crypto.randomBytes(32).toString("hex");
-      const expiresAt = new Date(Date.now() + maxAge);
-      
-      await createSession({
-        id: sessionToken,
-        userId: user.id,
-        expiresAt,
-      });
-      
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.cookie(COOKIE_NAME, sessionToken, {
-        ...cookieOptions,
-        maxAge,
-      });
+      await createUserSession(user.id, ctx.req, ctx.res, { maxAgeMs: maxAge });
 
       await upsertUser({
         ...user,
@@ -333,16 +306,7 @@ export const authRouter = router({
 
   // Logout
   logout: publicProcedure.mutation(async ({ ctx }) => {
-    const cookies = ctx.req.headers.cookie;
-    if (cookies) {
-      const parsed = require('cookie').parse(cookies);
-      const sessionToken = parsed[COOKIE_NAME];
-      if (sessionToken) {
-        await deleteSession(sessionToken);
-      }
-    }
-    const cookieOptions = getSessionCookieOptions(ctx.req);
-    ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+    await clearUserSession(ctx.req, ctx.res);
     return { success: true };
   }),
 
