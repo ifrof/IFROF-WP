@@ -100,6 +100,7 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use(cookieParser());
+  // Attach authenticated user (DB-backed sessions) for downstream middleware.
   app.use(attachAuthUser);
   
   // Hardened CORS

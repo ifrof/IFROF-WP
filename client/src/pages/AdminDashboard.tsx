@@ -39,7 +39,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center gap-3">
           <h1 className="text-3xl font-bold">{language === "ar" ? "لوحة التحكم" : "Admin Dashboard"}</h1>
           <button onClick={() => window.location.href = '/'} className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg">
             <Home className="w-4 h-4" /> {language === "ar" ? "الرئيسية" : "Home"}

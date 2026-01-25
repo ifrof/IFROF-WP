@@ -23,6 +23,7 @@ export async function createUserSession(
   const maxAgeMs = options.maxAgeMs ?? ONE_YEAR_MS;
   const cookieOptions = getSessionCookieOptions(req);
 
+  // Store sessions in the existing DB-backed sessions table.
   const sessionToken = crypto.randomBytes(32).toString("hex");
   await db.createSession({
     id: sessionToken,

@@ -25,6 +25,10 @@ pnpm build
 
 The admin console is available at `/admin`. It uses the existing tRPC admin stats endpoints to provide a quick overview.
 
+### AI features
+
+AI interactions use the existing tRPC `aiAgent` routes, so ensure `OPENAI_API_KEY` (or the forge key) is present server-side.
+
 
 ## Deployment checklist
 
