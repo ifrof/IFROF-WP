@@ -115,9 +115,9 @@ export default function Home() {
       <section className="relative bg-[#1e3a5f] text-white py-20 md:py-32 text-center">
         <div className="max-w-4xl mx-auto px-4">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            {language === 'ar' ? 'تجاوز الوسطاء تماماً' : 'Kill the Middleman'}
+            {language === 'ar' ? 'استورد مباشرة من المصنع' : 'Import Directly from Factories'}
             <span className="block text-[#ff8c42] mt-2">
-              {language === 'ar' ? 'استورد من المصنع الحقيقي مباشرة' : 'Direct from Real Factories'}
+              {language === 'ar' ? 'بدون وسطاء - أفضل الأسعار والجودة' : 'No Middlemen - Best Prices & Quality'}
             </span>
           </h1>
           <p className="text-lg md:text-xl text-gray-300 mb-10">
