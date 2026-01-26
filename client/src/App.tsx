@@ -19,7 +19,7 @@ const AIChat = lazy(() => import("./components/AIChat"));
 const Home = lazy(() => import("@/pages/Home"));
 const Blog = lazy(() => import("@/pages/Blog"));
 const BlogPostDetail = lazy(() => import("@/pages/BlogPostDetail"));
-const AISearch = lazy(() => import("@/pages/AISearch"));
+const FactoryInvestigator = lazy(() => import("@/pages/FactoryInvestigator"));
 const ImportRequest = lazy(() => import("@/pages/ImportRequest"));
 const Marketplace = lazy(() => import("@/pages/Marketplace"));
 const ProductSearch = lazy(() => import("@/pages/ProductSearch"));
@@ -62,7 +62,7 @@ function AppContent() {
           <Route path="/blog" component={Blog} />
           <Route path="/blog/:slug" component={BlogPostDetail} />
 
-          <Route path="/factory-investigator" component={AISearch} />
+          <Route path="/factory-investigator" component={FactoryInvestigator} />
           <Route path="/import-request" component={ImportRequest} />
           <Route path="/factory" component={Marketplace} />
           <Route path="/marketplace" component={Marketplace} />
