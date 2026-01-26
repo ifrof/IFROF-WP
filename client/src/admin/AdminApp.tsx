@@ -1,39 +1,35 @@
-import { Refine } from "@refinedev/core";
-import { routerProvider } from "@refinedev/react-router-v6";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { adminDataProvider } from "@/admin/dataProvider";
-import { AdminLayout } from "@/admin/AdminLayout";
-import { AdminOverview } from "@/admin/pages/AdminOverview";
-import { AdminUsers } from "@/admin/pages/AdminUsers";
-import { AdminProducts } from "@/admin/pages/AdminProducts";
-import { AdminOrders } from "@/admin/pages/AdminOrders";
-import { AdminFactories } from "@/admin/pages/AdminFactories";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export default function AdminApp() {
+  const [stats, setStats] = useState({ users: 0, factories: 0, orders: 0 });
+
+  useEffect(() => {
+    // Fetch admin stats
+    fetch("/api/admin/dashboard")
+      .then(r => r.json())
+      .then(data => setStats(data))
+      .catch(console.error);
+  }, []);
+
   return (
-    <BrowserRouter basename="/admin">
-      <Refine
-        routerProvider={routerProvider}
-        dataProvider={adminDataProvider}
-        resources={[
-          { name: "dashboard", list: "/" },
-          { name: "users", list: "/users" },
-          { name: "products", list: "/products" },
-          { name: "orders", list: "/orders" },
-          { name: "factories", list: "/factories" },
-        ]}
-        options={{ syncWithLocation: true }}
-      >
-        <Routes>
-          <Route element={<AdminLayout />}>
-            <Route index element={<AdminOverview />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="products" element={<AdminProducts />} />
-            <Route path="orders" element={<AdminOrders />} />
-            <Route path="factories" element={<AdminFactories />} />
-          </Route>
-        </Routes>
-      </Refine>
-    </BrowserRouter>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Users</h2>
+          <p className="text-3xl font-bold">{stats.users}</p>
+        </Card>
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Factories</h2>
+          <p className="text-3xl font-bold">{stats.factories}</p>
+        </Card>
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Orders</h2>
+          <p className="text-3xl font-bold">{stats.orders}</p>
+        </Card>
+      </div>
+    </div>
   );
 }

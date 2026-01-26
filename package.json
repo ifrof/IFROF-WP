@@ -14,7 +14,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
     "@aws-sdk/s3-request-presigner": "^3.693.0",
-    "@ai-sdk/openai": "^0.0.30",
+    "ai": "^4.0.0",
     "@builder.io/vite-plugin-jsx-loc": "^0.1.1",
     "@hookform/resolvers": "^5.2.2",
     "@lucia-auth/adapter-mysql": "^3.0.0",
@@ -50,10 +50,7 @@
     "@trpc/react-query": "^11.6.0",
     "@trpc/server": "^11.6.0",
     "@vitejs/plugin-react": "^5.0.4",
-    "@refinedev/core": "^4.64.0",
-    "@refinedev/react-router-v6": "^4.6.1",
     "axios": "^1.12.2",
-    "ai": "^4.0.0",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.6.2",
     "class-variance-authority": "^0.7.1",
@@ -136,9 +133,6 @@
   },
   "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af",
   "pnpm": {
-    "patchedDependencies": {
-      "wouter@3.7.1": "patches/wouter@3.7.1.patch"
-    },
     "overrides": {
       "tailwindcss>nanoid": "3.3.7"
     },
