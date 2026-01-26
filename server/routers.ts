@@ -31,6 +31,7 @@ import { adminActionsRouter } from "./routers/admin-actions";
 import { factoryVerificationAiRouter } from "./routers/factory-verification-ai";
 import { contentRouter } from "./routers/content";
 import { adminDashboardRouter } from "./routers/admin-dashboard";
+import { searchRouter } from "./routers/search";
 
 export const appRouter = router({
   system: systemRouter,
@@ -40,6 +41,7 @@ export const appRouter = router({
   // Marketplace features
   factories: factoriesRouter,
   products: productsRouter,
+  search: searchRouter,
   inquiries: inquiriesRouter,
   messages: messagesRouter,
   
@@ -80,6 +82,7 @@ export const appRouter = router({
   factoryVerificationAi: factoryVerificationAiRouter,
   content: contentRouter,
   adminDashboard: adminDashboardRouter,
+  search: searchRouter,
 });
 
 export type AppRouter = typeof appRouter;
@@ -106,4 +109,5 @@ export {
   factoryVerificationAiRouter,
   contentRouter,
   adminDashboardRouter,
+  searchRouter,
 };
