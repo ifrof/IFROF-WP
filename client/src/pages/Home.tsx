@@ -69,7 +69,8 @@ export default function Home() {
               <span className="font-bold text-xl text-primary">IFROF</span>
             </div>
 
-            <div className="hidden md:flex items-centehref="/factory-investigator" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/factory-investigator" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
                 {language === 'ar' ? 'Factory Investigator' : 'Factory Investigator'}
               </Link>
               <Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
@@ -121,7 +122,19 @@ export default function Home() {
               ? 'لا وسيط يسحب 40% من أرباحك. نربطك مباشرة بالمصانع الصينية الحقيقية لضمان أقل سعر وأعلى جودة.'
               : 'No 40% middleman cuts. We connect you directly with real Chinese factories for the lowest prices and highest quality.'}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-cent          </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/ai-search">
+              <Button size="lg" className="bg-[#ff8c42] hover:bg-[#e67a35] text-white px-8 py-6 text-lg font-bold rounded-xl shadow-xl transition-all hover:scale-105 flex items-center gap-2">
+                {language === 'ar' ? 'ابحث عن المصنع الحقيقي' : 'Find Real Factory'}
+                <Arrow className="w-5 h-5" />
+              </Button>
+            </Link>
+            <Link href="/marketplace">
+              <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 border-white/20 text-white px-8 py-6 text-lg font-bold rounded-xl backdrop-blur-sm transition-all">
+                {language === 'ar' ? 'تصفح المنتجات' : 'Browse Products'}
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 

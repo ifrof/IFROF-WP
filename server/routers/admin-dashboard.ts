@@ -2,7 +2,7 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { users, factories, orders, products } from "../../drizzle/schema";
-import { eq, count, and } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 async function requireAdmin(userId: number) {
@@ -40,12 +40,12 @@ export const adminDashboardRouter = router({
     const verifiedFactories = await db
       .select({ count: count() })
       .from(factories)
-      .where(eq(factories.verified, 1));
+      .where(eq(factories.verificationStatus, "verified"));
 
     const completedOrders = await db
       .select({ count: count() })
       .from(orders)
-      .where(eq(orders.paymentStatus, "completed"));
+      .where(eq(orders.status, "delivered"));
 
     return {
       totalUsers: totalUsers[0]?.count || 0,
@@ -54,7 +54,7 @@ export const adminDashboardRouter = router({
       totalOrders: totalOrders[0]?.count || 0,
       completedOrders: completedOrders[0]?.count || 0,
       totalProducts: totalProducts[0]?.count || 0,
-      revenue: completedOrders[0]?.count || 0 * 99, // Assuming $99 per order
+      revenue: (completedOrders[0]?.count || 0) * 99,
     };
   }),
 
@@ -79,7 +79,7 @@ export const adminDashboardRouter = router({
       let query = db.select().from(factories);
 
       if (input.verified !== undefined) {
-        query = query.where(eq(factories.verified, input.verified ? 1 : 0));
+        query = query.where(eq(factories.verificationStatus, input.verified ? "verified" : "pending"));
       }
 
       return query.limit(pageLimit).offset(pageOffset);
@@ -95,7 +95,7 @@ export const adminDashboardRouter = router({
 
       await db
         .update(factories)
-        .set({ verified: 1, verifiedAt: new Date() })
+        .set({ verificationStatus: "verified", verifiedAt: new Date() })
         .where(eq(factories.id, input.factoryId));
 
       return { success: true };
@@ -111,7 +111,7 @@ export const adminDashboardRouter = router({
 
       await db
         .update(factories)
-        .set({ verified: 0, verificationNotes: input.reason })
+        .set({ verificationStatus: "rejected", verificationNotes: input.reason })
         .where(eq(factories.id, input.factoryId));
 
       return { success: true };
