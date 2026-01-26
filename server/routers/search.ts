@@ -1,7 +1,7 @@
 import { router, publicProcedure } from "../_core/trpc";
 import { z } from "zod";
 import { db } from "../db";
-import { factories, products } from "../db/schema";
+import { factories, products } from "../../drizzle/schema";
 import { sql, like, and, gte, lte } from "drizzle-orm";
 
 export const searchRouter = router({

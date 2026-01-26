@@ -82,7 +82,6 @@ export const appRouter = router({
   factoryVerificationAi: factoryVerificationAiRouter,
   content: contentRouter,
   adminDashboard: adminDashboardRouter,
-  search: searchRouter,
 });
 
 export type AppRouter = typeof appRouter;
