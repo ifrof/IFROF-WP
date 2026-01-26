@@ -1,18 +1,10 @@
 # Build stage
 FROM node:20-bookworm-slim AS builder
 
-# Install build dependencies for native modules (like better-sqlite3)
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    python3 \
-    make \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm
+# Enable pnpm via corepack
+RUN corepack enable
 
 # Copy package files and patches
 COPY package.json pnpm-lock.yaml ./
@@ -30,15 +22,10 @@ RUN pnpm build
 # Production stage
 FROM node:20-bookworm-slim AS production
 
-# Install runtime dependencies including curl for healthcheck
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm
+# Enable pnpm via corepack
+RUN corepack enable
 
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
@@ -57,9 +44,9 @@ ENV PORT=3000
 # Expose port
 EXPOSE 3000
 
-# Health check with longer start period for Railway
+# Health check with longer start period for Railway (uses Node fetch to avoid curl)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:3000/api/health || exit 1
+    CMD node -e "fetch('http://localhost:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
 
 # Start the server
 CMD ["node", "dist/index.js"]
