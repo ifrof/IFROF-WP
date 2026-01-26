@@ -62,6 +62,7 @@ function AppContent() {
           <Route path="/blog" component={Blog} />
           <Route path="/blog/:slug" component={BlogPostDetail} />
           <Route path="/find-factory" component={AISearch} />
+          <Route path="/factory-investigator" component={AISearch} />
           <Route path="/import-request" component={ImportRequest} />
           <Route path="/factory" component={Marketplace} />
           <Route path="/marketplace" component={Marketplace} />

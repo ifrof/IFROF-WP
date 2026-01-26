@@ -73,8 +73,8 @@ export default function Home() {
               <Link href="/factory" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
                 {language === 'ar' ? 'السوق' : 'Marketplace'}
               </Link>
-              <Link href="/find-factory" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
-                {language === 'ar' ? 'ابحث عن المصنع الحقيقي' : 'Find Real Factory'}
+              <Link href="/factory-investigator" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
+                {language === 'ar' ? 'Factory Investigator' : 'Factory Investigator'}
               </Link>
               <Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
                 {language === 'ar' ? 'المدونة' : 'Blog'}
@@ -126,9 +126,9 @@ export default function Home() {
               : 'No 40% middleman cuts. We connect you directly with real Chinese factories for the lowest prices and highest quality.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/find-factory">
+            <Link href="/factory-investigator">
               <Button size="lg" className="bg-[#ff8c42] hover:bg-[#e67a35] text-white px-8 py-6 text-lg">
-                {language === 'ar' ? 'ابحث عن المصنع الحقيقي الآن' : 'Find Real Factory Now'}
+                {language === 'ar' ? 'Factory Investigator' : 'Factory Investigator'}
                 <Arrow className="w-5 h-5 ms-2" />
               </Button>
             </Link>

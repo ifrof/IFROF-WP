@@ -146,9 +146,9 @@ export default function AISearch() {
                   {t.manufacturers}
                 </Button>
               </Link>
-              <Link href="/find-factory">
+              <Link href="/factory-investigator">
                 <Button variant="outline" size="sm" className="border-[#ff8c42] text-[#ff8c42]">
-                  {language === 'ar' ? 'ابحث عن المصنع الحقيقي' : 'Find Real Factory'}
+                  {language === 'ar' ? 'Factory Investigator' : 'Factory Investigator'}
                 </Button>
               </Link>
               <Link href="/import-request">
