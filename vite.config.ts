@@ -45,23 +45,37 @@ export default defineConfig({
         drop_console: true,
         drop_debugger: true,
         pure_funcs: ['console.log', 'console.info'],
+        passes: 3,
+      },
+      mangle: true,
+      format: {
+        comments: false,
       },
     },
     rollupOptions: {
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-hook-form')) {
-              return 'react-vendor';
+            if (id.includes('react') && id.includes('react-dom')) {
+              return 'react';
+            }
+            if (id.includes('react-hook-form') || id.includes('@hookform')) {
+              return 'forms';
             }
             if (id.includes('@radix-ui')) {
-              return 'ui-vendor';
+              return 'ui';
             }
-            if (id.includes('@tanstack') || id.includes('@trpc')) {
-              return 'query-vendor';
+            if (id.includes('@tanstack/react-query')) {
+              return 'query';
+            }
+            if (id.includes('@trpc')) {
+              return 'trpc';
             }
             if (id.includes('lucide-react')) {
               return 'icons';
+            }
+            if (id.includes('framer-motion')) {
+              return 'motion';
             }
             return 'vendor';
           }
@@ -73,7 +87,9 @@ export default defineConfig({
     },
     cssCodeSplit: true,
     sourcemap: false,
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 500,
+    reportCompressedSize: false,
+    target: 'es2020',
   },
   server: {
     host: true,
