@@ -69,11 +69,7 @@ export default function Home() {
               <span className="font-bold text-xl text-primary">IFROF</span>
             </div>
 
-            <div className="hidden md:flex items-center gap-6">
-              <Link href="/factory" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
-                {language === 'ar' ? 'السوق' : 'Marketplace'}
-              </Link>
-              <Link href="/factory-investigator" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
+            <div className="hidden md:flex items-centehref="/factory-investigator" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
                 {language === 'ar' ? 'Factory Investigator' : 'Factory Investigator'}
               </Link>
               <Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
@@ -125,14 +121,7 @@ export default function Home() {
               ? 'لا وسيط يسحب 40% من أرباحك. نربطك مباشرة بالمصانع الصينية الحقيقية لضمان أقل سعر وأعلى جودة.'
               : 'No 40% middleman cuts. We connect you directly with real Chinese factories for the lowest prices and highest quality.'}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/factory-investigator">
-              <Button size="lg" className="bg-[#ff8c42] hover:bg-[#e67a35] text-white px-8 py-6 text-lg">
-                {language === 'ar' ? 'Factory Investigator' : 'Factory Investigator'}
-                <Arrow className="w-5 h-5 ms-2" />
-              </Button>
-            </Link>
-          </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-cent          </div>
         </div>
       </section>
 

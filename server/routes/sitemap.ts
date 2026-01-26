@@ -14,7 +14,7 @@ router.get('/sitemap.xml', async (req, res) => {
     const staticPages = [
       '',
       '/marketplace',
-      '/find-factory',
+      '/factory-investigator',
       '/faq',
       '/about',
       '/contact',

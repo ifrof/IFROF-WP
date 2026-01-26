@@ -43,8 +43,8 @@ export default function Blog() {
             <a href="/#how-it-works" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
               {language === 'ar' ? 'كيف يعمل' : 'How It Works'}
             </a>
-            <Link href="/find-factory" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
-              {language === 'ar' ? 'ابحث عن المصنع الحقيقي' : 'Find Real Factory'}
+            <Link href="/factory-investigator" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
+              {language === 'ar' ? 'Factory Investigator' : 'Factory Investigator'}
             </Link>
             
             <Link href="/login">

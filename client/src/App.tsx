@@ -61,7 +61,7 @@ function AppContent() {
           <Route path="/" component={Home} />
           <Route path="/blog" component={Blog} />
           <Route path="/blog/:slug" component={BlogPostDetail} />
-          <Route path="/find-factory" component={AISearch} />
+
           <Route path="/factory-investigator" component={AISearch} />
           <Route path="/import-request" component={ImportRequest} />
           <Route path="/factory" component={Marketplace} />
@@ -71,7 +71,6 @@ function AppContent() {
           <Route path="/faq" component={FAQ} />
           <Route path="/contact" component={Contact} />
           <Route path="/login" component={Login} />
-          <Route path="/register" component={Register} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/:rest*" component={AdminDashboard} />
           <Route path="/my-factory" component={FactoryDashboard} />

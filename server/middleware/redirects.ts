@@ -5,8 +5,8 @@ const redirects: Record<string, string> = {
   '/old-products': '/shop/products',
   '/manufacturers': '/marketplace',
 // '/factory-investigator': '/find-factory',
-  '/ai-search': '/find-factory',
-  '/factory': '/find-factory'
+
+	  '/factory': '/marketplace'
 };
 
 export function redirectMiddleware(req: Request, res: Response, next: NextFunction) {

@@ -146,11 +146,7 @@ export default function AISearch() {
                   {t.manufacturers}
                 </Button>
               </Link>
-              <Link href="/factory-investigator">
-                <Button variant="outline" size="sm" className="border-[#ff8c42] text-[#ff8c42]">
-                  {language === 'ar' ? 'Factory Investigator' : 'Factory Investigator'}
-                </Button>
-              </Link>
+  k>
               <Link href="/import-request">
                 <Button size="sm" className="bg-[#ff8c42] hover:bg-[#e67a35]">
                   {t.importRequest}

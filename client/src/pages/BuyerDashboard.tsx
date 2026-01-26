@@ -124,7 +124,7 @@ export default function BuyerDashboard() {
             </Card>
           </Link>
 
-          <Link href="/find-factory">
+          <Link href="/factory-investigator">
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardContent className="pt-6 text-center">
                 <MessageSquare className="w-12 h-12 mx-auto text-purple-600 mb-2" />
