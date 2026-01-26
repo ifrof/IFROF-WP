@@ -2,7 +2,7 @@ import { z } from "zod";
 import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { products, factories } from "../../drizzle/schema";
-import { eq, like, and, desc, gte, lte } from "drizzle-orm";
+import { eq, like, and, desc, gte, lte, or } from "drizzle-orm";
 import type { Product } from "../../drizzle/schema";
 import { TRPCError } from "@trpc/server";
 
@@ -61,16 +61,17 @@ export const productsRouter = router({
       // Search by name in multiple languages
       if (input.query) {
         const searchTerm = `%${input.query}%`;
-        conditions.push(
-          or(
-            like(products.nameAr, searchTerm),
-            like(products.nameEn, searchTerm),
-            like(products.nameZh, searchTerm),
-            like(products.descriptionAr, searchTerm),
-            like(products.descriptionEn, searchTerm),
-            like(products.descriptionZh, searchTerm)
-          )
+        const searchCondition = or(
+          like(products.nameAr, searchTerm),
+          like(products.nameEn, searchTerm),
+          like(products.nameZh, searchTerm),
+          like(products.descriptionAr, searchTerm),
+          like(products.descriptionEn, searchTerm),
+          like(products.descriptionZh, searchTerm)
         );
+        if (searchCondition) {
+          conditions.push(searchCondition);
+        }
       }
 
       // Filter by category
@@ -83,7 +84,7 @@ export const productsRouter = router({
         conditions.push(gte(products.minPrice, input.minPrice));
       }
       if (input.maxPrice !== undefined) {
-        conditions.push(lte(products.minPrice, input.maxPrice));
+        conditions.push(lte(products.maxPrice, input.maxPrice));
       }
 
       // Filter by MOQ
@@ -96,33 +97,24 @@ export const productsRouter = router({
         conditions.push(eq(products.factoryId, input.factoryId));
       }
 
-      // Filter by location (through factory)
+      // Filter by location (through factory) - optimized with JOIN
       if (input.location) {
-        // This would require a JOIN, so we'll fetch and filter in memory for now
+        // Fetch products with factory location filter
         const allProducts = await db
           .select()
           .from(products)
           .where(and(...conditions));
 
-        // Filter by location
-        const filtered = await Promise.all(
-          allProducts.map(async (p: any) => {
-            const factory = await db
-              .select()
-              .from(factories)
-              .where(eq(factories.id, p.factoryId))
-              .limit(1);
+        // Get all factories with matching location
+        const matchingFactories = await db
+          .select()
+          .from(factories)
+          .where(like(factories.location, `%${input.location}%`));
 
-            if (factory && factory[0]?.location?.includes(input.location)) {
-              return p;
-            }
-            return null;
-          })
-        );
+        const factoryIds = matchingFactories.map((f: any) => f.id);
+        const filtered = allProducts.filter((p: any) => factoryIds.includes(p.factoryId));
 
-        return filtered
-          .filter((p) => p !== null)
-          .slice(pageOffset, pageOffset + pageLimit);
+        return filtered.slice(pageOffset, pageOffset + pageLimit);
       }
 
       return db
@@ -394,7 +386,4 @@ export const productsRouter = router({
   }),
 });
 
-// Helper function for OR condition
-function or(...conditions: any[]) {
-  return conditions.reduce((acc, cond) => acc || cond);
-}
+
