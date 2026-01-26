@@ -28,6 +28,9 @@ import { factoryVerificationRouter } from "./routers/factoryVerification";
 import { twoFactorAuthRouter } from "./routers/two-factor-auth";
 import { newsletterRouter } from "./routers/newsletter";
 import { adminActionsRouter } from "./routers/admin-actions";
+import { factoryVerificationAiRouter } from "./routers/factory-verification-ai";
+import { contentRouter } from "./routers/content";
+import { adminDashboardRouter } from "./routers/admin-dashboard";
 
 export const appRouter = router({
   system: systemRouter,
@@ -72,6 +75,11 @@ export const appRouter = router({
   twoFactorAuth: twoFactorAuthRouter,
   newsletter: newsletterRouter,
   adminActions: adminActionsRouter,
+  
+  // New critical features
+  factoryVerificationAi: factoryVerificationAiRouter,
+  content: contentRouter,
+  adminDashboard: adminDashboardRouter,
 });
 
 export type AppRouter = typeof appRouter;
@@ -95,4 +103,7 @@ export {
   dashboardRouter,
   mapsRouter,
   adminRouter,
+  factoryVerificationAiRouter,
+  contentRouter,
+  adminDashboardRouter,
 };
