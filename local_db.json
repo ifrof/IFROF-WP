@@ -3,14 +3,14 @@
     {
       "id": 1,
       "email": "ifrof4@gmail.com",
-      "password": "$2b$10$t0qrssbW.VsjVNGprrSxxuzr4Op1ZNRimczxqcDes3xj.bcW5KUFS",
+      "password": "$2b$10$cHTRSC.oeQFyzJUMBaFfbO.VIlZ3/vtER7ehERLsZJ5BqKYX24afi",
       "role": "admin",
       "name": "Hady Essam",
-      "openId": "admin_manual_fix",
+      "openId": "admin_prod_2026",
       "loginMethod": "email",
-      "createdAt": "2026-01-27T10:35:36.940Z",
-      "updatedAt": "2026-01-27T10:35:36.940Z",
-      "lastSignedIn": "2026-01-27T10:35:36.940Z"
+      "createdAt": "2026-01-27T10:49:31.253Z",
+      "updatedAt": "2026-01-27T10:49:31.253Z",
+      "lastSignedIn": "2026-01-27T10:49:31.253Z"
     }
   ],
   "factories": [],
