@@ -5,9 +5,6 @@ import { eq } from "drizzle-orm";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "../_core/cookies";
 import crypto from "crypto";
-import fs from "fs";
-import path from "path";
-import bcrypt from "bcrypt";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -31,57 +28,23 @@ export const authImprovedRouter = router({
     .input(loginSchema)
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      
-      let user;
-      
-      // Try MySQL first
-      if (db && !db.isJsonMode) {
-        try {
-          const usersTable = getUsersTable() as any;
-          const [dbUser] = await db
-            .select()
-            .from(usersTable)
-            .where(eq(usersTable.email, input.email))
-            .limit(1);
-          user = dbUser;
-          
-          if (user) {
-            const isPasswordValid = input.password && user.password ? await bcrypt.compare(input.password, user.password) : false;
-            if (!isPasswordValid) {
-              user = null;
-            } else {
-              await db.update(usersTable)
-                .set({ lastSignedIn: new Date() })
-                .where(eq(usersTable.id, user.id));
-            }
-          }
-        } catch (e) {
-          console.warn("MySQL login failed, falling back to JSON", e);
-        }
-      }
+      const usersTable = getUsersTable() as any;
 
-      // Fallback to JSON
-      if (!user) {
-        const localDbPath = path.join(process.cwd(), "local_db.json");
-        if (fs.existsSync(localDbPath)) {
-          const data = JSON.parse(fs.readFileSync(localDbPath, 'utf-8'));
-          user = data.users.find((u: any) => u.email === input.email);
-          
-          if (user) {
-            const isPasswordValid = input.password && user.password ? await bcrypt.compare(input.password, user.password) : false;
-            if (!isPasswordValid) {
-              user = null;
-            } else {
-              user.lastSignedIn = new Date().toISOString();
-              fs.writeFileSync(localDbPath, JSON.stringify(data, null, 2));
-            }
-          }
-        }
-      }
+      // Find user by email
+      const [user] = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.email, input.email))
+        .limit(1);
 
       if (!user) {
-        throw new Error("User not found or incorrect credentials / المستخدم غير موجود أو بيانات الدخول خاطئة");
+        throw new Error("User not found / المستخدم غير موجود");
       }
+
+      // Update last signed in
+      await db.update(usersTable)
+        .set({ lastSignedIn: new Date() })
+        .where(eq(usersTable.id, user.id));
 
       // Set session cookie
       const cookieOptions = getSessionCookieOptions(ctx.req);
@@ -99,13 +62,11 @@ export const authImprovedRouter = router({
     .mutation(async ({ ctx, input }) => {
       const openId = crypto.randomBytes(16).toString("hex");
       
-      const hashedPassword = await bcrypt.hash(input.password, 10);
       const newUser = await upsertUser({
         email: input.email,
         name: input.name,
         role: input.role,
         openId: openId,
-        password: hashedPassword,
         loginMethod: "email",
       });
 

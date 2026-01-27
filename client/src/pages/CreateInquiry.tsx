@@ -61,11 +61,13 @@ export default function CreateInquiry() {
 
     try {
       await createInquiryMutation.mutateAsync({
+        buyerId: user.id,
         factoryId: parseInt(formData.factoryId),
         productId: formData.productId ? parseInt(formData.productId) : undefined,
-        productName: formData.subject,
-        quantity: formData.quantityRequired ? parseInt(formData.quantityRequired) : 1,
-        specifications: formData.specifications || formData.description,
+        subject: formData.subject,
+        description: formData.description,
+        specifications: formData.specifications,
+        quantityRequired: formData.quantityRequired ? parseInt(formData.quantityRequired) : undefined,
       });
 
       toast.success("Inquiry created successfully!");
@@ -186,7 +188,7 @@ export default function CreateInquiry() {
               </div>
 
               <div className="flex gap-2 justify-end pt-4">
-                <Button type="button" variant="outline" onClick={() => navigate("/factory")}>
+                <Button type="button" variant="outline" onClick={() => navigate("/marketplace")}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={createInquiryMutation.isPending}>

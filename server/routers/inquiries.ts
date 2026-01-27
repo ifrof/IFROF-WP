@@ -2,26 +2,17 @@ import { z } from "zod";
 import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { TRPCError } from "@trpc/server";
-import { sendImportRequestUpdateEmail } from "../_core/email-service";
 import { messages } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 
-const importRequestSchema = z.object({
-  productId: z.number().optional(),
-  factoryId: z.number().optional(),
-  productName: z.string().optional(),
-  category: z.string().optional(),
-  quantity: z.number().min(1),
-  specifications: z.string().optional(),
-  deliveryDetails: z.string().optional(),
-});
-
-const quoteSchema = z.object({
-  requestId: z.number(),
+const inquirySchema = z.object({
+  buyerId: z.number(),
   factoryId: z.number(),
-  price: z.number().min(1),
-  terms: z.string().optional(),
-  commission: z.number(),
+  productId: z.number().optional(),
+  subject: z.string().min(1),
+  description: z.string().optional(),
+  specifications: z.string().optional(),
+  quantityRequired: z.number().optional(),
 });
 
 const messageSchema = z.object({
@@ -33,91 +24,50 @@ const messageSchema = z.object({
 });
 
 export const inquiriesRouter = router({
-  // Get import requests for a factory
+  // Get inquiries for a factory (factory owner only)
   getByFactory: protectedProcedure
     .input(z.object({ factoryId: z.number() }))
     .query(async ({ ctx, input }) => {
-      return db.getImportRequestsByFactory(input.factoryId);
+      // In a real app, verify the user owns this factory
+      return db.getInquiriesByFactory(input.factoryId);
     }),
 
-  // Get import requests for a buyer
+  // Get inquiries for a buyer (buyer only)
   getByBuyer: protectedProcedure
     .input(z.object({ buyerId: z.number() }))
     .query(async ({ ctx, input }) => {
       if (ctx.user.id !== input.buyerId && ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Cannot view other buyer's requests" });
+        throw new TRPCError({ code: "FORBIDDEN", message: "Cannot view other buyer's inquiries" });
       }
-      return db.getImportRequestsByBuyer(input.buyerId);
+      return db.getInquiriesByBuyer(input.buyerId);
     }),
 
-  // Create import request
+  // Create inquiry (buyers only)
   create: protectedProcedure
-    .input(importRequestSchema)
+    .input(inquirySchema)
     .mutation(async ({ ctx, input }) => {
-      return db.createImportRequest({
+      if (ctx.user.role === "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Admins cannot create inquiries" });
+      }
+
+      const result = await db.createInquiry({
         ...input,
         buyerId: ctx.user.id,
-        status: "pending",
       });
+
+      return result;
     }),
 
-  // Update request status
+  // Update inquiry status (factory owner or admin)
   updateStatus: protectedProcedure
-    .input(z.object({ 
-      id: z.number(), 
-      status: z.enum(["pending", "quoted", "accepted", "paid", "shipped", "cancelled"]),
-    }))
+    .input(z.object({ id: z.number(), status: z.enum(["pending", "responded", "negotiating", "completed", "cancelled"]) }))
     .mutation(async ({ ctx, input }) => {
-      const updated = await db.updateImportRequest(input.id, { status: input.status });
-      
-      // Send notification to buyer
-      const request = await db.getImportRequestById(input.id);
-      if (request) {
-        const buyer = await db.getUserById(request.buyerId);
-        if (buyer) {
-          await sendImportRequestUpdateEmail(
-            buyer.email,
-            buyer.fullName || buyer.username,
-            input.id.toString(),
-            input.status,
-            request.productName || "Product"
-          );
-        }
+      if (ctx.user.role !== "admin" && ctx.user.role !== "factory") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only factory owners can update inquiry status" });
       }
-      
-      return updated;
-    }),
 
-  // Submit a quote (factory only)
-  submitQuote: protectedProcedure
-    .input(quoteSchema)
-    .mutation(async ({ ctx, input }) => {
-      const quote = await db.createQuote(input);
-      await db.updateImportRequest(input.requestId, { status: "quoted" });
-      
-      // Send notification to buyer
-      const request = await db.getImportRequestById(input.requestId);
-      if (request) {
-        const buyer = await db.getUserById(request.buyerId);
-        if (buyer) {
-          await sendImportRequestUpdateEmail(
-            buyer.email,
-            buyer.fullName || buyer.username,
-            input.requestId.toString(),
-            "quoted",
-            request.productName || "Product"
-          );
-        }
-      }
-      
-      return quote;
-    }),
-
-  // Get quotes for a request
-  getQuotes: protectedProcedure
-    .input(z.object({ requestId: z.number() }))
-    .query(async ({ ctx, input }) => {
-      return db.getQuotesByRequest(input.requestId);
+      const result = await db.updateInquiry(input.id, { status: input.status });
+      return result;
     }),
 });
 

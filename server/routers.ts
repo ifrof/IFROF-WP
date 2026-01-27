@@ -5,7 +5,7 @@ import { publicProcedure, router } from "./_core/trpc";
 
 // Import all feature routers
 import { factoriesRouter, productsRouter } from "./routers/factories";
-import { authImprovedRouter as authRouter } from "./routers/auth-improved";
+import { authImprovedRouter } from "./routers/auth-improved";
 import { inquiriesRouter, messagesRouter } from "./routers/inquiries";
 import { forumRouter } from "./routers/forum";
 import { chatbotRouter } from "./routers/chatbot";
@@ -14,28 +14,16 @@ import { notificationsRouter } from "./routers/notifications";
 import { blogRouter } from "./routers/blog";
 import { aiAgentRouter } from "./routers/aiAgent";
 import { cartRouter } from "./routers/cart";
-import { checkoutImprovedRouter } from "./routers/checkout-improved";
-import { checkoutRouter } from "./routers/checkout";
 import { reviewsRouter } from "./routers/reviews";
-import { profilesRouter } from "./routers/profiles";
-import { storageRouter } from "./routers/storage";
 import { servicesRouter } from "./routers/services";
 import { supportRouter } from "./routers/support";
 import { dashboardRouter } from "./routers/dashboard";
 import { mapsRouter } from "./routers/maps";
-import { adminRouter } from "./routers/admin";
-import { factoryVerificationRouter } from "./routers/factoryVerification";
-import { twoFactorAuthRouter } from "./routers/two-factor-auth";
-import { newsletterRouter } from "./routers/newsletter";
-import { adminActionsRouter } from "./routers/admin-actions";
-import { factoryVerificationAiRouter } from "./routers/factory-verification-ai";
-import { contentRouter } from "./routers/content";
-import { adminDashboardRouter } from "./routers/admin-dashboard";
 
 export const appRouter = router({
   system: systemRouter,
   
-  auth: authRouter,
+  auth: authImprovedRouter,
 
   // Marketplace features
   factories: factoriesRouter,
@@ -59,27 +47,13 @@ export const appRouter = router({
   
   // Shopping features
   cart: cartRouter,
-  checkout: checkoutImprovedRouter,
-  checkoutOld: checkoutRouter,
   reviews: reviewsRouter,
-  profiles: profilesRouter,
-  storage: storageRouter,
   
   // Additional features
   services: servicesRouter,
   support: supportRouter,
   dashboard: dashboardRouter,
   maps: mapsRouter,
-  admin: adminRouter,
-  factoryVerification: factoryVerificationRouter,
-  twoFactorAuth: twoFactorAuthRouter,
-  newsletter: newsletterRouter,
-  adminActions: adminActionsRouter,
-  
-  // New critical features
-  factoryVerificationAi: factoryVerificationAiRouter,
-  content: contentRouter,
-  adminDashboard: adminDashboardRouter,
 });
 
 export type AppRouter = typeof appRouter;
@@ -102,8 +76,4 @@ export {
   supportRouter,
   dashboardRouter,
   mapsRouter,
-  adminRouter,
-  factoryVerificationAiRouter,
-  contentRouter,
-  adminDashboardRouter,
 };

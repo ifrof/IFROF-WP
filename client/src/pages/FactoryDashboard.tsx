@@ -3,21 +3,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Package, ShoppingBag, MessageSquare, CheckCircle, Clock, XCircle, Truck, DollarSign } from "lucide-react";
+import { Loader2, Package, ShoppingBag, MessageSquare, CheckCircle, Clock, XCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
-import FactoryDashboardLayout from "@/components/FactoryDashboardLayout";
 
 export default function FactoryDashboard() {
   const { t } = useLanguage();
+  const { data: user } = trpc.auth.me.useQuery();
   
   // Mock factory ID - in production, this would come from user's factory association
   const factoryId = 1;
 
-  const { data: orders, isLoading: ordersLoading } = trpc.dashboard.getRecentOrders.useQuery();
+  const { data: orders, isLoading: ordersLoading } = trpc.dashboard.getRecentOrders.useQuery(
+    undefined,
+    { enabled: !!user }
+  );
   
   const { data: inquiries, isLoading: inquiriesLoading } = trpc.inquiries.getByFactory.useQuery(
-    { factoryId }
+    { factoryId },
+    { enabled: !!user }
   );
 
   const { data: products } = trpc.products.getByFactory.useQuery({ factoryId });
@@ -44,25 +48,33 @@ export default function FactoryDashboard() {
     );
   };
 
-  if (ordersLoading || inquiriesLoading) {
+  if (!user || user.role !== "factory") {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      <div className="min-h-screen flex items-center justify-center">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground">
+              {t("dashboard.accessDenied")}
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <FactoryDashboardLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.factory.title")}</h1>
-          <p className="text-muted-foreground">{t("dashboard.factory.subtitle")}</p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold">{t("dashboard.factory.title")}</h1>
+          <p className="text-blue-100 mt-2">{t("dashboard.factory.subtitle")}</p>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -128,7 +140,11 @@ export default function FactoryDashboard() {
                 <CardTitle>{t("dashboard.factory.recentOrders")}</CardTitle>
               </CardHeader>
               <CardContent>
-                {orders && (orders as any[]).length > 0 ? (
+                {ordersLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : orders && (orders as any[]).length > 0 ? (
                   <div className="space-y-4">
                     {(orders as any[]).map((order: any) => (
                       <div key={order.id} className="border rounded-lg p-4">
@@ -170,7 +186,11 @@ export default function FactoryDashboard() {
                 <CardTitle>{t("dashboard.factory.recentInquiries")}</CardTitle>
               </CardHeader>
               <CardContent>
-                {inquiries && (inquiries as any[]).length > 0 ? (
+                {inquiriesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : inquiries && (inquiries as any[]).length > 0 ? (
                   <div className="space-y-4">
                     {(inquiries as any[]).map((inquiry: any) => (
                       <div key={inquiry.id} className="border rounded-lg p-4">
@@ -181,23 +201,14 @@ export default function FactoryDashboard() {
                               {new Date(inquiry.createdAt).toLocaleDateString()}
                             </p>
                           </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <Badge>{inquiry.status}</Badge>
-                            {inquiry.shippingMethod && (
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                <Truck className="w-3 h-3 mr-1" />
-                                {t(`importRequest.form.shippingMethodOptions.${inquiry.shippingMethod}`)}
-                              </Badge>
-                            )}
-                          </div>
+                          <Badge>{inquiry.status}</Badge>
                         </div>
-                        <div className="flex justify-between items-center mt-4">
-                          {inquiry.shippingCostEstimate ? (
-                            <div className="text-sm font-semibold text-green-600 flex items-center">
-                              <DollarSign className="w-4 h-4 mr-1" />
-                              {t("importRequest.form.shippingCostEstimate")}: ${(inquiry.shippingCostEstimate / 100).toFixed(2)}
-                            </div>
-                          ) : <div></div>}
+                        {inquiry.description && (
+                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                            {inquiry.description}
+                          </p>
+                        )}
+                        <div className="flex justify-end mt-4">
                           <Button variant="outline" size="sm">
                             <MessageSquare className="w-4 h-4 mr-2" />
                             {t("dashboard.factory.respond")}
@@ -304,6 +315,6 @@ export default function FactoryDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </FactoryDashboardLayout>
+    </div>
   );
 }

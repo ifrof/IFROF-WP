@@ -5,7 +5,7 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
-import { getOAuthLoginUrl, logOAuthConfigErrorOnce } from "@/config/env";
+import { getLoginUrl } from "./const";
 import "./index.css";
 
 const queryClient = new QueryClient();
@@ -18,21 +18,14 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
-  const loginUrl = getOAuthLoginUrl();
-  if (!loginUrl) {
-    logOAuthConfigErrorOnce();
-    return;
-  }
-  window.location.assign(loginUrl);
+  window.location.href = getLoginUrl();
 };
 
 queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
     redirectToLoginIfUnauthorized(error);
-    if (process.env.NODE_ENV === 'development') {
-      console.error("[API Query Error]", error);
-    }
+    console.error("[API Query Error]", error);
   }
 });
 
@@ -40,9 +33,7 @@ queryClient.getMutationCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.mutation.state.error;
     redirectToLoginIfUnauthorized(error);
-    if (process.env.NODE_ENV === 'development') {
-      console.error("[API Mutation Error]", error);
-    }
+    console.error("[API Mutation Error]", error);
   }
 });
 

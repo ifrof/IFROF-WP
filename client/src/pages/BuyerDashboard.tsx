@@ -3,10 +3,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Package, FileText, MessageSquare, CheckCircle2, AlertCircle, Truck } from "lucide-react";
+import { Loader2, Package, FileText, MessageSquare, CheckCircle2, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
-import BuyerDashboardLayout from "@/components/BuyerDashboardLayout";
 
 export default function BuyerDashboard() {
   const { t } = useLanguage();
@@ -46,13 +45,16 @@ export default function BuyerDashboard() {
   }
 
   return (
-    <BuyerDashboardLayout>
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.buyer.title")}</h1>
-          <p className="text-muted-foreground">{t("dashboard.buyer.subtitle")}</p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-green-600 to-green-800 text-white py-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold">{t("dashboard.buyer.title")}</h1>
+          <p className="text-green-100 mt-2">{t("dashboard.buyer.subtitle")}</p>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card>
@@ -115,7 +117,7 @@ export default function BuyerDashboard() {
             </Card>
           </Link>
 
-          <Link href="/factory">
+          <Link href="/marketplace">
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardContent className="pt-6 text-center">
                 <Package className="w-12 h-12 mx-auto text-green-600 mb-2" />
@@ -124,7 +126,7 @@ export default function BuyerDashboard() {
             </Card>
           </Link>
 
-          <Link href="/factory-investigator">
+          <Link href="/ai-search">
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardContent className="pt-6 text-center">
                 <MessageSquare className="w-12 h-12 mx-auto text-purple-600 mb-2" />
@@ -195,7 +197,7 @@ export default function BuyerDashboard() {
                   <div className="text-center py-8">
                     <Package className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                     <p className="text-muted-foreground mb-4">{t("dashboard.buyer.noOrders")}</p>
-                    <Link href="/factory">
+                    <Link href="/marketplace">
                       <Button>{t("dashboard.buyer.startShopping")}</Button>
                     </Link>
                   </div>
@@ -226,15 +228,7 @@ export default function BuyerDashboard() {
                               {new Date(inquiry.createdAt).toLocaleDateString()}
                             </p>
                           </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <Badge>{inquiry.status}</Badge>
-                            {inquiry.shippingMethod && (
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                <Truck className="w-3 h-3 mr-1" />
-                                {t(`importRequest.form.shippingMethodOptions.${inquiry.shippingMethod}`)}
-                              </Badge>
-                            )}
-                          </div>
+                          <Badge>{inquiry.status}</Badge>
                         </div>
                         {inquiry.description && (
                           <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
@@ -265,7 +259,7 @@ export default function BuyerDashboard() {
         </Tabs>
 
         {/* KYC Verification Notice */}
-        <Card className="border-yellow-200 bg-yellow-50">
+        <Card className="mt-8 border-yellow-200 bg-yellow-50">
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
               <AlertCircle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
@@ -284,6 +278,6 @@ export default function BuyerDashboard() {
           </CardContent>
         </Card>
       </div>
-    </BuyerDashboardLayout>
+    </div>
   );
 }

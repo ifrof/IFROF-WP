@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +9,6 @@ import { Loader2, Package, CheckCircle, Clock } from "lucide-react";
 
 export default function Orders() {
   const { user, loading: authLoading } = useAuth();
-  const [, setLocation] = useLocation();
   const sessionId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("session_id") : null;
 
   const { data: orders, isLoading: ordersLoading } = trpc.payments.getOrders.useQuery({
@@ -161,11 +159,7 @@ export default function Orders() {
                   )}
 
                   <div className="mt-4 flex gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => setLocation(`/orders/${order.id}`)}
-                    >
+                    <Button variant="outline" className="flex-1">
                       View Details
                     </Button>
                     <Button variant="outline" className="flex-1">

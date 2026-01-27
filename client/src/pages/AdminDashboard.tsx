@@ -3,19 +3,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Users, Building2, Package, ShoppingBag, DollarSign, CheckCircle, ArrowRight, Plus } from "lucide-react";
+import { Loader2, Users, Building2, Package, ShoppingBag, AlertTriangle, CheckCircle, BarChart3 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function AdminDashboard() {
-  const { language, dir } = useLanguage();
+  const { t, language, dir } = useLanguage();
   const { user } = useAuth();
   
-  const { data, isLoading } = trpc.admin.getStats.useQuery(undefined, { 
-    enabled: !!user && user.role === "admin" 
-  });
+  const { data: factories, isLoading: factoriesLoading } = trpc.factories.list.useQuery();
+  const { data: products } = trpc.products.getByFactory.useQuery({ factoryId: 0 });
+  const { data: systemStats } = trpc.dashboard.getSystemStats.useQuery(undefined, { enabled: !!user && user.role === "admin" });
+  const { data: allUsers } = trpc.dashboard.getAllUsers.useQuery(undefined, { enabled: !!user && user.role === "admin" });
 
   if (!user || user.role !== "admin") {
     return (
@@ -39,87 +39,70 @@ export default function AdminDashboard() {
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-[#1e3a5f]" />
-      </div>
-    );
-  }
-
-  const stats = data?.stats;
-  const recentOrders = data?.recentOrders || [];
+  const verifiedFactories = (factories as any[])?.filter((f: any) => f.verificationStatus === "verified").length || 0;
+  const pendingFactories = (factories as any[])?.filter((f: any) => f.verificationStatus === "pending").length || 0;
 
   return (
     <div className="min-h-screen bg-gray-50" dir={dir}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#1e3a5f] to-[#2a528a] text-white py-8 px-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">
-              {language === "ar" ? "لوحة تحكم المسؤول" : "Admin Dashboard"}
-            </h1>
-            <p className="text-blue-100 mt-2">
-              {language === "ar" ? "إدارة المنتجات والطلبات والمستخدمين" : "Manage products, orders, and users"}
-            </p>
-          </div>
-          <Link href="/admin/products">
-            <Button className="bg-white text-[#1e3a5f] hover:bg-blue-50">
-              <Plus className="mr-2 h-4 w-4" />
-              {language === "ar" ? "إضافة منتج" : "Add Product"}
-            </Button>
-          </Link>
+      <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white py-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold">{t("dashboard.admin.title")}</h1>
+          <p className="text-purple-100 mt-2">{t("dashboard.admin.subtitle")}</p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="border-l-4 border-blue-500">
-            <CardHeader className="pb-2">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Building2 className="w-4 h-4" />
+                {t("dashboard.admin.totalFactories")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{systemStats?.factories || (factories as any[])?.length || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {verifiedFactories} {t("dashboard.admin.verified")}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Package className="w-4 h-4" />
-                {language === "ar" ? "إجمالي المنتجات" : "Total Products"}
+                {t("dashboard.admin.totalProducts")}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats?.products}</div>
+              <div className="text-3xl font-bold">{systemStats?.products || (products as any[])?.length || 0}</div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-green-500">
-            <CardHeader className="pb-2">
+          <Card>
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4" />
-                {language === "ar" ? "إجمالي الطلبات" : "Total Orders"}
+                <AlertTriangle className="w-4 h-4" />
+                {t("dashboard.admin.pendingVerifications")}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats?.orders}</div>
+              <div className="text-3xl font-bold text-yellow-600">{pendingFactories}</div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-purple-500">
-            <CardHeader className="pb-2">
+          <Card>
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                {language === "ar" ? "إجمالي المستخدمين" : "Total Users"}
+                {t("dashboard.admin.totalUsers")}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats?.users}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-orange-500">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
-                {language === "ar" ? "إجمالي الإيرادات" : "Total Revenue"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">${stats?.revenue.toLocaleString()}</div>
+              <div className="text-3xl font-bold">{systemStats?.users || (allUsers as any[])?.length || 0}</div>
             </CardContent>
           </Card>
         </div>
@@ -130,7 +113,7 @@ export default function AdminDashboard() {
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardContent className="pt-6 text-center">
                 <Building2 className="w-10 h-10 mx-auto text-blue-600 mb-2" />
-                <h3 className="font-medium text-sm">{language === "ar" ? "إدارة المصانع" : "Manage Factories"}</h3>
+                <h3 className="font-medium text-sm">{t("dashboard.admin.manageFactories")}</h3>
               </CardContent>
             </Card>
           </Link>
@@ -139,83 +122,96 @@ export default function AdminDashboard() {
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <CardContent className="pt-6 text-center">
                 <Package className="w-10 h-10 mx-auto text-green-600 mb-2" />
-                <h3 className="font-medium text-sm">{language === "ar" ? "إدارة المنتجات" : "Manage Products"}</h3>
+                <h3 className="font-medium text-sm">{t("dashboard.admin.manageProducts")}</h3>
               </CardContent>
             </Card>
           </Link>
 
-          <Link href="/admin/orders">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="pt-6 text-center">
-                <ShoppingBag className="w-10 h-10 mx-auto text-purple-600 mb-2" />
-                <h3 className="font-medium text-sm">{language === "ar" ? "إدارة الطلبات" : "Manage Orders"}</h3>
-              </CardContent>
-            </Card>
-          </Link>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardContent className="pt-6 text-center">
+              <ShoppingBag className="w-10 h-10 mx-auto text-purple-600 mb-2" />
+              <h3 className="font-medium text-sm">{t("dashboard.admin.manageServices")}</h3>
+            </CardContent>
+          </Card>
 
-          <Link href="/admin/users">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="pt-6 text-center">
-                <Users className="w-10 h-10 mx-auto text-orange-600 mb-2" />
-                <h3 className="font-medium text-sm">{language === "ar" ? "إدارة المستخدمين" : "Manage Users"}</h3>
-              </CardContent>
-            </Card>
-          </Link>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <CardContent className="pt-6 text-center">
+              <Users className="w-10 h-10 mx-auto text-orange-600 mb-2" />
+              <h3 className="font-medium text-sm">{t("dashboard.admin.manageUsers")}</h3>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Recent Orders Table */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>{language === "ar" ? "أحدث الطلبات" : "Recent Orders"}</CardTitle>
-            <Link href="/admin/orders">
-              <Button variant="ghost" size="sm">
-                {language === "ar" ? "عرض الكل" : "View All"}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{language === "ar" ? "رقم الطلب" : "Order #"}</TableHead>
-                  <TableHead>{language === "ar" ? "التاريخ" : "Date"}</TableHead>
-                  <TableHead>{language === "ar" ? "المبلغ" : "Amount"}</TableHead>
-                  <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
-                  <TableHead className="text-right">{language === "ar" ? "إجراءات" : "Actions"}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentOrders.map((order: any) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.orderNumber}</TableCell>
-                    <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>${(order.totalAmount / 100).toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Badge variant={order.status === 'delivered' ? 'default' : 'secondary'}>
-                        {order.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Link href={`/admin/orders/${order.id}`}>
-                        <Button variant="outline" size="sm">
-                          {language === "ar" ? "تفاصيل" : "Details"}
-                        </Button>
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {recentOrders.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                      {language === "ar" ? "لا توجد طلبات حديثة" : "No recent orders found"}
-                    </TableCell>
-                  </TableRow>
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="factories" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="factories">{t("dashboard.admin.factories")}</TabsTrigger>
+            <TabsTrigger value="verifications">{t("dashboard.admin.verifications")}</TabsTrigger>
+            <TabsTrigger value="disputes">{t("dashboard.admin.disputes")}</TabsTrigger>
+          </TabsList>
+
+          {/* Factories Tab */}
+          <TabsContent value="factories">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle>{t("dashboard.admin.allFactories")}</CardTitle>
+                  <Link href="/admin/factories">
+                    <Button>{t("dashboard.admin.addFactory")}</Button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {factoriesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : factories && (factories as any[]).length > 0 ? (
+                  <div className="space-y-3">
+                    {(factories as any[]).slice(0, 10).map((factory: any) => (
+                      <div key={factory.id} className="border rounded-lg p-4 flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                          {factory.logoUrl && (
+                            <img
+                              src={factory.logoUrl}
+                              alt={factory.name}
+                              className="w-12 h-12 rounded object-cover"
+                            />
+                          )}
+                          <div>
+                            <h3 className="font-medium">{factory.name}</h3>
+                            <p className="text-sm text-muted-foreground">{factory.location}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {factory.verificationStatus === "verified" ? (
+                            <Badge variant="default" className="bg-green-600">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              {t("manufacturer.verified")}
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              {t("manufacturer.notVerified")}
+                            </Badge>
+                          )}
+                          <Link href={`/admin/factories?id=${factory.id}`}>
+                            <Button variant="outline" size="sm">
+                              {t("common.edit")}
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    {t("dashboard.admin.noFactories")}
+                  </p>
                 )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

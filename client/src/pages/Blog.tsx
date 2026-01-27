@@ -4,13 +4,8 @@ import { Calendar, User, ArrowRight, Search } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { LazyImage } from "@/components/LazyImage";
 
 export default function Blog() {
-  const { language, t, dir } = useLanguage();
-  // Ensure t is defined even if context fails for some reason
-  const safeT = t || ((key: string) => key);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
 
@@ -18,15 +13,12 @@ export default function Blog() {
   const { data: posts = [], isLoading } = trpc.blog.list.useQuery({
     search: searchQuery,
     category: selectedCategory,
-    lang: language,
   });
 
-  const categories = language === 'ar' 
-    ? ["تكنولوجيا", "تجارة", "لوجستيات", "جودة", "نصائح"]
-    : ["Technology", "Trade", "Logistics", "Quality", "Tips"];
+  const categories = ["تكنولوجيا", "تجارة", "لوجستيات", "جودة", "نصائح"];
 
   return (
-    <div className="min-h-screen bg-white" dir={dir}>
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="container flex items-center justify-between py-4">
@@ -36,28 +28,19 @@ export default function Blog() {
             </div>
             <span className="font-bold text-xl text-blue-900">IFROF</span>
           </Link>
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
-              {language === 'ar' ? 'الرئيسية' : 'Home'}
+          <div className="hidden md:flex items-center gap-8">
+            <Link href="/" className="text-gray-700 hover:text-blue-900 transition-colors">
+              الرئيسية
             </Link>
-            <a href="/#how-it-works" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
-              {language === 'ar' ? 'كيف يعمل' : 'How It Works'}
+            <a href="/#features" className="text-gray-700 hover:text-blue-900 transition-colors">
+              المميزات
             </a>
-            <Link href="/factory-investigator" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
-              {language === 'ar' ? 'Factory Investigator' : 'Factory Investigator'}
-            </Link>
-            
-            <Link href="/login">
-              <Button variant="ghost" className="text-blue-900 font-medium">
-                {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
-              </Button>
-            </Link>
-
-            <Link href="/import-request">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold">
-                {language === 'ar' ? 'ابدأ طلب استيراد' : 'Start Import'}
-              </Button>
-            </Link>
+            <a href="/#services" className="text-gray-700 hover:text-blue-900 transition-colors">
+              الخدمات
+            </a>
+            <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+              ابدأ الآن
+            </Button>
           </div>
         </div>
       </nav>
@@ -66,12 +49,10 @@ export default function Blog() {
       <section className="bg-gradient-to-b from-blue-50 to-white py-16 md:py-24">
         <div className="container text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">
-            {language === 'ar' ? 'مدونة IFROF' : 'IFROF Blog'}
+            مدونة IFROF
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            {language === 'ar' 
-              ? 'اكتشف أحدث المقالات والنصائح حول التجارة الإلكترونية والمصانع والتكنولوجيا'
-              : 'Discover the latest articles and tips on e-commerce, factories, and technology'}
+            اكتشف أحدث المقالات والنصائح حول التجارة الإلكترونية والمصانع والتكنولوجيا
           </p>
         </div>
       </section>
@@ -82,13 +63,13 @@ export default function Blog() {
           {/* Search Bar */}
           <div className="mb-8">
             <div className="relative">
-              <Search className={language === 'ar' ? "absolute right-4 top-3.5 w-5 h-5 text-gray-400" : "absolute left-4 top-3.5 w-5 h-5 text-gray-400"} />
+              <Search className="absolute right-4 top-3.5 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder={language === 'ar' ? "ابحث عن مقالات..." : "Search articles..."}
+                placeholder="ابحث عن مقالات..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full ${language === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                className="w-full pr-12 pl-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           </div>
@@ -103,7 +84,7 @@ export default function Blog() {
                   : "bg-white text-gray-700 border border-gray-300 hover:border-blue-900"
               }`}
             >
-              {language === 'ar' ? 'الكل' : 'All'}
+              الكل
             </button>
             {categories.map((cat) => (
               <button
@@ -127,34 +108,25 @@ export default function Blog() {
         <div className="container">
           {isLoading ? (
             <div className="text-center py-12">
-              <p className="text-gray-600">{language === 'ar' ? 'جاري تحميل المقالات...' : 'Loading articles...'}</p>
+              <p className="text-gray-600">جاري تحميل المقالات...</p>
             </div>
           ) : posts.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">{language === 'ar' ? 'لا توجد مقالات حالياً' : 'No articles found'}</p>
+              <p className="text-gray-600 text-lg">لا توجد مقالات حالياً</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post: any) => (
+              {posts.map((post) => (
                 <Link key={post.id} href={`/blog/${post.slug}`}>
-                  <Card className="h-full hover:shadow-lg transition-shadow duration-300 cursor-pointer overflow-hidden">
-                    {post.imageUrl && (
-                      <div className="aspect-video w-full overflow-hidden">
-                        <LazyImage
-                          src={post.imageUrl}
-                          alt={post.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
+                  <Card className="h-full hover:shadow-lg transition-shadow duration-300 cursor-pointer">
                     <CardHeader>
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-sm font-semibold text-orange-500 bg-orange-50 px-3 py-1 rounded-full">
-                          {post.category || (language === 'ar' ? "عام" : "General")}
+                          {post.category || "عام"}
                         </span>
                         {post.featured && (
                           <span className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                            {language === 'ar' ? "مميز" : "Featured"}
+                            مميز
                           </span>
                         )}
                       </div>
@@ -171,10 +143,10 @@ export default function Blog() {
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            {new Date(post.createdAt).toLocaleDateString(language === 'ar' ? "ar-SA" : "en-US")}
+                            {new Date(post.createdAt).toLocaleDateString("ar-SA")}
                           </div>
                         </div>
-                        <ArrowRight className={`w-5 h-5 text-orange-500 ${language === 'en' ? '' : 'rotate-180'}`} />
+                        <ArrowRight className="w-5 h-5 text-orange-500" />
                       </div>
                     </CardContent>
                   </Card>

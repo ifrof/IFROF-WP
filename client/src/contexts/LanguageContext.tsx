@@ -14,19 +14,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE);
   const [mounted, setMounted] = useState(false);
 
-  // Initialize language from URL or localStorage
+  // Initialize language from localStorage
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const langParam = params.get('lang') as Language | null;
-    
-    if (langParam && (langParam === 'ar' || langParam === 'en' || langParam === 'zh')) {
-      setLanguageState(langParam);
-      localStorage.setItem('language', langParam);
-    } else {
-      const stored = localStorage.getItem('language') as Language | null;
-      if (stored && (stored === 'ar' || stored === 'en' || stored === 'zh')) {
-        setLanguageState(stored);
-      }
+    const stored = localStorage.getItem('language') as Language | null;
+    if (stored && (stored === 'ar' || stored === 'en')) {
+      setLanguageState(stored);
     }
     setMounted(true);
   }, []);
@@ -37,10 +29,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.lang = language;
       document.documentElement.dir = LANGUAGES[language].dir;
       localStorage.setItem('language', language);
-      
-      // Update body class for RTL/LTR specific styles
-      document.body.classList.remove('rtl', 'ltr');
-      document.body.classList.add(LANGUAGES[language].dir);
     }
   }, [language, mounted]);
 

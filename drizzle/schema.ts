@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, uniqueIndex, index } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -8,22 +8,9 @@ export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
-  email: varchar("email", { length: 320 }).notNull().unique(),
-  password: text("password"),
-  phone: varchar("phone", { length: 20 }),
+  email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin", "factory", "buyer"]).default("buyer").notNull(),
-  emailVerified: int("emailVerified").default(0).notNull(),
-  twoFactorEnabled: int("twoFactorEnabled").default(0).notNull(),
-  twoFactorSecret: varchar("twoFactorSecret", { length: 255 }),
-  twoFactorBackupCodes: text("twoFactorBackupCodes"),
-  isBlocked: int("isBlocked").default(0).notNull(),
-  blockedReason: text("blockedReason"),
-  blockedAt: timestamp("blockedAt"),
-  verificationToken: varchar("verificationToken", { length: 255 }),
-  verificationTokenExpires: timestamp("verificationTokenExpires"),
-  resetPasswordToken: varchar("resetPasswordToken", { length: 255 }),
-  resetPasswordExpires: timestamp("resetPasswordExpires"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -33,77 +20,12 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 /**
- * Buyer profiles table for storing additional buyer information
- */
-export const buyerProfiles = mysqlTable("buyer_profiles", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull().unique().references(() => users.id),
-  companyName: text("companyName"),
-  businessType: text("businessType"),
-  address: text("address"),
-  city: text("city"),
-  country: text("country"),
-  zipCode: varchar("zipCode", { length: 20 }),
-  interests: text("interests"), // JSON array of product categories
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type BuyerProfile = typeof buyerProfiles.$inferSelect;
-export type InsertBuyerProfile = typeof buyerProfiles.$inferInsert;
-
-/**
- * Admin profiles table for storing administrative user information
- */
-export const adminProfiles = mysqlTable("admin_profiles", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull().unique().references(() => users.id),
-  department: varchar("department", { length: 100 }),
-  accessLevel: int("accessLevel").default(1).notNull(), // 1: standard, 2: superadmin
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type AdminProfile = typeof adminProfiles.$inferSelect;
-export type InsertAdminProfile = typeof adminProfiles.$inferInsert;
-
-/**
- * Admin permissions table for granular access control
- */
-export const adminPermissions = mysqlTable("admin_permissions", {
-  id: int("id").autoincrement().primaryKey(),
-  adminId: int("adminId").notNull().references(() => adminProfiles.id),
-  module: varchar("module", { length: 100 }).notNull(), // e.g., "users", "products", "orders"
-  canRead: int("canRead").default(1).notNull(),
-  canWrite: int("canWrite").default(0).notNull(),
-  canDelete: int("canDelete").default(0).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type AdminPermission = typeof adminPermissions.$inferSelect;
-export type InsertAdminPermission = typeof adminPermissions.$inferInsert;
-
-/**
- * Sessions table for managing user login sessions
- */
-export const sessions = mysqlTable("sessions", {
-  id: varchar("id", { length: 255 }).primaryKey(),
-  userId: int("userId").notNull().references(() => users.id),
-  expiresAt: timestamp("expiresAt").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type Session = typeof sessions.$inferSelect;
-export type InsertSession = typeof sessions.$inferInsert;
-
-/**
  * Blog posts table for storing articles and content
  */
 export const blogPosts = mysqlTable("blog_posts", {
   id: int("id").autoincrement().primaryKey(),
   title: text("title").notNull(),
-  lang: mysqlEnum("lang", ["ar", "en", "zh"]).notNull().default("ar"),
-  slug: varchar("slug", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
   content: text("content").notNull(),
   excerpt: text("excerpt"),
   authorId: int("authorId").notNull().references(() => users.id),
@@ -111,37 +33,8 @@ export const blogPosts = mysqlTable("blog_posts", {
   tags: text("tags"),
   featured: int("featured").default(0),
   published: int("published").default(0),
-  status: mysqlEnum("status", ["draft", "published", "archived"]).default("draft"),
-  // Arabic fields
-  titleAr: text("titleAr"),
-  contentAr: text("contentAr"),
-  excerptAr: text("excerptAr"),
-  categoryAr: varchar("categoryAr", { length: 100 }),
-  // English fields
-  titleEn: text("titleEn"),
-  contentEn: text("contentEn"),
-  excerptEn: text("excerptEn"),
-  categoryEn: varchar("categoryEn", { length: 100 }),
-  // Chinese fields
-  titleZh: text("titleZh"),
-  contentZh: text("contentZh"),
-  excerptZh: text("excerptZh"),
-  categoryZh: varchar("categoryZh", { length: 100 }),
-  // SEO fields
-  metaDescription: varchar("metaDescription", { length: 160 }),
-  metaKeywords: text("metaKeywords"),
-  featuredImage: text("featuredImage"),
-  viewCount: int("viewCount").default(0),
-  publishedAt: timestamp("publishedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => {
-  return {
-    langSlugIdx: uniqueIndex("blog_posts_lang_slug_idx").on(table.lang, table.slug),
-    publishedIdx: index("blog_posts_published_idx").on(table.published),
-    categoryIdx: index("blog_posts_category_idx").on(table.category),
-    authorIdx: index("blog_posts_author_idx").on(table.authorId),
-  };
 });
 
 export type BlogPost = typeof blogPosts.$inferSelect;
@@ -181,19 +74,11 @@ export const factories = mysqlTable("factories", {
   minimumOrderQuantity: int("minimumOrderQuantity"),
   logoUrl: text("logoUrl"),
   bannerUrl: text("bannerUrl"),
-  certificationProofs: text("certificationProofs"), // JSON array of certification proof URLs or objects
   verificationStatus: mysqlEnum("verificationStatus", ["pending", "verified", "rejected"]).default("pending"),
-  verificationNotes: text("verificationNotes"),
-  verifiedAt: timestamp("verifiedAt"),
   rating: int("rating").default(0),
   responseTime: varchar("responseTime", { length: 50 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => {
-  return {
-    nameIdx: index("factories_name_idx").on(table.name),
-    locationIdx: index("factories_location_idx").on(table.location),
-  };
 });
 
 export type Factory = typeof factories.$inferSelect;
@@ -205,120 +90,50 @@ export type InsertFactory = typeof factories.$inferInsert;
 export const products = mysqlTable("products", {
   id: int("id").autoincrement().primaryKey(),
   factoryId: int("factoryId").notNull().references(() => factories.id),
-  // Multilingual name
-  nameAr: text("nameAr").notNull(),
-  nameEn: text("nameEn").notNull(),
-  nameZh: text("nameZh"),
-  // Multilingual description
-  descriptionAr: text("descriptionAr"),
-  descriptionEn: text("descriptionEn"),
-  descriptionZh: text("descriptionZh"),
-  categoryId: int("categoryId").references(() => categories.id),
-  subcategoryId: int("subcategoryId").references(() => subcategories.id),
+  name: text("name").notNull(),
+  description: text("description"),
   category: varchar("category", { length: 100 }),
   tags: text("tags"),
   specifications: text("specifications"),
-  // Price range (stored in cents)
-  minPrice: int("minPrice").notNull(),
-  maxPrice: int("maxPrice"),
-  currency: varchar("currency", { length: 10 }).default("USD").notNull(),
-  pricingTiers: text("pricingTiers"), // JSON array for bulk pricing
+  basePrice: int("basePrice").notNull(),
+  pricingTiers: text("pricingTiers"),
   minimumOrderQuantity: int("minimumOrderQuantity").default(1),
-  imageUrls: text("imageUrls"), // JSON array of image URLs
+  imageUrls: text("imageUrls"),
   featured: int("featured").default(0),
   active: int("active").default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => {
-  return {
-    nameArIdx: index("products_name_ar_idx").on(table.nameAr),
-    nameEnIdx: index("products_name_en_idx").on(table.nameEn),
-    categoryIdx: index("products_category_idx").on(table.category),
-    activeIdx: index("products_active_idx").on(table.active),
-    featuredIdx: index("products_featured_idx").on(table.featured),
-    factoryIdIdx: index("products_factory_id_idx").on(table.factoryId),
-  };
 });
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
 
 /**
- * Categories table for product classification
- */
-export const categories = mysqlTable("categories", {
-  id: int("id").autoincrement().primaryKey(),
-  nameAr: varchar("nameAr", { length: 100 }).notNull(),
-  nameEn: varchar("nameEn", { length: 100 }).notNull(),
-  nameZh: varchar("nameZh", { length: 100 }),
-  slug: varchar("slug", { length: 100 }).notNull().unique(),
-  icon: varchar("icon", { length: 50 }),
-  descriptionAr: text("descriptionAr"),
-  descriptionEn: text("descriptionEn"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type Category = typeof categories.$inferSelect;
-export type InsertCategory = typeof categories.$inferInsert;
-
-/**
- * Subcategories table linked to categories
- */
-export const subcategories = mysqlTable("subcategories", {
-  id: int("id").autoincrement().primaryKey(),
-  categoryId: int("categoryId").notNull().references(() => categories.id),
-  nameAr: varchar("nameAr", { length: 100 }).notNull(),
-  nameEn: varchar("nameEn", { length: 100 }).notNull(),
-  nameZh: varchar("nameZh", { length: 100 }),
-  slug: varchar("slug", { length: 100 }).notNull().unique(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type Subcategory = typeof subcategories.$inferSelect;
-export type InsertSubcategory = typeof subcategories.$inferInsert;
-
-/**
  * Inquiries table for buyer-factory inquiries
  */
-export const importRequests = mysqlTable("import_requests", {
+export const inquiries = mysqlTable("inquiries", {
   id: int("id").autoincrement().primaryKey(),
   buyerId: int("buyerId").notNull().references(() => users.id),
-  productId: int("productId").references(() => products.id),
-  factoryId: int("factoryId").references(() => factories.id),
-  productName: text("productName"),
-  category: varchar("category", { length: 100 }),
-  quantity: int("quantity").notNull(),
-  specifications: text("specifications"),
-  deliveryDetails: text("deliveryDetails"),
-  status: mysqlEnum("status", ["pending", "quoted", "accepted", "paid", "shipped", "cancelled"]).default("pending").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type ImportRequest = typeof importRequests.$inferSelect;
-export type InsertImportRequest = typeof importRequests.$inferInsert;
-
-export const quotes = mysqlTable("quotes", {
-  id: int("id").autoincrement().primaryKey(),
-  requestId: int("requestId").notNull().references(() => importRequests.id),
   factoryId: int("factoryId").notNull().references(() => factories.id),
-  price: int("price").notNull(), // in cents
-  terms: text("terms"),
-  commission: int("commission").notNull(), // 2-3% commission in cents
-  stripeSessionId: varchar("stripeSessionId", { length: 255 }),
+  productId: int("productId").references(() => products.id),
+  subject: text("subject").notNull(),
+  description: text("description"),
+  specifications: text("specifications"),
+  quantityRequired: int("quantityRequired"),
+  status: mysqlEnum("status", ["pending", "responded", "negotiating", "completed", "cancelled"]).default("pending"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type Quote = typeof quotes.$inferSelect;
-export type InsertQuote = typeof quotes.$inferInsert;
+export type Inquiry = typeof inquiries.$inferSelect;
+export type InsertInquiry = typeof inquiries.$inferInsert;
 
 /**
  * Messages table for buyer-factory messaging
  */
 export const messages = mysqlTable("messages", {
   id: int("id").autoincrement().primaryKey(),
-  inquiryId: int("inquiryId").notNull().references(() => importRequests.id),
+  inquiryId: int("inquiryId").notNull().references(() => inquiries.id),
   senderId: int("senderId").notNull().references(() => users.id),
   receiverId: int("receiverId").notNull().references(() => users.id),
   content: text("content").notNull(),
@@ -391,15 +206,10 @@ export const orders = mysqlTable("orders", {
   orderNumber: varchar("orderNumber", { length: 50 }).notNull().unique(),
   items: text("items").notNull(),
   totalAmount: int("totalAmount").notNull(),
-  commission: int("commission").default(0),
   status: mysqlEnum("status", ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]).default("pending"),
   paymentStatus: mysqlEnum("paymentStatus", ["pending", "completed", "failed", "refunded"]).default("pending"),
   stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
   shippingAddress: text("shippingAddress"),
-  shippingDetails: text("shippingDetails"),
-  trackingNumber: varchar("trackingNumber", { length: 100 }),
-  carrier: varchar("carrier", { length: 100 }),
-  estimatedDelivery: timestamp("estimatedDelivery"),
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -564,132 +374,3 @@ export const services = mysqlTable("services", {
 
 export type Service = typeof services.$inferSelect;
 export type InsertService = typeof services.$inferInsert;
-
-/**
- * Shopping cart items table
- */
-export const cartItems = mysqlTable("cart_items", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull().references(() => users.id),
-  productId: int("productId").notNull().references(() => products.id),
-  quantity: int("quantity").notNull().default(1),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type CartItem = typeof cartItems.$inferSelect;
-export type InsertCartItem = typeof cartItems.$inferInsert;
-
-/**
- * Reviews table for buyer reviews of products and factories
- */
-export const reviews = mysqlTable("reviews", {
-  id: int("id").autoincrement().primaryKey(),
-  orderId: int("orderId").notNull().references(() => orders.id),
-  buyerId: int("buyerId").notNull().references(() => users.id),
-  factoryId: int("factoryId").notNull().references(() => factories.id),
-  productId: int("productId").references(() => products.id),
-  rating: int("rating").notNull(), // 1-5
-  comment: text("comment"),
-  images: text("images"), // JSON array of image URLs
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type Review = typeof reviews.$inferSelect;
-export type InsertReview = typeof reviews.$inferInsert;
-
-/**
- * Order status history table for tracking status updates
- */
-export const orderStatusHistory = mysqlTable("order_status_history", {
-  id: int("id").autoincrement().primaryKey(),
-  orderId: int("orderId").notNull().references(() => orders.id),
-  status: mysqlEnum("status", ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]).notNull(),
-  notes: text("notes"),
-  updatedBy: int("updatedBy").references(() => users.id),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-}, (table) => {
-  return {
-    orderIdx: index("order_status_history_order_idx").on(table.orderId),
-  };
-});
-
-export type OrderStatusHistory = typeof orderStatusHistory.$inferSelect;
-export type InsertOrderStatusHistory = typeof orderStatusHistory.$inferInsert;
-
-/**
- * User blocks table for blocking functionality
- */
-export const userBlocks = mysqlTable("user_blocks", {
-  id: int("id").autoincrement().primaryKey(),
-  blockerId: int("blockerId").notNull().references(() => users.id),
-  blockedId: int("blockedId").notNull().references(() => users.id),
-  reason: text("reason"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-}, (table) => {
-  return {
-    blockerIdx: index("user_blocks_blocker_idx").on(table.blockerId),
-    blockedIdx: index("user_blocks_blocked_idx").on(table.blockedId),
-  };
-});
-
-export type UserBlock = typeof userBlocks.$inferSelect;
-export type InsertUserBlock = typeof userBlocks.$inferInsert;
-
-/**
- * User reports table for reporting system
- */
-export const userReports = mysqlTable("user_reports", {
-  id: int("id").autoincrement().primaryKey(),
-  reporterId: int("reporterId").notNull().references(() => users.id),
-  reportedId: int("reportedId").notNull().references(() => users.id),
-  reportType: mysqlEnum("reportType", ["spam", "harassment", "fraud", "inappropriate", "other"]).notNull(),
-  description: text("description").notNull(),
-  status: mysqlEnum("status", ["pending", "reviewed", "resolved", "dismissed"]).default("pending").notNull(),
-  adminNotes: text("adminNotes"),
-  reviewedBy: int("reviewedBy").references(() => users.id),
-  reviewedAt: timestamp("reviewedAt"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => {
-  return {
-    reporterIdx: index("user_reports_reporter_idx").on(table.reporterId),
-    reportedIdx: index("user_reports_reported_idx").on(table.reportedId),
-    statusIdx: index("user_reports_status_idx").on(table.status),
-  };
-});
-
-export type UserReport = typeof userReports.$inferSelect;
-export type InsertUserReport = typeof userReports.$inferInsert;
-
-/**
- * Invoices table for invoice generation
- */
-export const invoices = mysqlTable("invoices", {
-  id: int("id").autoincrement().primaryKey(),
-  orderId: int("orderId").notNull().references(() => orders.id),
-  invoiceNumber: varchar("invoiceNumber", { length: 50 }).notNull().unique(),
-  buyerId: int("buyerId").notNull().references(() => users.id),
-  factoryId: int("factoryId").notNull().references(() => factories.id),
-  totalAmount: int("totalAmount").notNull(),
-  commission: int("commission").notNull(),
-  currency: varchar("currency", { length: 10 }).default("USD").notNull(),
-  status: mysqlEnum("status", ["draft", "issued", "paid", "cancelled"]).default("draft").notNull(),
-  issuedAt: timestamp("issuedAt"),
-  paidAt: timestamp("paidAt"),
-  dueDate: timestamp("dueDate"),
-  notes: text("notes"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => {
-  return {
-    orderIdx: index("invoices_order_idx").on(table.orderId),
-    buyerIdx: index("invoices_buyer_idx").on(table.buyerId),
-    factoryIdx: index("invoices_factory_idx").on(table.factoryId),
-    statusIdx: index("invoices_status_idx").on(table.status),
-  };
-});
-
-export type Invoice = typeof invoices.$inferSelect;
-export type InsertInvoice = typeof invoices.$inferInsert;

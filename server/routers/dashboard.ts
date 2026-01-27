@@ -34,20 +34,12 @@ export const dashboardRouter = router({
   // Added methods for Buyer Dashboard
   getMyOrders: protectedProcedure
     .query(async ({ ctx }) => {
-      const { orders } = await import('../../drizzle/schema');
-      const { eq } = await import('drizzle-orm');
-      const db_instance = await db.getDb();
-      if (!db_instance) return [];
-      return db_instance.select().from(orders).where(eq(orders.buyerId, ctx.user.id));
+      return db.getOrdersByBuyer(ctx.user.id);
     }),
 
   getMyInquiries: protectedProcedure
     .query(async ({ ctx }) => {
-      const { importRequests } = await import('../../drizzle/schema');
-      const { eq } = await import('drizzle-orm');
-      const db_instance = await db.getDb();
-      if (!db_instance) return [];
-      return db_instance.select().from(importRequests).where(eq(importRequests.buyerId, ctx.user.id));
+      return db.getInquiriesByBuyer(ctx.user.id);
     }),
 
   // Added methods for Factory Dashboard

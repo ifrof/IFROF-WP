@@ -118,18 +118,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
-    font-family: 'Inter', sans-serif;
-  }
-  
-  body.rtl {
-    font-family: 'Noto Sans Arabic', sans-serif;
-  }
-  
-  /* Ensure dark mode applies to all elements */
-  .dark body {
-    background-color: var(--background);
-    color: var(--foreground);
+    @apply bg-background text-foreground;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),

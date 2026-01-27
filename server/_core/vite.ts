@@ -3,9 +3,6 @@ import fs from "fs";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
 import path from "path";
-import { cacheHeaders } from "./cache-headers";
-import { generateStaticContent } from "../utils/ssr";
-
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
 
@@ -41,11 +38,6 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`
       );
-      const ssrContent = await generateStaticContent(req);
-      template = template.replace(
-        '<div id="root"></div>',
-        `<div id="root">${ssrContent}</div>`
-      );
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
@@ -66,24 +58,10 @@ export function serveStatic(app: Express) {
     );
   }
 
-  // Add cache headers middleware
-  app.use(cacheHeaders);
-
-  app.use(express.static(distPath, {
-    maxAge: '1y',
-    immutable: true,
-    etag: true,
-  }));
+  app.use(express.static(distPath));
 
   // fall through to index.html if the file doesn't exist
-  app.use("*", async (req, res) => {
-    const indexPath = path.resolve(distPath, "index.html");
-    let template = await fs.promises.readFile(indexPath, "utf-8");
-    const ssrContent = await generateStaticContent(req);
-    template = template.replace(
-      '<div id="root"></div>',
-      `<div id="root">${ssrContent}</div>`
-    );
-    res.status(200).set({ "Content-Type": "text/html" }).send(template);
+  app.use("*", (_req, res) => {
+    res.sendFile(path.resolve(distPath, "index.html"));
   });
 }

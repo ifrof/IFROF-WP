@@ -4,6 +4,8 @@ Disallow: /admin/
 Disallow: /api/
 Disallow: /private/
 Disallow: /*.json$
+Disallow: /*.js$
+Disallow: /*.css$
 
 # Crawl delay (in seconds)
 Crawl-delay: 1
@@ -18,6 +20,10 @@ User-agent: Bingbot
 Allow: /
 Crawl-delay: 1
 
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
 # Block bad bots
 User-agent: MJ12bot
 Disallow: /
@@ -27,3 +33,5 @@ Disallow: /
 
 # Sitemap location
 Sitemap: https://ifrof.com/sitemap.xml
+Sitemap: https://ifrof.com/sitemap-manufacturers.xml
+Sitemap: https://ifrof.com/sitemap-products.xml

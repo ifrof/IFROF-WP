@@ -102,7 +102,7 @@ export default function HowItWorks() {
           <h2 className="text-3xl font-bold mb-4">{t("howItWorks.cta")}</h2>
           <p className="text-lg text-muted-foreground mb-8">{t("howItWorks.ctaDesc")}</p>
           <div className="flex gap-4 justify-center">
-            <Link href="/factory">
+            <Link href="/marketplace">
               <Button size="lg">{t("howItWorks.startBrowsing")}</Button>
             </Link>
             <Link href="/contact">

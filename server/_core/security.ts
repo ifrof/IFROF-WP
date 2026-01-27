@@ -47,7 +47,7 @@ export class CSRFTokenManager {
 
   cleanupExpiredTokens(): void {
     const now = Date.now();
-    for (const [sessionId, data] of Array.from(this.tokens.entries())) {
+    for (const [sessionId, data] of this.tokens.entries()) {
       if (now - data.timestamp > this.tokenExpiry) {
         this.tokens.delete(sessionId);
       }
@@ -149,7 +149,7 @@ export class DataEncryption {
     let encrypted = cipher.update(data, "utf8", "hex");
     encrypted += cipher.final("hex");
 
-    const authTag = (cipher as any).getAuthTag();
+    const authTag = cipher.getAuthTag();
 
     // Return IV + authTag + encrypted data
     return `${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted}`;
@@ -170,7 +170,7 @@ export class DataEncryption {
       this.encryptionKey,
       iv
     );
-    (decipher as any).setAuthTag(authTag);
+    decipher.setAuthTag(authTag);
 
     let decrypted = decipher.update(encrypted, "hex", "utf8");
     decrypted += decipher.final("utf8");

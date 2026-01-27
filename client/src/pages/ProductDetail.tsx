@@ -7,9 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { Loader2, ShoppingCart, MapPin, Star, Package, Truck, Shield, ArrowLeft } from "lucide-react";
-import MetaTags from "../components/SEO/MetaTags";
-import ProductSchema from "../components/SEO/ProductSchema";
-import BreadcrumbSchema from "../components/SEO/BreadcrumbSchema";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -26,7 +23,7 @@ export default function ProductDetail() {
   const { data: factory } = trpc.factories.getById.useQuery(
     { id: product?.factoryId || 0 },
     { enabled: !!product?.factoryId }
-  ) as { data: any };
+  );
 
   const { data: reviews } = trpc.reviews.getByProduct.useQuery(
     { productId: product?.id || 0 },
@@ -35,11 +32,6 @@ export default function ProductDetail() {
   const { data: factoryStats } = trpc.reviews.getAverageRating.useQuery(
     { productId: product?.id || 0 },
     { enabled: !!product?.id }
-  );
-
-  const { data: relatedProducts = [] } = trpc.products.getRelated.useQuery(
-    { factoryId: product?.factoryId || 0, excludeProductId: product?.id || 0, limit: 4 },
-    { enabled: !!product?.factoryId && !!product?.id }
   );
 
   const addToCartMutation = trpc.cart.addItem.useMutation({
@@ -84,34 +76,8 @@ export default function ProductDetail() {
   const specifications = product.specifications ? JSON.parse(product.specifications) : {};
   const pricingTiers = product.pricingTiers ? JSON.parse(product.pricingTiers) : [];
 
-  const seo = {
-    title: `${product.name} - Direct Import from China | IFROF`,
-    description: product.description.substring(0, 160),
-    keywords: [product.category || '', 'import from china', 'wholesale'],
-    ogImage: images[0] || 'https://ifrof.com/images/og-default.jpg',
-    canonical: `https://ifrof.com/products/${product.id}`
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      <MetaTags seo={seo} type="product" />
-      <ProductSchema product={{
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        images: images,
-        price: product.basePrice / 100,
-        brand: factory?.name,
-        rating: factoryStats ? {
-          value: (factoryStats as any).rating,
-          count: (factoryStats as any).count
-        } : undefined
-      }} />
-      <BreadcrumbSchema items={[
-        { name: 'Home', url: 'https://ifrof.com' },
-        { name: 'Marketplace', url: 'https://ifrof.com/marketplace' },
-        { name: product.name, url: `https://ifrof.com/products/${product.id}` }
-      ]} />
       {/* Breadcrumb */}
       <div className="bg-muted py-4">
         <div className="max-w-7xl mx-auto px-4">
@@ -120,7 +86,7 @@ export default function ProductDetail() {
               {t("nav.home")}
             </Link>
             <span className="text-muted-foreground">/</span>
-            <Link href="/factory" className="text-muted-foreground hover:text-foreground">
+            <Link href="/marketplace" className="text-muted-foreground hover:text-foreground">
               {t("nav.manufacturers")}
             </Link>
             <span className="text-muted-foreground">/</span>
@@ -130,7 +96,7 @@ export default function ProductDetail() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <Link href="/factory">
+        <Link href="/marketplace">
           <Button variant="ghost" className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t("common.back")}
@@ -301,31 +267,6 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
-
-        {/* Related Products */}
-        {relatedProducts && relatedProducts.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {relatedProducts.map((rel: any) => {
-                const imgs = rel.imageUrls ? JSON.parse(rel.imageUrls) : [];
-                return (
-                  <Link key={rel.id} href={`/products/${rel.id}`}>
-                    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-                      <div className="aspect-square bg-gray-100">
-                        <img src={imgs[0] || "https://via.placeholder.com/200"} alt={rel.name} className="w-full h-full object-cover" />
-                      </div>
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold line-clamp-2 mb-2">{rel.name}</h3>
-                        <span className="text-lg font-bold text-blue-600">¥{rel.basePrice}</span>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Tabs Section */}
         <div className="mt-8">

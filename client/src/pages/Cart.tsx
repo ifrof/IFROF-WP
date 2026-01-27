@@ -64,8 +64,8 @@ export default function Cart() {
     updateQuantityMutation.mutate({ productId: itemId, quantity: newQuantity });
   };
 
-  const handleRemoveItem = (productId: number) => {
-    removeItemMutation.mutate({ productId });
+  const handleRemoveItem = (itemId: number) => {
+    removeItemMutation.mutate({ productId: itemId });
   };
 
   const handleClearCart = () => {
@@ -117,7 +117,7 @@ export default function Cart() {
               <ShoppingCart className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
               <p className="text-xl font-medium mb-2">{t("cart.empty")}</p>
               <p className="text-muted-foreground mb-4">{t("cart.emptyDescription")}</p>
-              <Link href="/factory">
+              <Link href="/marketplace">
                 <Button className="bg-orange-500 hover:bg-orange-600">
                   {t("cart.continueShopping")}
                 </Button>
@@ -182,7 +182,7 @@ export default function Cart() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleRemoveItem(item.product?.id || item.service?.id || 0)}
+                                onClick={() => handleRemoveItem(item.cartItem.id)}
                                 disabled={removeItemMutation.isPending}
                               >
                                 <Trash2 className="w-4 h-4 text-red-500" />
@@ -196,7 +196,7 @@ export default function Cart() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() =>
-                                    handleQuantityChange(item.product?.id || item.service?.id || 0, item.cartItem.quantity - 1)
+                                    handleQuantityChange(item.cartItem.id, item.cartItem.quantity - 1)
                                   }
                                   disabled={item.cartItem.quantity <= 1}
                                 >
@@ -206,7 +206,7 @@ export default function Cart() {
                                   type="number"
                                   value={item.cartItem.quantity}
                                   onChange={(e) =>
-                                    handleQuantityChange(item.product?.id || item.service?.id || 0, parseInt(e.target.value) || 1)
+                                    handleQuantityChange(item.cartItem.id, parseInt(e.target.value) || 1)
                                   }
                                   className="w-16 text-center"
                                   min={1}
@@ -215,7 +215,7 @@ export default function Cart() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() =>
-                                    handleQuantityChange(item.product?.id || item.service?.id || 0, item.cartItem.quantity + 1)
+                                    handleQuantityChange(item.cartItem.id, item.cartItem.quantity + 1)
                                   }
                                 >
                                   +
@@ -276,7 +276,7 @@ export default function Cart() {
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
 
-                  <Link href="/factory">
+                  <Link href="/marketplace">
                     <Button variant="outline" className="w-full">
                       {t("cart.continueShopping")}
                     </Button>

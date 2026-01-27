@@ -20,18 +20,12 @@ const factorySchema = z.object({
 });
 
 const productSchema = z.object({
-  nameAr: z.string().min(1),
-  nameEn: z.string().min(1),
-  nameZh: z.string().optional(),
-  descriptionAr: z.string().optional(),
-  descriptionEn: z.string().optional(),
-  descriptionZh: z.string().optional(),
+  name: z.string().min(1),
+  description: z.string().optional(),
   category: z.string().optional(),
   tags: z.string().optional(),
   specifications: z.string().optional(),
-  minPrice: z.number().min(0),
-  maxPrice: z.number().optional(),
-  currency: z.string().default("USD"),
+  basePrice: z.number().min(0),
   pricingTiers: z.string().optional(),
   minimumOrderQuantity: z.number().default(1),
   imageUrls: z.string().optional(),
@@ -56,14 +50,9 @@ export const factoriesRouter = router({
 
   // Search factories (public)
   search: publicProcedure
-    .input(z.object({ 
-      query: z.string().optional(),
-      location: z.string().optional(),
-      page: z.number().default(1),
-      limit: z.number().default(20),
-    }))
+    .input(z.object({ query: z.string() }))
     .query(async ({ input }) => {
-      return db.searchFactoriesAdvanced(input);
+      return db.searchFactories(input.query);
     }),
 
   // Create factory (admin only)
@@ -106,81 +95,14 @@ export const factoriesRouter = router({
       // Note: In production, you'd want to soft-delete or handle related records
       throw new TRPCError({ code: "NOT_IMPLEMENTED", message: "Delete not yet implemented" });
     }),
-
-  // Admin: Approve factory verification
-  approveVerification: protectedProcedure
-    .input(z.object({ id: z.number(), notes: z.string().optional() }))
-    .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can approve factories" });
-      }
-
-      await db.updateFactory(input.id, {
-        verificationStatus: "verified",
-        verificationNotes: input.notes,
-        verifiedAt: new Date(),
-      });
-
-      return { success: true };
-    }),
-
-  // Admin: Reject factory verification
-  rejectVerification: protectedProcedure
-    .input(z.object({ id: z.number(), reason: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can reject factories" });
-      }
-
-      await db.updateFactory(input.id, {
-        verificationStatus: "rejected",
-        verificationNotes: input.reason,
-      });
-
-      return { success: true };
-    }),
-
-  // Admin: Get pending verifications
-  getPendingVerifications: protectedProcedure
-    .query(async ({ ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can view pending verifications" });
-      }
-
-      return db.getFactoriesByStatus("pending");
-    }),
 });
 
-import { getCached } from "../utils/cache";
-
 export const productsRouter = router({
-  // Get all products (public)
-  getAll: publicProcedure
-    .input(z.object({ limit: z.number().default(50), offset: z.number().default(0) }).optional())
-    .query(async ({ input }) => {
-      const limit = input?.limit ?? 50;
-      const offset = input?.offset ?? 0;
-      const cacheKey = `products:all:${limit}:${offset}`;
-      
-      return getCached(
-        cacheKey,
-        () => db.getAllProducts(limit, offset),
-        300 // 5 minutes
-      );
-    }),
-
   // Get products by factory (public)
   getByFactory: publicProcedure
     .input(z.object({ factoryId: z.number() }))
     .query(async ({ input }) => {
       return db.getProductsByFactory(input.factoryId);
-    }),
-
-  // Get related products (public)
-  getRelated: publicProcedure
-    .input(z.object({ factoryId: z.number(), excludeProductId: z.number(), limit: z.number().default(4) }))
-    .query(async ({ input }) => {
-      return db.getRelatedProducts(input.factoryId, input.excludeProductId, input.limit);
     }),
 
   // Get single product (public)
@@ -193,30 +115,20 @@ export const productsRouter = router({
       }
       
       // Fetch factory info to satisfy client-side expectations
-      const productData = product as any;
-      const factory = await db.getFactoryById(productData.factoryId);
+      const factory = await db.getFactoryById(product.factoryId);
       
       return {
-        ...productData,
+        ...product,
         factory, // Add factory relation
-        product: productData, // Alias for compatibility if needed
+        product: product, // Alias for compatibility if needed
       };
     }),
 
   // Search products (public)
   search: publicProcedure
-    .input(z.object({ 
-      query: z.string().optional(),
-      category: z.string().optional(),
-      minPrice: z.number().optional(),
-      maxPrice: z.number().optional(),
-      moq: z.number().optional(),
-      location: z.string().optional(),
-      page: z.number().default(1),
-      limit: z.number().default(20),
-    }))
+    .input(z.object({ query: z.string() }))
     .query(async ({ input }) => {
-      return db.searchProductsAdvanced(input);
+      return db.searchProducts(input.query);
     }),
 
   // Create product (admin only)
@@ -231,8 +143,7 @@ export const productsRouter = router({
       const result = await db.createProduct({
         factoryId,
         ...data,
-        minPrice: Math.round(data.minPrice * 100), // Convert to cents
-        maxPrice: data.maxPrice ? Math.round(data.maxPrice * 100) : null,
+        basePrice: Math.round(data.basePrice * 100), // Convert to cents
       });
 
       return result;
@@ -249,8 +160,7 @@ export const productsRouter = router({
       const { id, ...data } = input;
       await db.updateProduct(id, {
         ...data,
-        minPrice: Math.round(data.minPrice * 100), // Convert to cents
-        maxPrice: data.maxPrice ? Math.round(data.maxPrice * 100) : null,
+        basePrice: Math.round(data.basePrice * 100), // Convert to cents
       });
       return db.getProductById(id);
     }),
@@ -265,16 +175,4 @@ export const productsRouter = router({
 
       throw new TRPCError({ code: "NOT_IMPLEMENTED", message: "Delete not yet implemented" });
     }),
-
-  // Get featured products
-  getFeatured: publicProcedure
-    .input(z.object({ limit: z.number().default(10) }))
-    .query(async ({ input }) => {
-      return db.getFeaturedProducts(input.limit);
-    }),
-
-  // Get categories
-  getCategories: publicProcedure.query(async () => {
-    return db.getProductCategories();
-  }),
 });

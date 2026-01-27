@@ -1,14 +1,35 @@
 import { ENV } from "./env";
-import { TRPCError } from "@trpc/server";
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
+export type TextContent = {
+  type: "text";
+  text: string;
+};
+
+export type ImageContent = {
+  type: "image_url";
+  image_url: {
+    url: string;
+    detail?: "auto" | "low" | "high";
+  };
+};
+
+export type FileContent = {
+  type: "file_url";
+  file_url: {
+    url: string;
+    mime_type?: "audio/mpeg" | "audio/wav" | "application/pdf" | "audio/mp4" | "video/mp4" ;
+  };
+};
+
+export type MessageContent = string | TextContent | ImageContent | FileContent;
+
 export type Message = {
   role: Role;
-  content: string | any[];
+  content: MessageContent | MessageContent[];
   name?: string;
   tool_call_id?: string;
-  tool_calls?: any[];
 };
 
 export type Tool = {
@@ -16,18 +37,23 @@ export type Tool = {
   function: {
     name: string;
     description?: string;
-    parameters?: any;
+    parameters?: Record<string, unknown>;
   };
 };
 
-export type ToolChoice = "none" | "auto" | { type: "function"; function: { name: string } };
-
-export type OutputSchema = any;
-
-export type ResponseFormat = {
-  type: "text" | "json_object" | "json_schema";
-  json_schema?: any;
+export type ToolChoicePrimitive = "none" | "auto" | "required";
+export type ToolChoiceByName = { name: string };
+export type ToolChoiceExplicit = {
+  type: "function";
+  function: {
+    name: string;
+  };
 };
+
+export type ToolChoice =
+  | ToolChoicePrimitive
+  | ToolChoiceByName
+  | ToolChoiceExplicit;
 
 export type InvokeParams = {
   messages: Message[];
@@ -40,15 +66,30 @@ export type InvokeParams = {
   output_schema?: OutputSchema;
   responseFormat?: ResponseFormat;
   response_format?: ResponseFormat;
-  timeoutMs?: number;
+};
+
+export type ToolCall = {
+  id: string;
+  type: "function";
+  function: {
+    name: string;
+    arguments: string;
+  };
 };
 
 export type InvokeResult = {
-  choices: {
-    message: Message;
-    finish_reason: string;
+  id: string;
+  created: number;
+  model: string;
+  choices: Array<{
     index: number;
-  }[];
+    message: {
+      role: Role;
+      content: string | Array<TextContent | ImageContent | FileContent>;
+      tool_calls?: ToolCall[];
+    };
+    finish_reason: string | null;
+  }>;
   usage?: {
     prompt_tokens: number;
     completion_tokens: number;
@@ -56,70 +97,176 @@ export type InvokeResult = {
   };
 };
 
-const normalizeMessage = (m: Message) => ({
-  role: m.role,
-  content: m.content,
-  ...(m.name ? { name: m.name } : {}),
-  ...(m.tool_call_id ? { tool_call_id: m.tool_call_id } : {}),
-  ...(m.tool_calls ? { tool_calls: m.tool_calls } : {}),
-});
-
-const normalizeToolChoice = (choice: any, tools?: Tool[]) => {
-  if (!choice) return undefined;
-  if (typeof choice === "string") return choice;
-  return choice;
+export type JsonSchema = {
+  name: string;
+  schema: Record<string, unknown>;
+  strict?: boolean;
 };
 
-const normalizeResponseFormat = (params: any) => {
-  const format = params.responseFormat || params.response_format;
-  if (format) return format;
-  const schema = params.outputSchema || params.output_schema;
-  if (schema) {
-    return {
-      type: "json_schema",
-      json_schema: {
-        name: "output",
-        strict: true,
-        schema,
-      },
-    };
+export type OutputSchema = JsonSchema;
+
+export type ResponseFormat =
+  | { type: "text" }
+  | { type: "json_object" }
+  | { type: "json_schema"; json_schema: JsonSchema };
+
+const ensureArray = (
+  value: MessageContent | MessageContent[]
+): MessageContent[] => (Array.isArray(value) ? value : [value]);
+
+const normalizeContentPart = (
+  part: MessageContent
+): TextContent | ImageContent | FileContent => {
+  if (typeof part === "string") {
+    return { type: "text", text: part };
   }
-  return undefined;
+
+  if (part.type === "text") {
+    return part;
+  }
+
+  if (part.type === "image_url") {
+    return part;
+  }
+
+  if (part.type === "file_url") {
+    return part;
+  }
+
+  throw new Error("Unsupported message content part");
 };
 
-const resolveApiConfig = (): { url: string; key: string; model: string } => {
-  if (ENV.forgeApiUrl && ENV.forgeApiKey) {
+const normalizeMessage = (message: Message) => {
+  const { role, name, tool_call_id } = message;
+
+  if (role === "tool" || role === "function") {
+    const content = ensureArray(message.content)
+      .map(part => (typeof part === "string" ? part : JSON.stringify(part)))
+      .join("\n");
+
     return {
-      url: `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`,
-      key: ENV.forgeApiKey,
-      model: "gemini-2.5-flash",
+      role,
+      name,
+      tool_call_id,
+      content,
     };
   }
 
-  const groqKey = process.env.GROQ_API_KEY;
-  if (groqKey) {
+  const contentParts = ensureArray(message.content).map(normalizeContentPart);
+
+  // If there's only text content, collapse to a single string for compatibility
+  if (contentParts.length === 1 && contentParts[0].type === "text") {
     return {
-      url: "https://api.groq.com/openai/v1/chat/completions",
-      key: groqKey,
-      model: "llama-3.3-70b-versatile",
+      role,
+      name,
+      content: contentParts[0].text,
     };
   }
 
-  const openaiKey = process.env.OPENAI_API_KEY;
-  if (openaiKey) {
+  return {
+    role,
+    name,
+    content: contentParts,
+  };
+};
+
+const normalizeToolChoice = (
+  toolChoice: ToolChoice | undefined,
+  tools: Tool[] | undefined
+): "none" | "auto" | ToolChoiceExplicit | undefined => {
+  if (!toolChoice) return undefined;
+
+  if (toolChoice === "none" || toolChoice === "auto") {
+    return toolChoice;
+  }
+
+  if (toolChoice === "required") {
+    if (!tools || tools.length === 0) {
+      throw new Error(
+        "tool_choice 'required' was provided but no tools were configured"
+      );
+    }
+
+    if (tools.length > 1) {
+      throw new Error(
+        "tool_choice 'required' needs a single tool or specify the tool name explicitly"
+      );
+    }
+
     return {
-      url: "https://api.openai.com/v1/chat/completions",
-      key: openaiKey,
-      model: "gpt-4o-mini",
+      type: "function",
+      function: { name: tools[0].function.name },
     };
   }
 
-  throw new Error("No LLM API key configured.");
+  if ("name" in toolChoice) {
+    return {
+      type: "function",
+      function: { name: toolChoice.name },
+    };
+  }
+
+  return toolChoice;
+};
+
+const resolveApiUrl = () =>
+  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
+    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
+    : "https://api.openai.com/v1/chat/completions";
+
+const assertApiKey = () => {
+  if (!ENV.forgeApiKey) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+};
+
+const normalizeResponseFormat = ({
+  responseFormat,
+  response_format,
+  outputSchema,
+  output_schema,
+}: {
+  responseFormat?: ResponseFormat;
+  response_format?: ResponseFormat;
+  outputSchema?: OutputSchema;
+  output_schema?: OutputSchema;
+}):
+  | { type: "json_schema"; json_schema: JsonSchema }
+  | { type: "text" }
+  | { type: "json_object" }
+  | undefined => {
+  const explicitFormat = responseFormat || response_format;
+  if (explicitFormat) {
+    if (
+      explicitFormat.type === "json_schema" &&
+      !explicitFormat.json_schema?.schema
+    ) {
+      throw new Error(
+        "responseFormat json_schema requires a defined schema object"
+      );
+    }
+    return explicitFormat;
+  }
+
+  const schema = outputSchema || output_schema;
+  if (!schema) return undefined;
+
+  if (!schema.name || !schema.schema) {
+    throw new Error("outputSchema requires both name and schema");
+  }
+
+  return {
+    type: "json_schema",
+    json_schema: {
+      name: schema.name,
+      schema: schema.schema,
+      ...(typeof schema.strict === "boolean" ? { strict: schema.strict } : {}),
+    },
+  };
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  const apiConfig = resolveApiConfig();
-  const startTime = Date.now();
+  assertApiKey();
 
   const {
     messages,
@@ -130,13 +277,10 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     output_schema,
     responseFormat,
     response_format,
-    maxTokens,
-    max_tokens,
-    timeoutMs = 20000,
   } = params;
 
   const payload: Record<string, unknown> = {
-    model: apiConfig.model,
+    model: "gemini-2.5-flash",
     messages: messages.map(normalizeMessage),
   };
 
@@ -144,12 +288,18 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tools = tools;
   }
 
-  const normalizedToolChoice = normalizeToolChoice(toolChoice || tool_choice, tools);
+  const normalizedToolChoice = normalizeToolChoice(
+    toolChoice || tool_choice,
+    tools
+  );
   if (normalizedToolChoice) {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = maxTokens || max_tokens || 1500;
+  payload.max_tokens = 32768
+  payload.thinking = {
+    "budget_tokens": 128
+  }
 
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
@@ -159,69 +309,24 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   });
 
   if (normalizedResponseFormat) {
-    if (normalizedResponseFormat.type === "json_schema" && apiConfig.url.includes("groq.com")) {
-      payload.response_format = { type: "json_object" };
-      const schemaInstructions = `\n\nYou MUST respond with valid JSON that matches this exact schema:\n${JSON.stringify(normalizedResponseFormat.json_schema.schema, null, 2)}`;
-      const systemMsg = payload.messages as any[];
-      if (systemMsg.length > 0 && systemMsg[0].role === 'system') {
-        systemMsg[0].content += schemaInstructions;
-      } else {
-        systemMsg.unshift({ role: 'system', content: schemaInstructions });
-      }
-    } else {
-      payload.response_format = normalizedResponseFormat;
-    }
+    payload.response_format = normalizedResponseFormat;
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => {
-    controller.abort();
-  }, timeoutMs);
+  const response = await fetch(resolveApiUrl(), {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${ENV.forgeApiKey}`,
+    },
+    body: JSON.stringify(payload),
+  });
 
-  try {
-    const response = await fetch(apiConfig.url, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${apiConfig.key}`,
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[LLM] Error: ${response.status} ${response.statusText} – ${errorText}`);
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`,
-      });
-    }
-
-    const result = (await response.json()) as InvokeResult;
-    const duration = Date.now() - startTime;
-    const usage = result.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
-    
-    console.log(JSON.stringify({
-      level: 'info',
-      message: 'LLM_INVOKE_SUCCESS',
-      model: apiConfig.model,
-      latency_ms: duration,
-      input_tokens: usage.prompt_tokens,
-      output_tokens: usage.completion_tokens,
-      total_tokens: usage.total_tokens,
-    }));
-
-    return result;
-  } catch (error: any) {
-    if (error.name === 'AbortError') {
-      throw new TRPCError({
-        code: 'TIMEOUT',
-        message: `LLM request timed out after ${timeoutMs}ms.`,
-      });
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeout);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
+    );
   }
+
+  return (await response.json()) as InvokeResult;
 }

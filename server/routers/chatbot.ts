@@ -82,7 +82,7 @@ export const chatbotRouter = router({
       const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
         { role: "system", content: systemPrompt },
         // History is reversed because we fetched it in descending order (newest first)
-        ...history.reverse().map((msg: any) => ({
+        ...history.reverse().map((msg) => ({
           role: msg.role as "user" | "assistant",
           content: msg.content,
         })),
@@ -139,7 +139,7 @@ export const chatbotRouter = router({
 
       // Group by session and get latest message
       const sessions = new Map<string, typeof messages[0]>();
-      messages.forEach((msg: any) => {
+      messages.forEach((msg) => {
         const existing = sessions.get(msg.sessionId);
         if (!existing || msg.createdAt > existing.createdAt) {
           sessions.set(msg.sessionId, msg);

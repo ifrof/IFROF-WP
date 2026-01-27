@@ -42,7 +42,7 @@ export function getSessionCookieOptions(
   return {
     httpOnly: true,
     path: "/",
-    sameSite: "lax",
-    secure: true, // Force secure for production on ifrof.com
+    sameSite: "none",
+    secure: isSecureRequest(req),
   };
 }

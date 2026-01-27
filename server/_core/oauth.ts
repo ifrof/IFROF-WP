@@ -1,8 +1,8 @@
-import { ONE_YEAR_MS } from "@shared/const";
+import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import type { Express, Request, Response } from "express";
 import * as db from "../db";
+import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
-import { createUserSession } from "./sessions";
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
@@ -28,24 +28,21 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      // Filter for Google only
-      const loginMethod = userInfo.loginMethod ?? userInfo.platform;
-      if (loginMethod !== "google") {
-        console.warn(`[OAuth] Rejected login attempt from platform: ${loginMethod}`);
-        res.status(403).json({ error: "Only Google authentication is allowed / يسمح فقط بتسجيل الدخول عبر جوجل" });
-        return;
-      }
-
-      const user = await db.upsertUser({
+      await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
         email: userInfo.email ?? null,
-        loginMethod: "google",
+        loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
-        emailVerified: 1, // OAuth emails are considered verified
       });
 
-      await createUserSession(user.id, req, res, { maxAgeMs: ONE_YEAR_MS });
+      const sessionToken = await sdk.createSessionToken(userInfo.openId, {
+        name: userInfo.name || "",
+        expiresInMs: ONE_YEAR_MS,
+      });
+
+      const cookieOptions = getSessionCookieOptions(req);
+      res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
 
       res.redirect(302, "/");
     } catch (error) {
