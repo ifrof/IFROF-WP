@@ -98,3 +98,27 @@ export async function getUserByEmail(email: string): Promise<any> {
       return result[0] || null;
     } catch (e) {
       console.error("[Database] getUserByEmail MySQL error:", e);
+      console.error("[Database] getUserByEmail MySQL error:", e);
+    }
+  }
+  
+  const db = readJsonDb();
+  return db.users?.find((u: any) => u.email === email) || null;
+}
+
+export async function createUser(userData: InsertUser): Promise<any> {
+  if (!isJsonMode && _db) {
+    try {
+      const result = await _db.insert(schema.users).values(userData);
+      return result;
+    } catch (e) {
+      console.error("[Database] createUser MySQL error:", e);
+    }
+  }
+  
+  const db = readJsonDb();
+  const newUser = { id: Date.now(), ...userData };
+  db.users.push(newUser);
+  writeJsonDb(db);
+  return newUser;
+}

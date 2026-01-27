@@ -453,8 +453,8 @@ export default function AdminProducts() {
                       </TableCell>
                     </TableRow>
                   ))}
-                </SelectContent>
-              </Select>
+                </TableBody>
+              </Table>
             )}
           </CardContent>
         </Card>

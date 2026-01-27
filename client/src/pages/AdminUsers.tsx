@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import AdminDashboardLayout from "@/components/AdminDashboardLayout";
 import {
   Table,
   TableBody,
@@ -167,6 +168,6 @@ export default function AdminUsers() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </AdminDashboardLayout>
   );
 }

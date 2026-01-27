@@ -1,1 +1,45 @@
-/**\n * Advanced Search and Filtering Utilities\n */\n\nexport interface SearchFilter {\n  field: string;\n  operator: \"eq\" | \"gt\" | \"lt\" | \"gte\" | \"lte\" | \"contains\" | \"in\";\n  value: any;\n}\n\nexport interface SearchOptions {\n  query?: string;\n  filters?: SearchFilter[];\n  sortBy?: string;\n  sortOrder?: \"asc\" | \"desc\";\n  page?: number;\n  pageSize?: number;\n}\n\nexport interface SearchResult<T> {\n  items: T[];\n  total: number;\n  page: number;\n  pageSize: number;\n  hasMore: boolean;\n}\n\n/**\n * Advanced Search Engine\n */\nexport class SearchEngine<T> {\n  private data: T[] = [];\n  private searchableFields: (keyof T)[] = [];\n\n  constructor(data: T[], searchableFields: (keyof T)[]) {\n    this.data = data;\n    this.searchableFields = searchableFields;\n  }\n\n  search(options: SearchOptions): SearchResult<T> {\n    let results = [...this.data];\n\n    // Apply text search\n    if (options.query) {\n      results = this.textSearch(results, options.query);\n    }\n\n    // Apply filters\n    if (options.filters && options.filters.length > 0) {\n      results = this.applyFilters(results, options.filters);\n    }\n\n    // Apply sorting\n    if (options.sortBy) {\n      results = this.sort(results, options.sortBy, options.sortOrder || \"asc\");\n    }\n\n    // Apply pagination\n    const page = options.page || 1;\n    const pageSize = options.pageSize || 20;\n    const startIndex = (page - 1) * pageSize;\n    const endIndex = startIndex + pageSize;\n\n    const paginatedResults = results.slice(startIndex, endIndex);\n\n    return {\n      items: paginatedResults,\n      total: results.length,\n      page,\n      pageSize,\n      hasMore: endIndex < results.length,\n    };\n  }\n\n  private textSearch(data: T[], query: string): T[] {\n    const lowerQuery = query.toLowerCase();\n    return data.filter((item) =>\n      this.searchableFields.some((field) => {\n        const value = String(item[field]).toLowerCase();\n        return value.includes(lowerQuery);\n      })\n    );\n  }\n\n  private applyFilters(data: T[], filters: SearchFilter[]): T[] {\n    return data.filter((item) =>\n      filters.every((filter) => this.matchesFilter(item, filter))\n    );\n  }\n\n  private matchesFilter(item: T, filter: SearchFilter): boolean {\n    const value = (item as any)[filter.field];\n\n    switch (filter.operator) {\n      case \"eq\":\n        return value === filter.value;\n      case \"gt\":\n        return value > filter.value;\n      case \"lt\":\n        return value < filter.value;\n      case \"gte\":\n        return value >= filter.value;\n      case \"lte\":\n        return value <= filter.value;\n      case \"contains\":\n        return String(value).toLowerCase().includes(String(filter.value).toLowerCase());\n      case \"in\":\n        return Array.isArray(filter.value) && filter.value.includes(value);\n      default:\n        return true;\n    }\n  }\n\n  private sort(data: T[], field: string, order: \"asc\" | \"desc\"): T[] {\n    return [...data].sort((a, b) => {\n      const aValue = (a as any)[field];\n      const bValue = (b as any)[field];\n\n      if (aValue < bValue) return order === \"asc\" ? -1 : 1;\n      if (aValue > bValue) return order === \"asc\" ? 1 : -1;\n      return 0;\n    });\n  }\n}\n\n/**\n * Faceted Search\n */\nexport interface Facet {\n  name: string;\n  values: { value: string; count: number }[];\n}\n\nexport class FacetedSearch<T> {\n  private data: T[] = [];\n  private facetFields: (keyof T)[] = [];\n\n  constructor(data: T[], facetFields: (keyof T)[]) {\n    this.data = data;\n    this.facetFields = facetFields;\n  }\n\n  getFacets(): Facet[] {\n    return this.facetFields.map((field) => ({\n      name: String(field),\n      values: this.countValues(field),\n    }));\n  }\n\n  private countValues(field: keyof T): { value: string; count: number }[] {\n    const counts = new Map<string, number>();\n\n    this.data.forEach((item) => {\n      const value = String(item[field]);\n      counts.set(value, (counts.get(value) || 0) + 1);\n    });\n\n    return Array.from(counts.entries())\n      .map(([value, count]) => ({ value, count }))\n      .sort((a, b) => b.count - a.count);\n  }\n}\n\n/**\n * Auto-complete/Suggestions\n */\nexport class AutoComplete<T> {\n  private data: T[] = [];\n  private field: keyof T;\n  private maxSuggestions: number;\n\n  constructor(data: T[], field: keyof T, maxSuggestions: number = 10) {\n    this.data = data;\n    this.field = field;\n    this.maxSuggestions = maxSuggestions;\n  }\n\n  getSuggestions(query: string): string[] {\n    const lowerQuery = query.toLowerCase();\n    const suggestions = new Set<string>();\n\n    this.data.forEach((item) => {\n      const value = String(item[this.field]).toLowerCase();\n      if (value.includes(lowerQuery)) {\n        suggestions.add(String(item[this.field]));\n      }\n    });\n\n    return Array.from(suggestions).slice(0, this.maxSuggestions);\n  }\n}\n\n/**\n * Aggregation\n */\nexport interface Aggregation {\n  field: string;\n  type: \"count\" | \"sum\" | \"avg\" | \"min\" | \"max\";\n  result: number;\n}\n\nexport class Aggregator<T> {\n  private data: T[] = [];\n\n  constructor(data: T[]) {\n    this.data = data;\n  }\n\n  aggregate(field: keyof T, type: \"count\" | \"sum\" | \"avg\" | \"min\" | \"max\"): number {\n    const values = this.data.map((item) => (item as any)[field]);\n\n    switch (type) {\n      case \"count\":\n        return values.length;\n      case \"sum\":\n        return values.reduce((sum, val) => sum + Number(val), 0);\n      case \"avg\":\n        return values.reduce((sum, val) => sum + Number(val), 0) / values.length;\n      case \"min\":\n        return Math.min(...values.map((v) => Number(v)));\n      case \"max\":\n        return Math.max(...values.map((v) => Number(v)));\n      default:\n        return 0;\n    }\n  }\n}\n\n/**\n * Search History\n */\nexport class SearchHistory {\n  private history: string[] = [];\n  private maxHistory: number;\n\n  constructor(maxHistory: number = 50) {\n    this.maxHistory = maxHistory;\n  }\n\n  addSearch(query: string): void {\n    // Remove if already exists\n    const index = this.history.indexOf(query);\n    if (index > -1) {\n      this.history.splice(index, 1);\n    }\n\n    // Add to beginning\n    this.history.unshift(query);\n\n    // Keep only maxHistory items\n    if (this.history.length > this.maxHistory) {\n      this.history.pop();\n    }\n  }\n\n  getHistory(): string[] {\n    return [...this.history];\n  }\n\n  clearHistory(): void {\n    this.history = [];\n  }\n\n  removeFromHistory(query: string): void {\n    const index = this.history.indexOf(query);\n    if (index > -1) {\n      this.history.splice(index, 1);\n    }\n  }\n}\n
+export interface SearchResult {
+  id: number;
+  title: string;
+  description?: string;
+  type: "product" | "factory" | "blog";
+  url: string;
+}
+
+export const searchProducts = (query: string, products: any[]): SearchResult[] => {
+  const lowerQuery = query.toLowerCase();
+  return products
+    .filter(
+      (p) =>
+        p.nameEn?.toLowerCase().includes(lowerQuery) ||
+        p.nameAr?.toLowerCase().includes(lowerQuery) ||
+        p.descriptionEn?.toLowerCase().includes(lowerQuery)
+    )
+    .map((p) => ({
+      id: p.id,
+      title: p.nameEn || p.nameAr,
+      description: p.descriptionEn,
+      type: "product" as const,
+      url: `/products/${p.id}`,
+    }));
+};
+
+export const searchFactories = (query: string, factories: any[]): SearchResult[] => {
+  const lowerQuery = query.toLowerCase();
+  return factories
+    .filter((f) => f.name?.toLowerCase().includes(lowerQuery) || f.description?.toLowerCase().includes(lowerQuery))
+    .map((f) => ({
+      id: f.id,
+      title: f.name,
+      description: f.description,
+      type: "factory" as const,
+      url: `/factories/${f.id}`,
+    }));
+};
+
+export const performSearch = (query: string, data: any): SearchResult[] => {
+  const results: SearchResult[] = [];
+  results.push(...searchProducts(query, data.products || []));
+  results.push(...searchFactories(query, data.factories || []));
+  return results;
+};
