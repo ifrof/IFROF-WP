@@ -64,7 +64,6 @@ export default function Checkout() {
   };
 
   const handleCheckout = async () => {
-    // Validate shipping address
     if (
       !shippingAddress.fullName ||
       !shippingAddress.address ||
@@ -84,43 +83,36 @@ export default function Checkout() {
     setIsProcessing(true);
 
     try {
-      // Group items by factory
       const factoryGroups = (cartItems as CartItemData[]).reduce((groups: Record<number, CartItemData[]>, item: CartItemData) => {
         const factoryId = item.factory?.id;
         if (factoryId) {
           if (!groups[factoryId]) {
             groups[factoryId] = [];
           }
-          return groups;
-        },
-        {}
-      );
+          groups[factoryId].push(item);
+        }
+        return groups;
+      }, {});
 
-      // Create orders for each factory
       for (const [factoryId, items] of Object.entries(factoryGroups)) {
         const orderItems = items.map((item) => ({
           productId: item.product?.id || item.service?.id || 0,
           quantity: item.cartItem.quantity,
-          price:
-            (item.product?.basePrice || item.service?.basePrice || 0) / 100,
+          price: (item.product?.basePrice || item.service?.basePrice || 0) / 100,
         }));
 
-        // Create checkout session
         const checkoutResult = await createCheckoutMutation.mutateAsync({
           factoryId: parseInt(factoryId),
           items: orderItems,
         });
 
         if (checkoutResult.checkoutUrl) {
-          // Redirect to Stripe checkout
           window.location.href = checkoutResult.checkoutUrl;
           return;
         }
       }
 
-      // Clear cart after successful checkout
       await clearCartMutation.mutateAsync();
-
       toast.success(t("checkout.success"));
       setLocation("/orders");
     } catch (error: any) {
@@ -156,7 +148,6 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-8 px-4">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -168,9 +159,7 @@ export default function Checkout() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Checkout Form */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Shipping Address */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -184,43 +173,26 @@ export default function Checkout() {
                   <Input
                     id="fullName"
                     value={shippingAddress.fullName}
-                    onChange={e =>
-                      setShippingAddress({
-                        ...shippingAddress,
-                        fullName: e.target.value,
-                      })
-                    }
+                    onChange={e => setShippingAddress({ ...shippingAddress, fullName: e.target.value })}
                     required
                   />
                 </div>
-
                 <div>
                   <Label htmlFor="address">{t("checkout.address")} *</Label>
                   <Textarea
                     id="address"
                     value={shippingAddress.address}
-                    onChange={e =>
-                      setShippingAddress({
-                        ...shippingAddress,
-                        address: e.target.value,
-                      })
-                    }
+                    onChange={e => setShippingAddress({ ...shippingAddress, address: e.target.value })}
                     required
                   />
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="city">{t("checkout.city")} *</Label>
                     <Input
                       id="city"
                       value={shippingAddress.city}
-                      onChange={e =>
-                        setShippingAddress({
-                          ...shippingAddress,
-                          city: e.target.value,
-                        })
-                      }
+                      onChange={e => setShippingAddress({ ...shippingAddress, city: e.target.value })}
                       required
                     />
                   </div>
@@ -229,28 +201,17 @@ export default function Checkout() {
                     <Input
                       id="state"
                       value={shippingAddress.state}
-                      onChange={e =>
-                        setShippingAddress({
-                          ...shippingAddress,
-                          state: e.target.value,
-                        })
-                      }
+                      onChange={e => setShippingAddress({ ...shippingAddress, state: e.target.value })}
                     />
                   </div>
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="zipCode">{t("checkout.zipCode")}</Label>
                     <Input
                       id="zipCode"
                       value={shippingAddress.zipCode}
-                      onChange={e =>
-                        setShippingAddress({
-                          ...shippingAddress,
-                          zipCode: e.target.value,
-                        })
-                      }
+                      onChange={e => setShippingAddress({ ...shippingAddress, zipCode: e.target.value })}
                     />
                   </div>
                   <div>
@@ -258,36 +219,24 @@ export default function Checkout() {
                     <Input
                       id="country"
                       value={shippingAddress.country}
-                      onChange={e =>
-                        setShippingAddress({
-                          ...shippingAddress,
-                          country: e.target.value,
-                        })
-                      }
+                      onChange={e => setShippingAddress({ ...shippingAddress, country: e.target.value })}
                       required
                     />
                   </div>
                 </div>
-
                 <div>
                   <Label htmlFor="phone">{t("checkout.phone")} *</Label>
                   <Input
                     id="phone"
                     type="tel"
                     value={shippingAddress.phone}
-                    onChange={e =>
-                      setShippingAddress({
-                        ...shippingAddress,
-                        phone: e.target.value,
-                      })
-                    }
+                    onChange={e => setShippingAddress({ ...shippingAddress, phone: e.target.value })}
                     required
                   />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Order Notes */}
             <Card>
               <CardHeader>
                 <CardTitle>{t("checkout.orderNotes")}</CardTitle>
@@ -303,61 +252,40 @@ export default function Checkout() {
             </Card>
           </div>
 
-          {/* Order Summary */}
           <div className="lg:col-span-1">
             <Card className="sticky top-4">
               <CardHeader>
                 <CardTitle>{t("checkout.orderSummary")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Items */}
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {(cartItems as CartItemData[]).map((item) => {
                     const itemData = item.product || item.service;
                     const price = itemData?.basePrice || 0;
                     return (
-                      <div
-                        key={item.cartItem.id}
-                        className="flex justify-between text-sm"
-                      >
-                        <span>
-                          {itemData?.name} × {item.cartItem.quantity}
-                        </span>
-                        <span className="font-medium">
-                          ${((price * item.cartItem.quantity) / 100).toFixed(2)}
-                        </span>
+                      <div key={item.cartItem.id} className="flex justify-between text-sm">
+                        <span>{itemData?.name} × {item.cartItem.quantity}</span>
+                        <span className="font-medium">${((price * item.cartItem.quantity) / 100).toFixed(2)}</span>
                       </div>
                     );
                   })}
                 </div>
-
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      {t("checkout.subtotal")}:
-                    </span>
-                    <span className="font-medium">
-                      ${(calculateTotal() / 100).toFixed(2)}
-                    </span>
+                    <span className="text-muted-foreground">{t("checkout.subtotal")}:</span>
+                    <span className="font-medium">${(calculateTotal() / 100).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      {t("checkout.shipping")}:
-                    </span>
-                    <span className="font-medium">
-                      {t("checkout.calculatedLater")}
-                    </span>
+                    <span className="text-muted-foreground">{t("checkout.shipping")}:</span>
+                    <span className="font-medium">{t("checkout.calculatedLater")}</span>
                   </div>
                   <div className="border-t pt-2">
                     <div className="flex justify-between text-lg">
                       <span className="font-bold">{t("checkout.total")}:</span>
-                      <span className="font-bold text-blue-600">
-                        ${(calculateTotal() / 100).toFixed(2)}
-                      </span>
+                      <span className="font-bold text-blue-600">${(calculateTotal() / 100).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
-
                 <Button
                   className="w-full bg-orange-500 hover:bg-orange-600"
                   size="lg"
@@ -365,21 +293,12 @@ export default function Checkout() {
                   disabled={isProcessing}
                 >
                   {isProcessing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      {t("checkout.processing")}
-                    </>
+                    <><Loader2 className="w-4 h-4 animate-spin mr-2" />{t("checkout.processing")}</>
                   ) : (
-                    <>
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      {t("checkout.placeOrder")}
-                    </>
+                    <><CreditCard className="w-4 h-4 mr-2" />{t("checkout.placeOrder")}</>
                   )}
                 </Button>
-
-                <p className="text-xs text-center text-muted-foreground">
-                  {t("checkout.securePayment")}
-                </p>
+                <p className="text-xs text-center text-muted-foreground">{t("checkout.securePayment")}</p>
               </CardContent>
             </Card>
           </div>

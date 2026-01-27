@@ -16,9 +16,11 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function FactoryDashboard() {
   const { t } = useLanguage();
+  const { user } = useAuth();
 
   // Mock factory ID - in production, this would come from user's factory association
   const factoryId = 1;
@@ -72,10 +74,9 @@ export default function FactoryDashboard() {
   }
 
   return (
-    <FactoryDashboardLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div>
+    <div className="min-h-screen bg-background p-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">
             {t("dashboard.factory.title")}
           </h1>
@@ -83,9 +84,7 @@ export default function FactoryDashboard() {
             {t("dashboard.factory.subtitle")}
           </p>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card>
@@ -149,12 +148,8 @@ export default function FactoryDashboard() {
             <TabsTrigger value="products">
               {t("dashboard.factory.products")}
             </TabsTrigger>
-            <TabsTrigger value="services">
-              {t("dashboard.factory.services")}
-            </TabsTrigger>
           </TabsList>
 
-          {/* Orders Tab */}
           <TabsContent value="orders">
             <Card>
               <CardHeader>
@@ -200,7 +195,6 @@ export default function FactoryDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Inquiries Tab */}
           <TabsContent value="inquiries">
             <Card>
               <CardHeader>
@@ -230,23 +224,12 @@ export default function FactoryDashboard() {
                                 className="bg-blue-50 text-blue-700 border-blue-200"
                               >
                                 <Truck className="w-3 h-3 mr-1" />
-                                {t(
-                                  `importRequest.form.shippingMethodOptions.${inquiry.shippingMethod}`
-                                )}
+                                {t(`importRequest.form.shippingMethodOptions.${inquiry.shippingMethod}`)}
                               </Badge>
                             )}
                           </div>
                         </div>
                         <div className="flex justify-between items-center mt-4">
-                          {inquiry.shippingCostEstimate ? (
-                            <div className="text-sm font-semibold text-green-600 flex items-center">
-                              <DollarSign className="w-4 h-4 mr-1" />
-                              {t("importRequest.form.shippingCostEstimate")}: $
-                              {(inquiry.shippingCostEstimate / 100).toFixed(2)}
-                            </div>
-                          ) : (
-                            <div></div>
-                          )}
                           <Button variant="outline" size="sm">
                             <MessageSquare className="w-4 h-4 mr-2" />
                             {t("dashboard.factory.respond")}
@@ -258,122 +241,6 @@ export default function FactoryDashboard() {
                 ) : (
                   <p className="text-center text-muted-foreground py-8">
                     {t("dashboard.factory.noInquiries")}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Products Tab */}
-          <TabsContent value="products">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>{t("dashboard.factory.myProducts")}</CardTitle>
-                  <Link href="/admin/products">
-                    <Button>{t("dashboard.factory.addProduct")}</Button>
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {products && (products as any[]).length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {(products as any[]).map((product: any) => {
-                      const images = product.imageUrls ? JSON.parse(product.imageUrls) : [];
-                      return (
-                        <div
-                          key={product.id}
-                          className="border rounded-lg overflow-hidden"
-                        >
-                          <div className="w-full h-32 bg-gray-100">
-                            {images.length > 0 && (
-                              <img
-                                src={images[0]}
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                              />
-                            )}
-                          </div>
-                          <div className="p-3">
-                            <h3 className="font-medium line-clamp-1">
-                              {product.name}
-                            </h3>
-                            <p className="text-lg font-bold text-blue-600 mt-2">
-                              ${(product.basePrice / 100).toFixed(2)}
-                            </p>
-                            <Badge
-                              variant={product.active ? "default" : "secondary"}
-                              className="mt-2"
-                            >
-                              {product.active
-                                ? t("common.active")
-                                : t("common.inactive")}
-                            </Badge>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">
-                    {t("dashboard.factory.noProducts")}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Services Tab */}
-          <TabsContent value="services">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>{t("dashboard.factory.myServices")}</CardTitle>
-                  <Button>{t("dashboard.factory.addService")}</Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {services && (services as any[]).length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {(services as any[]).map((service: any) => {
-                      const images = service.imageUrls ? JSON.parse(service.imageUrls) : [];
-                      return (
-                        <div
-                          key={service.id}
-                          className="border rounded-lg overflow-hidden"
-                        >
-                          <div className="w-full h-32 bg-gray-100">
-                            {images.length > 0 && (
-                              <img
-                                src={images[0]}
-                                alt={service.name}
-                                className="w-full h-full object-cover"
-                              />
-                            )}
-                          </div>
-                          <div className="p-3">
-                            <h3 className="font-medium line-clamp-1">
-                              {service.name}
-                            </h3>
-                            <p className="text-lg font-bold text-purple-600 mt-2">
-                              ${(service.basePrice / 100).toFixed(2)}
-                            </p>
-                            <Badge
-                              variant={service.active ? "default" : "secondary"}
-                              className="mt-2"
-                            >
-                              {service.active
-                                ? t("common.active")
-                                : t("common.inactive")}
-                            </Badge>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">
-                    {t("dashboard.factory.noServices")}
                   </p>
                 )}
               </CardContent>

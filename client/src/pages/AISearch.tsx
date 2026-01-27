@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { CheckCircle, AlertCircle, Search, Loader2, ArrowRight, ArrowLeft, Home } from 'lucide-react';
+import { CheckCircle, AlertCircle, Search, Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Link } from 'wouter';
 
@@ -13,21 +13,16 @@ export default function AISearch() {
   const [category, setCategory] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [recommendations, setRecommendations] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  const t =
-    pageTranslations[language as keyof typeof pageTranslations] ||
-    pageTranslations.en;
 
   const searchMutation = trpc.aiAgent.searchFactories.useMutation({
     onSuccess: data => {
       setSearchResults(data.results || []);
-      setRecommendations(data.recommendations || []);
       setIsSearching(false);
     },
     onError: error => {
       console.error("Search API Error:", error);
+      setError("Failed to fetch results");
       setIsSearching(false);
     },
   });
@@ -110,7 +105,7 @@ export default function AISearch() {
           <CardContent>
             <form onSubmit={handleSearch} className="space-y-6">
               <div className="grid md:grid-cols-3 gap-4">
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-2">
                     {language === 'ar' ? 'ماذا تبحث عن؟' : 'What are you looking for?'}
                   </label>
@@ -118,36 +113,19 @@ export default function AISearch() {
                     placeholder={language === 'ar' ? 'مثال: مصنع نسيج في قوانغتشو' : 'Example: Textile factory in Guangzhou'}
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="h-14 border-gray-200 focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/20 text-lg rounded-xl"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {language === 'ar' ? 'الفئة' : 'Category'}
-                  </label>
-                  <Input
-                    placeholder={language === 'ar' ? 'اختياري' : 'Optional'}
-                    value={category}
-                    onChange={e => setCategory(e.target.value)}
-                    className="h-14 border-gray-200 focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/20 text-lg rounded-xl"
+                    className="h-14 border-gray-200"
                   />
                 </div>
                 <div className="flex items-end">
                   <Button
                     type="submit"
                     disabled={isSearching || !searchQuery.trim()}
-                    className="w-full bg-blue-900 hover:bg-blue-950 text-white"
+                    className="w-full h-14 bg-blue-900 hover:bg-blue-950 text-white"
                   >
                     {isSearching ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin me-2" />
-                        {language === 'ar' ? 'جاري البحث...' : 'Searching...'}
-                      </>
+                      <><Loader2 className="w-4 h-4 animate-spin me-2" />{language === 'ar' ? 'جاري البحث...' : 'Searching...'}</>
                     ) : (
-                      <>
-                        <Search className="w-4 h-4 me-2" />
-                        {language === 'ar' ? 'بحث' : 'Search'}
-                      </>
+                      <><Search className="w-4 h-4 me-2" />{language === 'ar' ? 'بحث' : 'Search'}</>
                     )}
                   </Button>
                 </div>
@@ -159,72 +137,24 @@ export default function AISearch() {
         {/* Results Section */}
         {searchResults.length > 0 && (
           <div className="mt-12 space-y-8">
-            <div>
-              <h2 className="text-2xl font-bold text-blue-900 mb-6">
-                {language === 'ar' ? 'نتائج البحث' : 'Search Results'}
-              </h2>
-              <div className="grid gap-6">
-                {searchResults.map((result, index) => (
-                  <Card
-                    key={index}
-                    className={`border-2 ${
-                      result.isDirectFactory
-                        ? 'border-green-200 bg-green-50'
-                        : 'border-red-200 bg-red-50'
-                    }`}
-                  >
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            {result.isDirectFactory ? (
-                              <CheckCircle className="w-6 h-6 text-green-600" />
-                            ) : (
-                              <AlertCircle className="w-6 h-6 text-red-600" />
-                            )}
-                            <CardTitle className="text-lg">{result.name}</CardTitle>
-                          </div>
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            <span
-                              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                result.isDirectFactory
-                                  ? 'bg-green-200 text-green-800'
-                                  : 'bg-red-200 text-red-800'
-                              }`}
-                            >
-                              {result.isDirectFactory
-                                ? (language === 'ar' ? 'مصنع مباشر ✓' : 'Direct Factory ✓')
-                                : (language === 'ar' ? 'وسيط/تاجر ✗' : 'Middleman/Trader ✗')}
-                            </span>
-                            <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-200 text-blue-800">
-                              {language === 'ar'
-                                ? `ثقة: ${result.confidence}%`
-                                : `Confidence: ${result.confidence}%`}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-700 leading-relaxed">{result.reasoning}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              <h3 className="text-xl font-bold mb-3">
-                {t.comprehensiveSearch}
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {t.comprehensiveSearchDesc}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-none shadow-sm bg-white hover:shadow-md transition-shadow">
-            <CardContent className="pt-8 text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-orange-50 mb-6">
-                <Search className="w-8 h-8 text-orange-600" />
-              </div>
-            )}
+            <h2 className="text-2xl font-bold text-blue-900 mb-6">
+              {language === 'ar' ? 'نتائج البحث' : 'Search Results'}
+            </h2>
+            <div className="grid gap-6">
+              {searchResults.map((result, index) => (
+                <Card key={index} className={`border-2 ${result.isDirectFactory ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      {result.isDirectFactory ? <CheckCircle className="w-6 h-6 text-green-600" /> : <AlertCircle className="w-6 h-6 text-red-600" />}
+                      <CardTitle className="text-lg">{result.name}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700">{result.reasoning}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
 
@@ -244,23 +174,17 @@ export default function AISearch() {
             {[
               {
                 title: language === 'ar' ? 'ابحث بسهولة' : 'Search Easily',
-                desc: language === 'ar'
-                  ? 'أدخل ما تبحث عنه والذكاء الاصطناعي سيجد أفضل المصانع المباشرة'
-                  : 'Enter what you are looking for and AI will find the best direct factories',
+                desc: language === 'ar' ? 'أدخل ما تبحث عنه والذكاء الاصطناعي سيجد أفضل المصانع المباشرة' : 'Enter what you are looking for and AI will find the best direct factories',
                 icon: Search,
               },
               {
                 title: language === 'ar' ? 'تحقق موثوق' : 'Verified Verification',
-                desc: language === 'ar'
-                  ? 'نتأكد من أن المصنع مباشر وليس وسيط أو شركة تجارية'
-                  : 'We ensure the factory is direct, not an intermediary or trading company',
+                desc: language === 'ar' ? 'نتأكد من أن المصنع مباشر وليس وسيط أو شركة تجارية' : 'We ensure the factory is direct, not an intermediary or trading company',
                 icon: CheckCircle,
               },
               {
-                title: language === 'ar' ? 'احصل على نصائح' : 'Get Tips',
-                desc: language === 'ar'
-                  ? 'احصل على نصائح قيمة للعثور على أفضل المصانع'
-                  : 'Get valuable tips for finding the best factories',
+                title: language === 'ar' ? 'دعم متكامل' : 'Full Support',
+                desc: language === 'ar' ? 'نحن نساعدك في التواصل مع المصانع الصينية' : 'We help you communicate with Chinese factories',
                 icon: ArrowRight,
               },
             ].map((item, index) => {

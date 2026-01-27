@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Users, Building2, Package, ShoppingBag, AlertTriangle, CheckCircle, BarChart3 } from "lucide-react";
+import { Loader2, Users, Building2, Package, ShoppingBag, AlertTriangle, CheckCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function AdminDashboard() {
-  const { t, language, dir } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
   
   const { data: factories, isLoading: factoriesLoading } = trpc.factories.list.useQuery();
@@ -43,10 +45,9 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold mb-8">Admin Dashboard</h1>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card>
@@ -179,7 +180,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="flex items-center gap-2">
                           {factory.verificationStatus === "verified" ? (
-                            <Badge variant="default" className="bg-green-600">
+                            <Badge className="bg-green-600">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               {t("manufacturer.verified")}
                             </Badge>

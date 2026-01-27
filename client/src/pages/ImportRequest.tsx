@@ -16,19 +16,18 @@ import { trpc } from "@/lib/trpc";
 import {
   CheckCircle,
   Loader2,
-  Factory,
-  Truck,
   User,
-  ArrowRight,
-  ArrowLeft,
 } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { toast } from "sonner";
 
 export default function ImportRequest() {
-  const { language, t, dir } = useLanguage();
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const { language, dir } = useLanguage();
+  const { user, isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({
     productId: undefined as number | undefined,
@@ -39,7 +38,6 @@ export default function ImportRequest() {
     deliveryDetails: "",
   });
 
-  // Get productId from URL if present
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const pid = params.get("productId");
@@ -48,20 +46,7 @@ export default function ImportRequest() {
     }
   }, []);
 
-  const createRequest = trpc.inquiries.create.useMutation({
-    onSuccess: () => {
-      toast.success(
-        language === "ar"
-          ? "تم إرسال طلبك بنجاح!"
-          : "Request submitted successfully!"
-      );
-      setStep(4);
-    },
-    onError: error => {
-      toast.error(error.message);
-      setIsSubmitting(false);
-    },
-  });
+  const createRequestMutation = trpc.inquiries.create.useMutation();
 
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => s - 1);
@@ -72,24 +57,27 @@ export default function ImportRequest() {
       return;
     }
 
-    if (!formData.productName || !formData.quantity || !formData.destination) {
+    if (!formData.productName || !formData.quantity) {
       toast.error(language === 'ar' ? 'يرجى ملء الحقول المطلوبة' : 'Please fill required fields');
-      return;
-    }
-
-    if (formData.attachments.length === 0 && formData.attachmentUrls.length === 0) {
-      toast.error(language === 'ar' ? 'يرجى إضافة صور أو ملفات' : 'Please add images or files');
       return;
     }
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      await createRequestMutation.mutateAsync({
+        factoryId: 1, // Mock or from product
+        subject: formData.productName,
+        message: `Quantity: ${formData.quantity}\nSpecs: ${formData.specifications}\nDelivery: ${formData.deliveryDetails}`,
+      });
 
-    setIsSubmitting(false);
-    setSubmitted(true);
-    toast.success(language === 'ar' ? 'تم إرسال طلب الاستيراد بنجاح!' : 'Import request submitted successfully!');
+      setSubmitted(true);
+      toast.success(language === 'ar' ? 'تم إرسال طلب الاستيراد بنجاح!' : 'Import request submitted successfully!');
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -108,10 +96,10 @@ export default function ImportRequest() {
               : "We will contact you soon with quotes."}
           </p>
           <Button
-            onClick={() => setLocation("/buyer/requests")}
+            onClick={() => setLocation("/")}
             className="w-full"
           >
-            {language === "ar" ? "عرض طلباتي" : "View My Requests"}
+            {language === "ar" ? "العودة للرئيسية" : "Back Home"}
           </Button>
         </Card>
       </div>
@@ -121,7 +109,6 @@ export default function ImportRequest() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4" dir={dir}>
       <div className="max-w-2xl mx-auto">
-        {/* Progress Bar */}
         <div className="flex justify-between mb-8 relative">
           <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
           {[1, 2, 3].map(i => (
@@ -137,45 +124,28 @@ export default function ImportRequest() {
             </div>
           ))}
         </div>
-      </div>
 
         <Card>
           <CardHeader>
             <CardTitle>
-              {step === 1 &&
-                (language === "ar" ? "اختيار المنتج" : "Product Selection")}
-              {step === 2 &&
-                (language === "ar" ? "التفاصيل والكمية" : "Details & Quantity")}
-              {step === 3 &&
-                (language === "ar" ? "معلومات التواصل" : "Contact Information")}
+              {step === 1 && (language === "ar" ? "اختيار المنتج" : "Product Selection")}
+              {step === 2 && (language === "ar" ? "التفاصيل والكمية" : "Details & Quantity")}
+              {step === 3 && (language === "ar" ? "معلومات التواصل" : "Contact Information")}
             </CardTitle>
             <CardDescription>
-              {step === 1 &&
-                (language === "ar"
-                  ? "ما الذي ترغب في استيراده؟"
-                  : "What would you like to import?")}
-              {step === 2 &&
-                (language === "ar"
-                  ? "حدد الكمية والمواصفات المطلوبة"
-                  : "Specify quantity and requirements")}
-              {step === 3 &&
-                (language === "ar"
-                  ? "تأكيد بياناتك لإرسال الطلب"
-                  : "Confirm your details to submit")}
+              {step === 1 && (language === "ar" ? "ما الذي ترغب في استيراده؟" : "What would you like to import?")}
+              {step === 2 && (language === "ar" ? "حدد الكمية والمواصفات المطلوبة" : "Specify quantity and requirements")}
+              {step === 3 && (language === "ar" ? "تأكيد بياناتك لإرسال الطلب" : "Confirm your details to submit")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {step === 1 && (
               <div className="space-y-4">
                 <div>
-                  <Label>
-                    {language === "ar" ? "اسم المنتج" : "Product Name"}
-                  </Label>
+                  <Label>{language === "ar" ? "اسم المنتج" : "Product Name"}</Label>
                   <Input
                     value={formData.productName}
-                    onChange={e =>
-                      setFormData(f => ({ ...f, productName: e.target.value }))
-                    }
+                    onChange={e => setFormData(f => ({ ...f, productName: e.target.value }))}
                     placeholder="e.g. Cotton T-shirts"
                   />
                 </div>
@@ -183,9 +153,7 @@ export default function ImportRequest() {
                   <Label>{language === "ar" ? "التصنيف" : "Category"}</Label>
                   <Input
                     value={formData.category}
-                    onChange={e =>
-                      setFormData(f => ({ ...f, category: e.target.value }))
-                    }
+                    onChange={e => setFormData(f => ({ ...f, category: e.target.value }))}
                     placeholder="e.g. Apparel"
                   />
                 </div>
@@ -199,39 +167,23 @@ export default function ImportRequest() {
                   <Input
                     type="number"
                     value={formData.quantity}
-                    onChange={e =>
-                      setFormData(f => ({ ...f, quantity: e.target.value }))
-                    }
+                    onChange={e => setFormData(f => ({ ...f, quantity: e.target.value }))}
                     placeholder="1000"
                   />
                 </div>
                 <div>
-                  <Label>
-                    {language === "ar" ? "المواصفات" : "Specifications"}
-                  </Label>
+                  <Label>{language === "ar" ? "المواصفات" : "Specifications"}</Label>
                   <Textarea
                     value={formData.specifications}
-                    onChange={e =>
-                      setFormData(f => ({
-                        ...f,
-                        specifications: e.target.value,
-                      }))
-                    }
+                    onChange={e => setFormData(f => ({ ...f, specifications: e.target.value }))}
                     placeholder="Size, color, material..."
                   />
                 </div>
                 <div>
-                  <Label>
-                    {language === "ar" ? "تفاصيل التوصيل" : "Delivery Details"}
-                  </Label>
+                  <Label>{language === "ar" ? "تفاصيل التوصيل" : "Delivery Details"}</Label>
                   <Textarea
                     value={formData.deliveryDetails}
-                    onChange={e =>
-                      setFormData(f => ({
-                        ...f,
-                        deliveryDetails: e.target.value,
-                      }))
-                    }
+                    onChange={e => setFormData(f => ({ ...f, deliveryDetails: e.target.value }))}
                     placeholder="Shipping address, preferred method..."
                   />
                 </div>
@@ -243,7 +195,7 @@ export default function ImportRequest() {
                 <div className="p-4 bg-blue-50 rounded-lg space-y-2">
                   <div className="flex items-center gap-2 text-blue-800">
                     <User className="w-4 h-4" />
-                    <span className="font-medium">{user?.name}</span>
+                    <span className="font-medium">{user?.name || 'Guest'}</span>
                   </div>
                   <div className="text-sm text-blue-600">{user?.email}</div>
                 </div>
@@ -263,17 +215,12 @@ export default function ImportRequest() {
               )}
               <div className="flex-1" />
               {step < 3 ? (
-                <Button
-                  onClick={nextStep}
-                  disabled={step === 1 && !formData.productName}
-                >
+                <Button onClick={nextStep} disabled={step === 1 && !formData.productName}>
                   {language === "ar" ? "التالي" : "Next"}
                 </Button>
               ) : (
                 <Button onClick={handleSubmit} disabled={isSubmitting}>
-                  {isSubmitting && (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  )}
+                  {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   {language === "ar" ? "إرسال الطلب" : "Submit Request"}
                 </Button>
               )}

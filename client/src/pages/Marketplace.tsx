@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
-import { Loader2, MapPin, Phone, Mail, Search, ArrowLeft, ArrowRight, Home } from "lucide-react";
+import { Loader2, MapPin, Phone, Mail, Search, ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -34,8 +34,6 @@ export default function Marketplace() {
     ) || [];
 
   const BackArrow = language === "ar" ? ArrowRight : ArrowLeft;
-
-  const BackArrow = language === 'ar' ? ArrowRight : ArrowLeft;
 
   return (
     <div className="min-h-screen bg-background" dir={dir}>
@@ -128,13 +126,6 @@ export default function Marketplace() {
                     onClick={() => setSelectedFactory(factory.id)}
                   >
                     <CardHeader className="pb-3">
-                      {factory.logoUrl && (
-                        <img
-                          src={factory.logoUrl}
-                          alt={factory.name}
-                          className="w-full h-20 object-cover rounded mb-2"
-                        />
-                      )}
                       <CardTitle className="text-lg">{factory.name}</CardTitle>
                       <CardDescription className="flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
@@ -148,12 +139,6 @@ export default function Marketplace() {
                           <span className="truncate">
                             {factory.contactEmail}
                           </span>
-                        </div>
-                      )}
-                      {factory.contactPhone && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Phone className="w-3 h-3" />
-                          {factory.contactPhone}
                         </div>
                       )}
                       {factory.verificationStatus === "verified" && (
@@ -195,24 +180,6 @@ export default function Marketplace() {
                         key={product.id}
                         className="hover:shadow-lg transition-shadow"
                       >
-                        {product.imageUrls && (
-                          <div className="w-full h-40 bg-gray-200 rounded-t-lg overflow-hidden">
-                            {typeof product.imageUrls === "string" &&
-                            product.imageUrls.startsWith("[") ? (
-                              <LazyImage
-                                src={JSON.parse(product.imageUrls)[0]}
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                <span className="text-gray-400">
-                                  {language === 'ar' ? 'لا توجد صورة' : 'No image'}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        )}
                         <CardHeader>
                           <CardTitle className="text-lg">
                             {product.name}

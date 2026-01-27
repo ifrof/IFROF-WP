@@ -16,6 +16,7 @@ export default function AIChat() {
   const { language, dir } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  
   const initialMessage = useMemo(
     () => [
       {
@@ -28,8 +29,8 @@ export default function AIChat() {
     ],
     [language]
   );
-  const { messages, input, isLoading, setInput, sendMessage } =
-    useAiChat(initialMessage);
+
+  const { messages, input, isLoading, setInput, sendMessage } = useAiChat(initialMessage);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -42,53 +43,8 @@ export default function AIChat() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!input.trim()) {
-      return;
-    }
-
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: input,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponses = {
-        ar: [
-          'هذا سؤال ممتاز! دعني أساعدك في البحث عن أفضل المصانع الموثقة.',
-          'يمكنني مساعدتك في التحقق من سمعة المصنع والتأكد من جودته.',
-          'هل تريد معرفة المزيد عن عملية التحقق من المصانع؟',
-          'يمكنني تقديم توصيات بناءً على احتياجاتك ومتطلباتك.',
-        ],
-        en: [
-          'That\'s a great question! Let me help you find the best verified manufacturers.',
-          'I can help you verify the factory\'s reputation and quality standards.',
-          'Would you like to know more about our factory verification process?',
-          'I can provide recommendations based on your specific needs and requirements.',
-        ]
-      };
-
-      const responses = language === 'ar' ? aiResponses.ar : aiResponses.en;
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: randomResponse,
-        timestamp: new Date(),
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 1000);
+    if (!input.trim()) return;
+    sendMessage(input);
   };
 
   const suggestedQuestions = language === 'ar' 
@@ -149,7 +105,6 @@ export default function AIChat() {
 
       {!isMinimized && (
         <>
-          {/* Messages */}
           <div className="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50">
             {messages.map((msg, index) => (
               <div
@@ -166,30 +121,7 @@ export default function AIChat() {
                   {msg.content}
                 </div>
               </div>
-            ) : (
-              messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-xs px-4 py-2 rounded-lg ${
-                      message.type === 'user'
-                        ? 'bg-[#ff8c42] text-white rounded-br-none'
-                        : 'bg-gray-200 text-gray-800 rounded-bl-none'
-                    }`}
-                  >
-                    <p className="text-sm">{message.content}</p>
-                    <p className="text-xs opacity-70 mt-1">
-                      {message.timestamp.toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )}
+            ))}
             {isLoading && (
               <div className="flex justify-start">
                 <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg rounded-bl-none">
@@ -200,7 +132,6 @@ export default function AIChat() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Suggested Questions */}
           {messages.length === 1 && (
             <div className="px-4 py-2 bg-white border-t border-gray-200">
               <p className="text-xs text-gray-600 mb-2">
@@ -212,10 +143,6 @@ export default function AIChat() {
                     key={index}
                     onClick={() => {
                       setInput(question);
-                      setTimeout(() => {
-                        const form = document.querySelector('form');
-                        if (form) form.dispatchEvent(new Event('submit', { bubbles: true }));
-                      }, 0);
                     }}
                     className="w-full text-left text-xs bg-gray-100 hover:bg-gray-200 p-2 rounded transition"
                   >
@@ -226,7 +153,6 @@ export default function AIChat() {
             </div>
           )}
 
-          {/* Input */}
           <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-white">
             <div className="flex gap-2">
               <Input

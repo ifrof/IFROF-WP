@@ -8,18 +8,17 @@ import {
   Package,
   FileText,
   MessageSquare,
-  CheckCircle2,
   AlertCircle,
   Truck,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function BuyerDashboard() {
   const { t } = useLanguage();
-  const { data: user } = trpc.auth.me.useQuery();
+  const { user } = useAuth();
   
-  // Using available methods from dashboard router or other routers
   const { data: orders, isLoading: ordersLoading } = trpc.dashboard.getRecentOrders.useQuery(
     undefined,
     { enabled: !!user }
@@ -32,27 +31,12 @@ export default function BuyerDashboard() {
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { variant: any; label: string }> = {
-      pending: {
-        variant: "secondary",
-        label: t("importRequest.status.pending"),
-      },
-      confirmed: {
-        variant: "default",
-        label: t("importRequest.status.approved"),
-      },
-      processing: {
-        variant: "default",
-        label: t("importRequest.status.inProgress"),
-      },
-      shipped: { variant: "default", label: t("importRequest.status.shipped") },
-      delivered: {
-        variant: "default",
-        label: t("importRequest.status.completed"),
-      },
-      cancelled: {
-        variant: "destructive",
-        label: t("importRequest.status.cancelled"),
-      },
+      pending: { variant: "secondary", label: "Pending" },
+      confirmed: { variant: "default", label: "Approved" },
+      processing: { variant: "default", label: "In Progress" },
+      shipped: { variant: "default", label: "Shipped" },
+      delivered: { variant: "default", label: "Completed" },
+      cancelled: { variant: "destructive", label: "Cancelled" },
     };
 
     const config = statusMap[status] || statusMap.pending;
@@ -68,9 +52,9 @@ export default function BuyerDashboard() {
   }
 
   return (
-    <BuyerDashboardLayout>
-      <div className="space-y-8">
-        <div>
+    <div className="min-h-screen bg-background p-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">
             {t("dashboard.buyer.title")}
           </h1>
@@ -78,9 +62,7 @@ export default function BuyerDashboard() {
             {t("dashboard.buyer.subtitle")}
           </p>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card>
@@ -179,7 +161,6 @@ export default function BuyerDashboard() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Orders Tab */}
           <TabsContent value="orders">
             <Card>
               <CardHeader>
@@ -203,28 +184,15 @@ export default function BuyerDashboard() {
                           </div>
                           {getStatusBadge(order.status)}
                         </div>
-
-                        {/* Order Items */}
-                        <div className="my-3 text-sm text-muted-foreground">
-                          {order.items ? JSON.parse(order.items).length : 0} {t("cart.items")}
-                        </div>
-
                         <div className="flex justify-between items-center mt-4">
                           <span className="text-lg font-bold text-blue-600">
                             ${(order.totalAmount / 100).toFixed(2)}
                           </span>
-                          <div className="flex gap-2">
-                            <Link href={`/orders/${order.id}`}>
-                              <Button variant="outline" size="sm">
-                                {t("common.viewDetails")}
-                              </Button>
-                            </Link>
-                            {order.status === "shipped" && (
-                              <Button size="sm">
-                                {t("dashboard.buyer.trackShipment")}
-                              </Button>
-                            )}
-                          </div>
+                          <Link href={`/orders/${order.id}`}>
+                            <Button variant="outline" size="sm">
+                              {t("common.viewDetails")}
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     ))}
@@ -235,16 +203,12 @@ export default function BuyerDashboard() {
                     <p className="text-muted-foreground mb-4">
                       {t("dashboard.buyer.noOrders")}
                     </p>
-                    <Link href="/factory">
-                      <Button>{t("dashboard.buyer.startShopping")}</Button>
-                    </Link>
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Inquiries Tab */}
           <TabsContent value="inquiries">
             <Card>
               <CardHeader>
@@ -268,24 +232,8 @@ export default function BuyerDashboard() {
                           </div>
                           <div className="flex flex-col items-end gap-2">
                             <Badge>{inquiry.status}</Badge>
-                            {inquiry.shippingMethod && (
-                              <Badge
-                                variant="outline"
-                                className="bg-blue-50 text-blue-700 border-blue-200"
-                              >
-                                <Truck className="w-3 h-3 mr-1" />
-                                {t(
-                                  `importRequest.form.shippingMethodOptions.${inquiry.shippingMethod}`
-                                )}
-                              </Badge>
-                            )}
                           </div>
                         </div>
-                        {inquiry.description && (
-                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                            {inquiry.description}
-                          </p>
-                        )}
                         <div className="flex justify-end mt-4">
                           <Button variant="outline" size="sm">
                             <MessageSquare className="w-4 h-4 mr-2" />
@@ -301,9 +249,6 @@ export default function BuyerDashboard() {
                     <p className="text-muted-foreground mb-4">
                       {t("dashboard.buyer.noInquiries")}
                     </p>
-                    <Link href="/import-request">
-                      <Button>{t("dashboard.buyer.createInquiry")}</Button>
-                    </Link>
                   </div>
                 )}
               </CardContent>
