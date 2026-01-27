@@ -21,39 +21,62 @@ function readJsonDb() {
 
 const createBlogPostSchema = z.object({
   title: z.string(),
+  // Arabic fields
   titleAr: z.string().optional(),
+  contentAr: z.string().optional(),
+  excerptAr: z.string().optional(),
+  categoryAr: z.string().optional(),
+  // English fields
   titleEn: z.string().optional(),
+  contentEn: z.string().optional(),
+  excerptEn: z.string().optional(),
+  categoryEn: z.string().optional(),
+  // Chinese fields
+  titleZh: z.string().optional(),
+  contentZh: z.string().optional(),
+  excerptZh: z.string().optional(),
+  categoryZh: z.string().optional(),
+  // Main fields
   slug: z.string(),
   content: z.string(),
-  contentAr: z.string().optional(),
-  contentEn: z.string().optional(),
   excerpt: z.string().optional(),
-  excerptAr: z.string().optional(),
-  excerptEn: z.string().optional(),
   category: z.string().optional(),
-  categoryAr: z.string().optional(),
-  categoryEn: z.string().optional(),
   tags: z.string().optional(),
-  lang: z.enum(["ar", "en"]).default("ar"),
+  metaDescription: z.string().optional(),
+  metaKeywords: z.string().optional(),
+  featuredImage: z.string().optional(),
+  lang: z.enum(["ar", "en", "zh"]).default("ar"),
 });
 
 const updateBlogPostSchema = z.object({
   id: z.number(),
   title: z.string().optional(),
+  // Arabic fields
   titleAr: z.string().optional(),
-  titleEn: z.string().optional(),
-  content: z.string().optional(),
   contentAr: z.string().optional(),
-  contentEn: z.string().optional(),
-  excerpt: z.string().optional(),
   excerptAr: z.string().optional(),
-  excerptEn: z.string().optional(),
-  category: z.string().optional(),
   categoryAr: z.string().optional(),
+  // English fields
+  titleEn: z.string().optional(),
+  contentEn: z.string().optional(),
+  excerptEn: z.string().optional(),
   categoryEn: z.string().optional(),
+  // Chinese fields
+  titleZh: z.string().optional(),
+  contentZh: z.string().optional(),
+  excerptZh: z.string().optional(),
+  categoryZh: z.string().optional(),
+  // Main fields
+  content: z.string().optional(),
+  excerpt: z.string().optional(),
+  category: z.string().optional(),
   tags: z.string().optional(),
+  metaDescription: z.string().optional(),
+  metaKeywords: z.string().optional(),
+  featuredImage: z.string().optional(),
   featured: z.number().optional(),
   published: z.number().optional(),
+  status: z.enum(["draft", "published", "archived"]).optional(),
 });
 
 export const blogRouter = router({
@@ -193,15 +216,16 @@ export const blogRouter = router({
       };
     }),
 
-  // Create blog post (admin only)
+  // Create blog post (OWNER ONLY)
   create: protectedProcedure
     .input(createBlogPostSchema)
     .mutation(async ({ input, ctx }) => {
-      // Verify admin role
-      if (ctx.user.role !== 'admin') {
+      // Verify OWNER role (only owner can create blog posts)
+      const ownerOpenId = process.env.OWNER_OPEN_ID || process.env.VITE_OWNER_OPEN_ID;
+      if (ctx.user.openId !== ownerOpenId) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Only admins can create blog posts",
+          message: "Only the owner can create blog posts",
         });
       }
 
@@ -231,15 +255,16 @@ export const blogRouter = router({
       return result;
     }),
 
-  // Update blog post (admin only)
+  // Update blog post (OWNER ONLY)
   update: protectedProcedure
     .input(updateBlogPostSchema)
     .mutation(async ({ input, ctx }) => {
-      // Verify admin role
-      if (ctx.user.role !== 'admin') {
+      // Verify OWNER role (only owner can update blog posts)
+      const ownerOpenId = process.env.OWNER_OPEN_ID || process.env.VITE_OWNER_OPEN_ID;
+      if (ctx.user.openId !== ownerOpenId) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Only admins can update blog posts",
+          message: "Only the owner can update blog posts",
         });
       }
 
@@ -287,15 +312,16 @@ export const blogRouter = router({
       return { success: true };
     }),
 
-  // Delete blog post (admin only)
+  // Delete blog post (OWNER ONLY)
   delete: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      // Verify admin role
-      if (ctx.user.role !== 'admin') {
+      // Verify OWNER role (only owner can delete blog posts)
+      const ownerOpenId = process.env.OWNER_OPEN_ID || process.env.VITE_OWNER_OPEN_ID;
+      if (ctx.user.openId !== ownerOpenId) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Only admins can delete blog posts",
+          message: "Only the owner can delete blog posts",
         });
       }
 
