@@ -22,6 +22,14 @@ import { supportRouter } from "./routers/support";
 import { dashboardRouter } from "./routers/dashboard";
 import { mapsRouter } from "./routers/maps";
 import { adminRouter } from "./routers/admin";
+import { factoryVerificationRouter } from "./routers/factoryVerification";
+import { twoFactorAuthRouter } from "./routers/two-factor-auth";
+import { newsletterRouter } from "./routers/newsletter";
+import { adminActionsRouter } from "./routers/admin-actions";
+import { factoryVerificationAiRouter } from "./routers/factory-verification-ai";
+import { contentRouter } from "./routers/content";
+import { adminDashboardRouter } from "./routers/admin-dashboard";
+import { searchRouter } from "./routers/search";
 
 export const appRouter = router({
   system: systemRouter,
@@ -31,6 +39,7 @@ export const appRouter = router({
   // Marketplace features
   factories: factoriesRouter,
   products: productsRouter,
+  search: searchRouter,
   inquiries: inquiriesRouter,
   messages: messagesRouter,
 
@@ -62,6 +71,16 @@ export const appRouter = router({
   dashboard: dashboardRouter,
   maps: mapsRouter,
   admin: adminRouter,
+  factoryVerification: factoryVerificationRouter,
+  twoFactorAuth: twoFactorAuthRouter,
+  newsletter: newsletterRouter,
+  adminActions: adminActionsRouter,
+  
+  // New critical features
+  factoryVerificationAi: factoryVerificationAiRouter,
+  content: contentRouter,
+  adminDashboard: adminDashboardRouter,
+  search: searchRouter,
 });
 
 export type AppRouter = typeof appRouter;
@@ -85,4 +104,8 @@ export {
   dashboardRouter,
   mapsRouter,
   adminRouter,
+  factoryVerificationAiRouter,
+  contentRouter,
+  adminDashboardRouter,
+  searchRouter,
 };
