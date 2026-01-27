@@ -7,6 +7,7 @@ import { getSessionCookieOptions } from "../_core/cookies";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
+import bcrypt from "bcrypt";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -45,9 +46,14 @@ export const authImprovedRouter = router({
           user = dbUser;
           
           if (user) {
-            await db.update(usersTable)
-              .set({ lastSignedIn: new Date() })
-              .where(eq(usersTable.id, user.id));
+            const isPasswordValid = input.password && user.password ? await bcrypt.compare(input.password, user.password) : false;
+            if (!isPasswordValid) {
+              user = null;
+            } else {
+              await db.update(usersTable)
+                .set({ lastSignedIn: new Date() })
+                .where(eq(usersTable.id, user.id));
+            }
           }
         } catch (e) {
           console.warn("MySQL login failed, falling back to JSON", e);
@@ -62,8 +68,13 @@ export const authImprovedRouter = router({
           user = data.users.find((u: any) => u.email === input.email);
           
           if (user) {
-            user.lastSignedIn = new Date().toISOString();
-            fs.writeFileSync(localDbPath, JSON.stringify(data, null, 2));
+            const isPasswordValid = input.password && user.password ? await bcrypt.compare(input.password, user.password) : false;
+            if (!isPasswordValid) {
+              user = null;
+            } else {
+              user.lastSignedIn = new Date().toISOString();
+              fs.writeFileSync(localDbPath, JSON.stringify(data, null, 2));
+            }
           }
         }
       }
@@ -88,11 +99,13 @@ export const authImprovedRouter = router({
     .mutation(async ({ ctx, input }) => {
       const openId = crypto.randomBytes(16).toString("hex");
       
+      const hashedPassword = await bcrypt.hash(input.password, 10);
       const newUser = await upsertUser({
         email: input.email,
         name: input.name,
         role: input.role,
         openId: openId,
+        password: hashedPassword,
         loginMethod: "email",
       });
 

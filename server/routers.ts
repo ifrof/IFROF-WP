@@ -5,7 +5,7 @@ import { publicProcedure, router } from "./_core/trpc";
 
 // Import all feature routers
 import { factoriesRouter, productsRouter } from "./routers/factories";
-import { authRouter } from "./routers/auth-complete";
+import { authImprovedRouter as authRouter } from "./routers/auth-improved";
 import { inquiriesRouter, messagesRouter } from "./routers/inquiries";
 import { forumRouter } from "./routers/forum";
 import { chatbotRouter } from "./routers/chatbot";
