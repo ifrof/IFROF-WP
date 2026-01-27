@@ -228,11 +228,10 @@ export const productsRouter = router({
           message: "Product not found",
         });
       }
-
+      
       // Fetch factory info to satisfy client-side expectations
-      const productData = product as any;
-      const factory = await db.getFactoryById(productData.factoryId);
-
+      const factory = await db.getFactoryById(product.factoryId);
+      
       return {
         ...product,
         factory, // Add factory relation

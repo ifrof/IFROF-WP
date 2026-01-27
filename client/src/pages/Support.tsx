@@ -33,12 +33,9 @@ export default function Support() {
   const [priority, setPriority] = useState<string>("medium");
 
   const { data: user } = trpc.auth.me.useQuery();
-  const { data: myTickets, refetch } = trpc.support.getTickets.useQuery(
-    undefined,
-    {
-      enabled: !!user,
-    }
-  );
+  const { data: myTickets, refetch } = trpc.support.getTickets.useQuery(undefined, {
+    enabled: !!user,
+  });
   const createTicketMutation = trpc.support.createTicket.useMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {

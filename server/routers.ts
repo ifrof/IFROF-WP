@@ -33,8 +33,8 @@ import { searchRouter } from "./routers/search";
 
 export const appRouter = router({
   system: systemRouter,
-
-  auth: authRouter,
+  
+  auth: authImprovedRouter,
 
   // Marketplace features
   factories: factoriesRouter,

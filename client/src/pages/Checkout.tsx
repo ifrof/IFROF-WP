@@ -57,13 +57,10 @@ export default function Checkout() {
 
   const calculateTotal = () => {
     if (!cartItems) return 0;
-    return (cartItems as CartItemData[]).reduce(
-      (total: number, item: CartItemData) => {
-        const price = item.product?.basePrice || item.service?.basePrice || 0;
-        return total + price * item.cartItem.quantity;
-      },
-      0
-    );
+    return (cartItems as CartItemData[]).reduce((total: number, item: CartItemData) => {
+      const price = item.product?.basePrice || item.service?.basePrice || 0;
+      return total + price * item.cartItem.quantity;
+    }, 0);
   };
 
   const handleCheckout = async () => {
@@ -88,14 +85,11 @@ export default function Checkout() {
 
     try {
       // Group items by factory
-      const factoryGroups = (cartItems as CartItemData[]).reduce(
-        (groups: Record<number, CartItemData[]>, item: CartItemData) => {
-          const factoryId = item.factory?.id;
-          if (factoryId) {
-            if (!groups[factoryId]) {
-              groups[factoryId] = [];
-            }
-            groups[factoryId].push(item);
+      const factoryGroups = (cartItems as CartItemData[]).reduce((groups: Record<number, CartItemData[]>, item: CartItemData) => {
+        const factoryId = item.factory?.id;
+        if (factoryId) {
+          if (!groups[factoryId]) {
+            groups[factoryId] = [];
           }
           return groups;
         },
@@ -104,7 +98,7 @@ export default function Checkout() {
 
       // Create orders for each factory
       for (const [factoryId, items] of Object.entries(factoryGroups)) {
-        const orderItems = items.map(item => ({
+        const orderItems = items.map((item) => ({
           productId: item.product?.id || item.service?.id || 0,
           quantity: item.cartItem.quantity,
           price:
@@ -318,7 +312,7 @@ export default function Checkout() {
               <CardContent className="space-y-4">
                 {/* Items */}
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {(cartItems as CartItemData[]).map(item => {
+                  {(cartItems as CartItemData[]).map((item) => {
                     const itemData = item.product || item.service;
                     const price = itemData?.basePrice || 0;
                     return (

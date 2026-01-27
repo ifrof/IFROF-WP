@@ -29,10 +29,8 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const { t } = useLanguage();
 
-  const { data: product, isLoading } = trpc.products.getById.useQuery({
-    id: productId,
-  });
-
+  const { data: product, isLoading } = trpc.products.getById.useQuery({ id: productId });
+  
   // We need to fetch factory separately if it's not included in product
   const { data: factory } = trpc.factories.getById.useQuery(
     { id: product?.factoryId || 0 },
@@ -48,15 +46,6 @@ export default function ProductDetail() {
     { enabled: !!product?.id }
   );
 
-  const { data: relatedProducts = [] } = trpc.products.getRelated.useQuery(
-    {
-      factoryId: product?.factoryId || 0,
-      excludeProductId: product?.id || 0,
-      limit: 4,
-    },
-    { enabled: !!product?.factoryId && !!product?.id }
-  );
-
   const addToCartMutation = trpc.cart.addItem.useMutation({
     onSuccess: () => {
       toast.success(t("cart.added"));
@@ -68,7 +57,7 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!product) return;
-
+    
     addToCartMutation.mutate({
       productId: product.id,
       quantity,
@@ -253,8 +242,7 @@ export default function ProductDetail() {
                     <div className="flex items-center gap-2">
                       <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                       <span>
-                        {(factoryStats as any).rating.toFixed(1)} (
-                        {(factoryStats as any).count} {t("reviews.title")})
+                        {(factoryStats as any).rating.toFixed(1)} ({(factoryStats as any).count} {t("reviews.title")})
                       </span>
                     </div>
                   )}
@@ -432,16 +420,11 @@ export default function ProductDetail() {
               <Card>
                 <CardContent className="pt-6">
                   {!reviews || (reviews as any[]).length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">
-                      {t("reviews.noReviews")}
-                    </p>
+                    <p className="text-center text-muted-foreground py-8">{t("reviews.noReviews")}</p>
                   ) : (
                     <div className="space-y-6">
                       {(reviews as any[]).map((review: any) => (
-                        <div
-                          key={review.id}
-                          className="border-b pb-4 last:border-0"
-                        >
+                        <div key={review.id} className="border-b pb-4 last:border-0">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                               <div className="flex">
@@ -456,9 +439,7 @@ export default function ProductDetail() {
                                   />
                                 ))}
                               </div>
-                              <span className="font-medium">
-                                {review.user?.name || t("common.anonymous")}
-                              </span>
+                              <span className="font-medium">{review.user?.name || t("common.anonymous")}</span>
                             </div>
                             <span className="text-sm text-muted-foreground">
                               {new Date(review.createdAt).toLocaleDateString()}

@@ -15,8 +15,7 @@ export interface SEOConfig {
 
 export const defaultSEO: SEOConfig = {
   title: "IFROF - Verified Chinese Manufacturers & Suppliers",
-  description:
-    "Connect with verified Chinese manufacturers and suppliers. Find factories, products, and services with confidence. IFROF provides comprehensive supplier verification and risk assessment.",
+  description: "Connect with verified Chinese manufacturers and suppliers. Find factories, products, and services with confidence. IFROF provides comprehensive supplier verification and risk assessment.",
   keywords: [
     "Chinese manufacturers",
     "verified suppliers",
@@ -25,43 +24,38 @@ export const defaultSEO: SEOConfig = {
     "supplier network",
     "manufacturing",
     "wholesale",
-    "import export",
+    "import export"
   ],
   ogImage: "https://ifrof.com/og-image.png",
   ogType: "website",
   robots: "index, follow",
-  author: "IFROF",
+  author: "IFROF"
 };
 
 export const pageSEO: Record<string, SEOConfig> = {
   home: {
     title: "IFROF - Verified Chinese Manufacturers & Suppliers",
-    description:
-      "Discover verified Chinese manufacturers and suppliers on IFROF. Access comprehensive factory profiles, product catalogs, and supplier verification services.",
+    description: "Discover verified Chinese manufacturers and suppliers on IFROF. Access comprehensive factory profiles, product catalogs, and supplier verification services.",
     keywords: ["manufacturers", "suppliers", "China", "verified", "B2B"],
   },
   manufacturers: {
     title: "Browse Verified Manufacturers | IFROF",
-    description:
-      "Explore thousands of verified Chinese manufacturers and factories. Filter by industry, location, and certification status.",
+    description: "Explore thousands of verified Chinese manufacturers and factories. Filter by industry, location, and certification status.",
     keywords: ["manufacturers", "factories", "verified", "directory"],
   },
   products: {
     title: "Products & Services | IFROF Marketplace",
-    description:
-      "Browse products and services from verified manufacturers. Compare prices, specifications, and manufacturer ratings.",
+    description: "Browse products and services from verified manufacturers. Compare prices, specifications, and manufacturer ratings.",
     keywords: ["products", "services", "marketplace", "wholesale"],
   },
   blog: {
     title: "Blog & Resources | IFROF",
-    description:
-      "Learn about supplier verification, manufacturing best practices, and supply chain management from IFROF experts.",
+    description: "Learn about supplier verification, manufacturing best practices, and supply chain management from IFROF experts.",
     keywords: ["blog", "resources", "guides", "tips"],
   },
   forum: {
     title: "Community Forum | IFROF",
-    description:
-      "Connect with buyers and suppliers. Ask questions, share experiences, and get advice from the IFROF community.",
+    description: "Connect with buyers and suppliers. Ask questions, share experiences, and get advice from the IFROF community.",
     keywords: ["forum", "community", "Q&A", "discussions"],
   },
 };
@@ -85,10 +79,7 @@ export function generateMetaTags(config: SEOConfig): Record<string, string> {
 /**
  * Structured data for JSON-LD
  */
-export function generateStructuredData(
-  type: "Organization" | "LocalBusiness" | "Product",
-  data: any
-) {
+export function generateStructuredData(type: "Organization" | "LocalBusiness" | "Product", data: any) {
   const baseStructure = {
     "@context": "https://schema.org",
     "@type": type,
@@ -155,12 +146,7 @@ export function generateStructuredData(
 /**
  * Sitemap generation helper
  */
-export function generateSitemapEntry(
-  url: string,
-  lastmod?: string,
-  changefreq?: string,
-  priority?: number
-) {
+export function generateSitemapEntry(url: string, lastmod?: string, changefreq?: string, priority?: number) {
   return {
     url,
     lastmod: lastmod || new Date().toISOString(),

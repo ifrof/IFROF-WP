@@ -18,16 +18,17 @@ import { Link } from "wouter";
 export default function BuyerDashboard() {
   const { t } = useLanguage();
   const { data: user } = trpc.auth.me.useQuery();
-
+  
   // Using available methods from dashboard router or other routers
-  const { data: orders, isLoading: ordersLoading } =
-    trpc.dashboard.getRecentOrders.useQuery(undefined, { enabled: !!user });
-
-  const { data: inquiries, isLoading: inquiriesLoading } =
-    trpc.inquiries.getByBuyer.useQuery(
-      { buyerId: user?.id || 0 },
-      { enabled: !!user }
-    );
+  const { data: orders, isLoading: ordersLoading } = trpc.dashboard.getRecentOrders.useQuery(
+    undefined,
+    { enabled: !!user }
+  );
+  
+  const { data: inquiries, isLoading: inquiriesLoading } = trpc.inquiries.getByBuyer.useQuery(
+    { buyerId: user?.id || 0 },
+    { enabled: !!user }
+  );
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { variant: any; label: string }> = {
@@ -89,9 +90,7 @@ export default function BuyerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">
-                {(orders as any[])?.length || 0}
-              </div>
+              <div className="text-3xl font-bold">{(orders as any[])?.length || 0}</div>
             </CardContent>
           </Card>
 
@@ -103,10 +102,7 @@ export default function BuyerDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {(orders as any[])?.filter(
-                  (o: any) =>
-                    o.status !== "delivered" && o.status !== "cancelled"
-                ).length || 0}
+                {(orders as any[])?.filter((o: any) => o.status !== "delivered" && o.status !== "cancelled").length || 0}
               </div>
             </CardContent>
           </Card>
@@ -118,9 +114,7 @@ export default function BuyerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">
-                {(inquiries as any[])?.length || 0}
-              </div>
+              <div className="text-3xl font-bold">{(inquiries as any[])?.length || 0}</div>
             </CardContent>
           </Card>
 
@@ -212,8 +206,7 @@ export default function BuyerDashboard() {
 
                         {/* Order Items */}
                         <div className="my-3 text-sm text-muted-foreground">
-                          {order.items ? JSON.parse(order.items).length : 0}{" "}
-                          {t("cart.items")}
+                          {order.items ? JSON.parse(order.items).length : 0} {t("cart.items")}
                         </div>
 
                         <div className="flex justify-between items-center mt-4">

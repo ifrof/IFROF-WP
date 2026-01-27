@@ -23,11 +23,15 @@ export default function FactoryDashboard() {
   // Mock factory ID - in production, this would come from user's factory association
   const factoryId = 1;
 
-  const { data: orders, isLoading: ordersLoading } =
-    trpc.dashboard.getRecentOrders.useQuery();
-
-  const { data: inquiries, isLoading: inquiriesLoading } =
-    trpc.inquiries.getByFactory.useQuery({ factoryId });
+  const { data: orders, isLoading: ordersLoading } = trpc.dashboard.getRecentOrders.useQuery(
+    undefined,
+    { enabled: !!user }
+  );
+  
+  const { data: inquiries, isLoading: inquiriesLoading } = trpc.inquiries.getByFactory.useQuery(
+    { factoryId },
+    { enabled: !!user }
+  );
 
   const { data: products } = trpc.products.getByFactory.useQuery({ factoryId });
   const { data: services } = trpc.services.list.useQuery();
@@ -91,9 +95,7 @@ export default function FactoryDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">
-                {(products as any[])?.length || 0}
-              </div>
+              <div className="text-3xl font-bold">{(products as any[])?.length || 0}</div>
             </CardContent>
           </Card>
 
@@ -104,9 +106,7 @@ export default function FactoryDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">
-                {(services as any[])?.length || 0}
-              </div>
+              <div className="text-3xl font-bold">{(services as any[])?.length || 0}</div>
             </CardContent>
           </Card>
 
@@ -118,10 +118,7 @@ export default function FactoryDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {(orders as any[])?.filter(
-                  (o: any) =>
-                    o.status !== "delivered" && o.status !== "cancelled"
-                ).length || 0}
+                {(orders as any[])?.filter((o: any) => o.status !== "delivered" && o.status !== "cancelled").length || 0}
               </div>
             </CardContent>
           </Card>
@@ -134,9 +131,7 @@ export default function FactoryDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {(inquiries as any[])?.filter(
-                  (i: any) => i.status === "pending"
-                ).length || 0}
+                {(inquiries as any[])?.filter((i: any) => i.status === "pending").length || 0}
               </div>
             </CardContent>
           </Card>
@@ -284,9 +279,7 @@ export default function FactoryDashboard() {
                 {products && (products as any[]).length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {(products as any[]).map((product: any) => {
-                      const images = product.imageUrls
-                        ? JSON.parse(product.imageUrls)
-                        : [];
+                      const images = product.imageUrls ? JSON.parse(product.imageUrls) : [];
                       return (
                         <div
                           key={product.id}
@@ -343,9 +336,7 @@ export default function FactoryDashboard() {
                 {services && (services as any[]).length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {(services as any[]).map((service: any) => {
-                      const images = service.imageUrls
-                        ? JSON.parse(service.imageUrls)
-                        : [];
+                      const images = service.imageUrls ? JSON.parse(service.imageUrls) : [];
                       return (
                         <div
                           key={service.id}

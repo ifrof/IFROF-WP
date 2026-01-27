@@ -38,7 +38,7 @@ export default function Cart() {
   const utils = trpc.useUtils();
 
   const { data: cartItems, isLoading } = trpc.cart.getItems.useQuery();
-
+  
   const updateQuantityMutation = trpc.cart.updateQuantity.useMutation({
     onSuccess: () => {
       utils.cart.getItems.invalidate();
@@ -76,13 +76,10 @@ export default function Cart() {
 
   const calculateTotal = () => {
     if (!cartItems) return 0;
-    return (cartItems as CartItemData[]).reduce(
-      (total: number, item: CartItemData) => {
-        const price = item.product?.basePrice || item.service?.basePrice || 0;
-        return total + price * item.cartItem.quantity;
-      },
-      0
-    );
+    return (cartItems as CartItemData[]).reduce((total: number, item: CartItemData) => {
+      const price = item.product?.basePrice || item.service?.basePrice || 0;
+      return total + price * item.cartItem.quantity;
+    }, 0);
   };
 
   const handleCheckout = () => {
@@ -148,7 +145,7 @@ export default function Cart() {
               </div>
 
               <div className="space-y-4">
-                {(cartItems as CartItemData[]).map(item => {
+                {(cartItems as CartItemData[]).map((item) => {
                   const itemData = item.product || item.service;
                   const images = itemData?.imageUrls
                     ? JSON.parse(itemData.imageUrls)

@@ -71,52 +71,33 @@ function AppContent() {
 
 function Router() {
   return (
-    <TooltipProvider>
-      <GA4 />
-      <GTM />
-      <Toaster />
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center min-h-screen">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          </div>
-        }
-      >
-        <Switch>
-          <Route path="/" component={Home} />
-          <Route path="/blog" component={Blog} />
-          <Route path="/blog/:slug" component={BlogPostDetail} />
-
-          <Route path="/factory-investigator" component={FactoryInvestigator} />
-          <Route path="/import-request" component={ImportRequest} />
-          <Route path="/factory" component={Marketplace} />
-          <Route path="/marketplace" component={Marketplace} />
-          <Route path="/products" component={ProductSearch} />
-          <Route path="/products/:id" component={ProductDetail} />
-          <Route path="/faq" component={FAQ} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/login" component={Login} />
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/admin/:rest*" component={AdminDashboard} />
-          <Route path="/my-factory" component={FactoryDashboard} />
-          <Route path="/buyer" component={BuyerDashboard} />
-          <Route path="/profile" component={Profile} />
-          <Route path="/about" component={About} />
-          <Route path="/terms" component={Terms} />
-          <Route path="/privacy" component={PrivacyPolicy} />
-          <Route path="/factories" component={PublicFactoryListings} />
-          <Route path="/factories/:id" component={FactoryPublicProfile} />
-          <Route path="/verify-factory" component={VerifyFactory} />
-          <Route path="/forgot-password" component={ForgotPassword} />
-          <Route path="/cart" component={Cart} />
-          <Route path="/chat" component={Chatbot} />
-          <Route component={NotFound} />
-        </Switch>
-      </Suspense>
-      <Suspense fallback={null}>
-        <AIChat />
-      </Suspense>
-    </TooltipProvider>
+    <Switch>
+      <Route path={"/"} component={Home} />
+      <Route path={"/blog"} component={Blog} />
+      <Route path={"/blog/:slug"} component={BlogPostDetail} />
+      <Route path={"/blog-editor"} component={BlogEditor} />
+      <Route path={"/ai-search"} component={AISearch} />
+      <Route path={"/import-request"} component={ImportRequest} />
+      <Route path={"/marketplace"} component={Marketplace} />
+      <Route path={"/products/:id"} component={ProductDetail} />
+      <Route path={"/services"} component={Services} />
+      <Route path={"/cart"} component={Cart} />
+      <Route path={"/checkout"} component={Checkout} />
+      <Route path={"/orders"} component={Orders} />
+      <Route path={"/dashboard/factory"} component={FactoryDashboard} />
+      <Route path={"/dashboard/buyer"} component={BuyerDashboard} />
+      <Route path={"/dashboard/admin"} component={AdminDashboard} />
+      <Route path={"/support"} component={Support} />
+      <Route path={"/maps"} component={Maps} />
+      <Route path={"/how-it-works"} component={HowItWorks} />
+      <Route path={"/pricing"} component={Pricing} />
+      <Route path={"/about"} component={About} />
+      <Route path={"/privacy"} component={PrivacyPolicy} />
+      <Route path={"/terms"} component={Terms} />
+      <Route path={"/login"} component={Login} />
+      <Route path={"/404"} component={NotFound} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 

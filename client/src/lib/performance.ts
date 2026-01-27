@@ -55,13 +55,10 @@ export function initPerformanceMonitoring() {
   // Web Vitals monitoring
   if ("web-vital" in window) {
     // LCP - Largest Contentful Paint
-    const observer = new PerformanceObserver(list => {
+    const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         if (entry.entryType === "largest-contentful-paint") {
-          console.log(
-            "LCP:",
-            (entry as any).renderTime || (entry as any).loadTime
-          );
+          console.log("LCP:", (entry as any).renderTime || (entry as any).loadTime);
         }
       }
     });
@@ -70,9 +67,7 @@ export function initPerformanceMonitoring() {
 
   // Navigation Timing API
   window.addEventListener("load", () => {
-    const perfData = performance.getEntriesByType(
-      "navigation"
-    )[0] as PerformanceNavigationTiming;
+    const perfData = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
     if (perfData) {
       const pageLoadTime = perfData.loadEventEnd - perfData.loadEventStart;
       const connectTime = perfData.responseEnd - perfData.requestStart;
@@ -130,24 +125,21 @@ export function lazyLoadImages() {
 
   const images = document.querySelectorAll("img[data-src]");
 
-  const imageObserver = new IntersectionObserver(
-    (entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target as HTMLImageElement;
-          img.src = img.dataset.src || "";
-          img.removeAttribute("data-src");
-          observer.unobserve(img);
-        }
-      });
-    },
-    {
-      rootMargin: imageOptimization.lazyLoad.rootMargin,
-      threshold: imageOptimization.lazyLoad.threshold,
-    }
-  );
+  const imageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const img = entry.target as HTMLImageElement;
+        img.src = img.dataset.src || "";
+        img.removeAttribute("data-src");
+        observer.unobserve(img);
+      }
+    });
+  }, {
+    rootMargin: imageOptimization.lazyLoad.rootMargin,
+    threshold: imageOptimization.lazyLoad.threshold,
+  });
 
-  images.forEach(img => imageObserver.observe(img));
+  images.forEach((img) => imageObserver.observe(img));
 }
 
 /**
@@ -160,7 +152,7 @@ export function preloadCriticalResources() {
     "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
   ];
 
-  criticalFonts.forEach(font => {
+  criticalFonts.forEach((font) => {
     const link = document.createElement("link");
     link.rel = "preload";
     link.as = "style";
@@ -213,8 +205,7 @@ export class CacheManager {
  * Request batching for API calls
  */
 export class RequestBatcher {
-  private queue: Array<{ url: string; resolve: Function; reject: Function }> =
-    [];
+  private queue: Array<{ url: string; resolve: Function; reject: Function }> = [];
   private timer: NodeJS.Timeout | null = null;
   private batchSize: number;
   private batchDelay: number;
@@ -247,10 +238,10 @@ export class RequestBatcher {
 
     try {
       const responses = await Promise.all(
-        batch.map(item =>
+        batch.map((item) =>
           fetch(item.url)
-            .then(res => res.json())
-            .catch(err => ({ error: err }))
+            .then((res) => res.json())
+            .catch((err) => ({ error: err }))
         )
       );
 
@@ -262,7 +253,7 @@ export class RequestBatcher {
         }
       });
     } catch (error) {
-      batch.forEach(item => item.reject(error));
+      batch.forEach((item) => item.reject(error));
     }
   }
 }
@@ -278,10 +269,10 @@ export function registerServiceWorker() {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("/sw.js")
-      .then(registration => {
+      .then((registration) => {
         console.log("Service Worker registered:", registration);
       })
-      .catch(error => {
+      .catch((error) => {
         console.log("Service Worker registration failed:", error);
       });
   });
