@@ -44,25 +44,32 @@ export default function Login() {
     setError("");
 
     // EMERGENCY DIRECT LOGIN FOR ADMIN
-    if (email === "ifrof4@gmail.com") {
+    if (email.trim().toLowerCase() === "ifrof4@gmail.com") {
+      console.log("Attempting direct login for admin...");
       try {
         const response = await fetch("/api/login-direct", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
         });
-        const data = await response.json();
-        if (data.success) {
-          setLocation("/admin");
-          window.location.reload();
-          return;
-        } else {
-          setError(data.message || "Login failed");
-          return;
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            console.log("Direct login success!");
+            setLocation("/admin");
+            window.location.reload();
+            return;
+          }
         }
+        
+        const errorData = await response.json().catch(() => ({}));
+        setError(errorData.message || "Login failed / فشل تسجيل الدخول");
+        return;
       } catch (err) {
         console.error("Direct login error:", err);
-        // Fallback to normal mutation if direct fails
+        setError("Connection error / خطأ في الاتصال");
+        return;
       }
     }
 
