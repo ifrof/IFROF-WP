@@ -21,6 +21,7 @@ import { servicesRouter } from "./routers/services";
 import { supportRouter } from "./routers/support";
 import { dashboardRouter } from "./routers/dashboard";
 import { mapsRouter } from "./routers/maps";
+import { adminRouter } from "./routers/admin";
 
 export const appRouter = router({
   system: systemRouter,
@@ -61,15 +62,6 @@ export const appRouter = router({
   dashboard: dashboardRouter,
   maps: mapsRouter,
   admin: adminRouter,
-  factoryVerification: factoryVerificationRouter,
-  twoFactorAuth: twoFactorAuthRouter,
-  newsletter: newsletterRouter,
-  adminActions: adminActionsRouter,
-
-  // New critical features
-  factoryVerificationAi: factoryVerificationAiRouter,
-  content: contentRouter,
-  adminDashboard: adminDashboardRouter,
 });
 
 export type AppRouter = typeof appRouter;
@@ -92,4 +84,5 @@ export {
   supportRouter,
   dashboardRouter,
   mapsRouter,
+  adminRouter,
 };
