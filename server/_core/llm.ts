@@ -100,28 +100,34 @@ export type InvokeResult = {
   };
 };
 
-export type JsonSchema = {
-  name: string;
-  schema: Record<string, unknown>;
-  strict?: boolean;
+const normalizeMessage = (m: Message) => ({
+  role: m.role,
+  content: m.content,
+  ...(m.name ? { name: m.name } : {}),
+  ...(m.tool_call_id ? { tool_call_id: m.tool_call_id } : {}),
+  ...(m.tool_calls ? { tool_calls: m.tool_calls } : {}),
+});
+
+const normalizeToolChoice = (choice: any) => {
+  if (!choice) return undefined;
+  if (typeof choice === "string") return choice;
+  return choice;
 };
 
-export type OutputSchema = JsonSchema;
+const normalizeResponseFormat = (params: any) => {
+  const format = params.responseFormat || params.response_format;
+  if (format) return format;
 
-export type ResponseFormat =
-  | { type: "text" }
-  | { type: "json_object" }
-  | { type: "json_schema"; json_schema: JsonSchema };
-
-const ensureArray = (
-  value: MessageContent | MessageContent[]
-): MessageContent[] => (Array.isArray(value) ? value : [value]);
-
-const normalizeContentPart = (
-  part: MessageContent
-): TextContent | ImageContent | FileContent => {
-  if (typeof part === "string") {
-    return { type: "text", text: part };
+  const schema = params.outputSchema || params.output_schema;
+  if (schema) {
+    return {
+      type: "json_schema",
+      json_schema: {
+        name: "output",
+        strict: true,
+        schema,
+      },
+    };
   }
 
   if (part.type === "text") {
@@ -139,14 +145,11 @@ const normalizeContentPart = (
   throw new Error("Unsupported message content part");
 };
 
-const normalizeMessage = (message: Message) => {
-  const { role, name, tool_call_id } = message;
-
-  if (role === "tool" || role === "function") {
-    const content = ensureArray(message.content)
-      .map(part => (typeof part === "string" ? part : JSON.stringify(part)))
-      .join("\n");
-
+/**
+ * Resolves the API URL and key based on available environment variables.
+ */
+const resolveApiConfig = (): { url: string; key: string; model: string } => {
+  if (ENV.forgeApiUrl && ENV.forgeApiKey) {
     return {
       role,
       name,
@@ -291,18 +294,13 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tools = tools;
   }
 
-  const normalizedToolChoice = normalizeToolChoice(
-    toolChoice || tool_choice,
-    tools
-  );
+  const normalizedToolChoice = normalizeToolChoice(toolChoice || tool_choice);
   if (normalizedToolChoice) {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768
-  payload.thinking = {
-    "budget_tokens": 128
-  }
+  // Guardrail default; still overrideable via params
+  payload.max_tokens = maxTokens ?? max_tokens ?? 1000;
 
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
@@ -312,31 +310,30 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   });
 
   if (normalizedResponseFormat) {
+    // Groq doesn't support json_schema response_format like OpenAI does; fall back to json_object + instructions
     if (
       normalizedResponseFormat.type === "json_schema" &&
       apiConfig.url.includes("groq.com")
     ) {
       payload.response_format = { type: "json_object" };
-      const schemaInstructions = `\n\nYou MUST respond with valid JSON that matches this exact schema:\n${JSON.stringify(normalizedResponseFormat.json_schema.schema, null, 2)}`;
-      const systemMsg = payload.messages as any[];
-      if (systemMsg.length > 0 && systemMsg[0].role === "system") {
-        systemMsg[0].content += schemaInstructions;
+
+      const schemaInstructions =
+        `\n\nYou MUST respond with valid JSON that matches this exact schema:\n` +
+        `${JSON.stringify(normalizedResponseFormat.json_schema.schema, null, 2)}`;
+
+      const msgs = payload.messages as any[];
+      if (msgs.length > 0 && msgs[0].role === "system") {
+        msgs[0].content += schemaInstructions;
       } else {
-        systemMsg.unshift({ role: "system", content: schemaInstructions });
+        msgs.unshift({ role: "system", content: schemaInstructions });
       }
     } else {
       payload.response_format = normalizedResponseFormat;
     }
   }
 
-  const response = await fetch(resolveApiUrl(), {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
-    },
-    body: JSON.stringify(payload),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(apiConfig.url, {
@@ -382,7 +379,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
 
     return result;
   } catch (error: any) {
-    if (error.name === "AbortError") {
+    if (error?.name === "AbortError") {
       throw new TRPCError({
         code: "TIMEOUT",
         message: `LLM request timed out after ${timeoutMs}ms.`,

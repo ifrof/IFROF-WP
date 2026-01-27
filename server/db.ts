@@ -7,6 +7,7 @@ import { ENV } from "./_core/env";
 import path from "path";
 import fs from "fs";
 
+let _pool: mysql.Pool | null = null;
 let _db: any = null;
 let isJsonMode = false;
 
@@ -71,8 +72,8 @@ export async function getDb() {
   if (!_db) {
     if (process.env.DATABASE_URL) {
       try {
-        const connection = await mysql.createConnection(dbUrl);
-        _db = drizzleMysql(connection, { schema, mode: "default" });
+        if (!_pool) { _pool = mysql.createPool({ uri: process.env.DATABASE_URL, connectionLimit: 10, idleTimeout: 60000, queueLimit: 0, enableKeepAlive: true, keepAliveInitialDelay: 10000 }); }
+        _db = drizzleMysql(_pool);
         isJsonMode = false;
       } catch (error) {
         console.warn(
