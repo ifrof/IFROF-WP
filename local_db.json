@@ -12,6 +12,18 @@
       "createdAt": "2026-01-24T08:50:49.060Z",
       "updatedAt": "2026-01-24T08:50:49.060Z",
       "lastSignedIn": "2026-01-24T08:50:49.060Z"
+    },
+    {
+      "id": 2,
+      "email": "admin_c043a46c@ifrof.com",
+      "password": "gClH/CT16/2IXqzUoir2KKXzxVGWBRZp",
+      "role": "admin",
+      "name": "Admin Owner",
+      "loginMethod": "email",
+      "emailVerified": 1,
+      "createdAt": "2026-01-27T00:00:00.000Z",
+      "updatedAt": "2026-01-27T00:00:00.000Z",
+      "lastSignedIn": "2026-01-27T00:00:00.000Z"
     }
   ],
   "factories": [],
