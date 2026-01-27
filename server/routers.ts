@@ -15,7 +15,7 @@ import { blogRouter } from "./routers/blog";
 import { aiAgentRouter } from "./routers/aiAgent";
 import { cartRouter } from "./routers/cart";
 import { checkoutImprovedRouter } from "./routers/checkout-improved";
-import { checkoutRouter } from "./routers/checkout";
+// import { checkoutRouter } from "./routers/checkout"; // Removed to fix build error
 import { reviewsRouter } from "./routers/reviews";
 import { profilesRouter } from "./routers/profiles";
 import { storageRouter } from "./routers/storage";
@@ -60,7 +60,7 @@ export const appRouter = router({
   // Shopping features
   cart: cartRouter,
   checkout: checkoutImprovedRouter,
-  checkoutOld: checkoutRouter,
+  // checkoutOld: checkoutRouter, // Removed to fix build error
   reviews: reviewsRouter,
   profiles: profilesRouter,
   storage: storageRouter,
