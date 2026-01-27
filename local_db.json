@@ -1,0 +1,39 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "ifrof4@gmail.com",
+      "password": "$2b$10$t0qrssbW.VsjVNGprrSxxuzr4Op1ZNRimczxqcDes3xj.bcW5KUFS",
+      "role": "admin",
+      "name": "Hady Essam",
+      "openId": "admin_manual_fix",
+      "loginMethod": "email",
+      "createdAt": "2026-01-27T10:35:36.940Z",
+      "updatedAt": "2026-01-27T10:35:36.940Z",
+      "lastSignedIn": "2026-01-27T10:35:36.940Z"
+    }
+  ],
+  "factories": [],
+  "products": [],
+  "orders": [],
+  "importRequests": [],
+  "quotes": [],
+  "messages": [],
+  "blogPosts": [],
+  "chatMessages": [],
+  "forumPosts": [],
+  "forumAnswers": [],
+  "forumVotes": [],
+  "notifications": [],
+  "subscriptionPlans": [],
+  "userSubscriptions": [],
+  "countryPreferences": [],
+  "shipments": [],
+  "activityLogs": [],
+  "productPortfolio": [],
+  "services": [],
+  "reviews": [],
+  "cartItems": [],
+  "sessions": [],
+  "buyerProfiles": []
+}
