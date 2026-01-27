@@ -3,15 +3,20 @@ import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 
 export const supportRouter = router({
   // Get support tickets
-  getTickets: protectedProcedure
-    .query(async ({ ctx }) => {
-      // TODO: Implement support functionality
-      return [];
-    }),
+  getTickets: protectedProcedure.query(async ({ ctx }) => {
+    // TODO: Implement support functionality
+    return [];
+  }),
 
   // Create support ticket
   createTicket: protectedProcedure
-    .input(z.object({ subject: z.string(), message: z.string(), category: z.string().optional() }))
+    .input(
+      z.object({
+        subject: z.string(),
+        message: z.string(),
+        category: z.string().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       // TODO: Implement support functionality
       return { success: true, ticketId: 1 };
@@ -34,14 +39,19 @@ export const supportRouter = router({
     }),
 
   // Aliases for compatibility
-  getMyTickets: protectedProcedure
-    .query(async ({ ctx }) => {
-      // TODO: Implement support functionality
-      return [];
-    }),
+  getMyTickets: protectedProcedure.query(async ({ ctx }) => {
+    // TODO: Implement support functionality
+    return [];
+  }),
 
   create: protectedProcedure
-    .input(z.object({ subject: z.string(), message: z.string(), category: z.string().optional() }))
+    .input(
+      z.object({
+        subject: z.string(),
+        message: z.string(),
+        category: z.string().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       // TODO: Implement support functionality
       return { success: true, ticketId: 1 };

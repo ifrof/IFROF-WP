@@ -1,7 +1,13 @@
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Loader2, Send, Trash2 } from "lucide-react";
 import { Streamdown } from "streamdown";
@@ -9,7 +15,8 @@ import { useAiChat } from "@/hooks/useAiChat";
 
 export default function Chatbot() {
   const { user, loading: authLoading } = useAuth();
-  const { messages, input, isLoading, setInput, sendMessage, reset } = useAiChat();
+  const { messages, input, isLoading, setInput, sendMessage, reset } =
+    useAiChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -17,7 +24,11 @@ export default function Chatbot() {
   }, [messages]);
 
   if (authLoading) {
-    return <div className="flex items-center justify-center min-h-screen"><Loader2 className="animate-spin" /></div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="animate-spin" />
+      </div>
+    );
   }
 
   if (!user) {
@@ -26,7 +37,9 @@ export default function Chatbot() {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Login Required</CardTitle>
-            <CardDescription>You must be logged in to use the chatbot.</CardDescription>
+            <CardDescription>
+              You must be logged in to use the chatbot.
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -46,7 +59,10 @@ export default function Chatbot() {
             <div className="flex justify-between items-start">
               <div>
                 <CardTitle>IFROF Smart Assistant</CardTitle>
-                <CardDescription>Your intelligent partner for direct sourcing from Chinese manufacturers</CardDescription>
+                <CardDescription>
+                  Your intelligent partner for direct sourcing from Chinese
+                  manufacturers
+                </CardDescription>
               </div>
               <Button
                 variant="outline"
@@ -64,9 +80,12 @@ export default function Chatbot() {
             {messages.length === 0 ? (
               <div className="flex items-center justify-center h-full text-center">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Welcome to IFROF Smart Assistant</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Welcome to IFROF Smart Assistant
+                  </h3>
                   <p className="text-muted-foreground mb-4">
-                    Ask me anything about finding factories, products, or using the platform.
+                    Ask me anything about finding factories, products, or using
+                    the platform.
                   </p>
                   <div className="space-y-2 text-sm text-muted-foreground">
                     <p>Example questions:</p>
@@ -116,7 +135,7 @@ export default function Chatbot() {
             <form onSubmit={handleSendMessage} className="flex gap-2">
               <Input
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={e => setInput(e.target.value)}
                 placeholder="Ask me anything..."
                 disabled={isLoading}
               />

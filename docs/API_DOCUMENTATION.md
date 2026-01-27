@@ -27,6 +27,7 @@ This document provides comprehensive documentation for the IFROF platform API en
 Login with email and password.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -36,6 +37,7 @@ Login with email and password.
 ```
 
 **Response:**
+
 ```json
 {
   "user": {
@@ -52,6 +54,7 @@ Login with email and password.
 Register a new user account.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -94,6 +97,7 @@ Report a user.
 List all products with filters.
 
 **Query Parameters:**
+
 - `page`: Page number (default: 1)
 - `limit`: Items per page (default: 20)
 - `category`: Filter by category
@@ -180,6 +184,7 @@ Stripe webhook endpoint (internal use only).
 Handle Stripe webhook events.
 
 **Supported Events:**
+
 - `checkout.session.completed`
 - `payment_intent.succeeded`
 - `payment_intent.payment_failed`
@@ -206,6 +211,7 @@ Handle Stripe webhook events.
 ## Currency Support
 
 Supported currencies:
+
 - **USD** (Primary)
 - **SAR** (Saudi Riyal)
 - **CNY** (Chinese Yuan)
@@ -214,4 +220,4 @@ Exchange rates are updated automatically.
 
 ---
 
-*Last updated: January 2026*
+_Last updated: January 2026_

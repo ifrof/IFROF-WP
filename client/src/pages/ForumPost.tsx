@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { Loader2, ThumbsUp, ThumbsDown, Check } from "lucide-react";
@@ -14,10 +20,11 @@ export default function ForumPost() {
   const postId = params?.id ? parseInt(params.id) : null;
   const [answerContent, setAnswerContent] = useState("");
 
-  const { data: postData, isLoading: postLoading, refetch } = trpc.forum.getPost.useQuery(
-    { id: postId || 0 },
-    { enabled: !!postId }
-  );
+  const {
+    data: postData,
+    isLoading: postLoading,
+    refetch,
+  } = trpc.forum.getPost.useQuery({ id: postId || 0 }, { enabled: !!postId });
 
   const createAnswerMutation = trpc.forum.createAnswer.useMutation();
   const voteAnswerMutation = trpc.forum.voteAnswer.useMutation();
@@ -66,7 +73,10 @@ export default function ForumPost() {
     }
   };
 
-  const handleVote = async (answerId: number, voteType: "upvote" | "downvote") => {
+  const handleVote = async (
+    answerId: number,
+    voteType: "upvote" | "downvote"
+  ) => {
     try {
       await voteAnswerMutation.mutateAsync({
         answerId,
@@ -104,7 +114,8 @@ export default function ForumPost() {
           <CardHeader>
             <CardTitle className="text-2xl">{postData.title}</CardTitle>
             <CardDescription>
-              Asked by {postData.authorId} on {new Date(postData.createdAt).toLocaleDateString()}
+              Asked by {postData.authorId} on{" "}
+              {new Date(postData.createdAt).toLocaleDateString()}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -122,19 +133,24 @@ export default function ForumPost() {
         {/* Answers */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">
-            {postData.answers?.length || 0} Answer{(postData.answers?.length || 0) !== 1 ? "s" : ""}
+            {postData.answers?.length || 0} Answer
+            {(postData.answers?.length || 0) !== 1 ? "s" : ""}
           </h2>
 
           <div className="space-y-4">
             {postData.answers && postData.answers.length > 0 ? (
               postData.answers.map((answer: any) => (
-                <Card key={answer.id} className={answer.isBestAnswer ? "ring-2 ring-green-500" : ""}>
+                <Card
+                  key={answer.id}
+                  className={answer.isBestAnswer ? "ring-2 ring-green-500" : ""}
+                >
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-lg">Answer</CardTitle>
                         <CardDescription>
-                          By {answer.authorId} on {new Date(answer.createdAt).toLocaleDateString()}
+                          By {answer.authorId} on{" "}
+                          {new Date(answer.createdAt).toLocaleDateString()}
                         </CardDescription>
                       </div>
                       {answer.isBestAnswer && (
@@ -146,7 +162,9 @@ export default function ForumPost() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-base whitespace-pre-wrap mb-4">{answer.content}</p>
+                    <p className="text-base whitespace-pre-wrap mb-4">
+                      {answer.content}
+                    </p>
 
                     <div className="flex gap-2 items-center">
                       <Button
@@ -166,17 +184,19 @@ export default function ForumPost() {
                         <ThumbsDown className="w-4 h-4" />
                       </Button>
 
-                      {user && user.id === postData.authorId && !answer.isBestAnswer && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleMarkBest(answer.id)}
-                          className="ml-auto gap-1"
-                        >
-                          <Check className="w-4 h-4" />
-                          Mark as Best
-                        </Button>
-                      )}
+                      {user &&
+                        user.id === postData.authorId &&
+                        !answer.isBestAnswer && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleMarkBest(answer.id)}
+                            className="ml-auto gap-1"
+                          >
+                            <Check className="w-4 h-4" />
+                            Mark as Best
+                          </Button>
+                        )}
                     </div>
                   </CardContent>
                 </Card>
@@ -184,7 +204,9 @@ export default function ForumPost() {
             ) : (
               <Card>
                 <CardContent className="pt-6">
-                  <p className="text-center text-muted-foreground">No answers yet. Be the first to answer!</p>
+                  <p className="text-center text-muted-foreground">
+                    No answers yet. Be the first to answer!
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -201,12 +223,15 @@ export default function ForumPost() {
               <form onSubmit={handleSubmitAnswer} className="space-y-4">
                 <Textarea
                   value={answerContent}
-                  onChange={(e) => setAnswerContent(e.target.value)}
+                  onChange={e => setAnswerContent(e.target.value)}
                   placeholder="Write your answer here..."
                   rows={6}
                 />
                 <div className="flex justify-end">
-                  <Button type="submit" disabled={createAnswerMutation.isPending}>
+                  <Button
+                    type="submit"
+                    disabled={createAnswerMutation.isPending}
+                  >
                     {createAnswerMutation.isPending ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -223,7 +248,9 @@ export default function ForumPost() {
         ) : (
           <Card>
             <CardContent className="pt-6">
-              <p className="text-center text-muted-foreground">Please log in to post an answer</p>
+              <p className="text-center text-muted-foreground">
+                Please log in to post an answer
+              </p>
             </CardContent>
           </Card>
         )}

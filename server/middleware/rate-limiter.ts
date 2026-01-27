@@ -62,7 +62,7 @@ export function rateLimiter(options: RateLimitOptions) {
 // Cleanup old entries periodically
 setInterval(() => {
   const now = Date.now();
-  Object.keys(store).forEach((key) => {
+  Object.keys(store).forEach(key => {
     if (store[key].resetTime < now) {
       delete store[key];
     }

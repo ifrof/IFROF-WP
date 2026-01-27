@@ -16,7 +16,9 @@ import { Link } from "wouter";
 
 export default function Maps() {
   const { t } = useLanguage();
-  const [searchType, setSearchType] = useState<"location" | "city" | "country">("location");
+  const [searchType, setSearchType] = useState<"location" | "city" | "country">(
+    "location"
+  );
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [radius, setRadius] = useState("50");
@@ -38,7 +40,9 @@ export default function Maps() {
   // Load Google Maps script
   useEffect(() => {
     if (!import.meta.env.VITE_GOOGLE_MAPS_API_KEY) {
-      console.warn("Google Maps API key not configured. Set VITE_GOOGLE_MAPS_API_KEY environment variable.");
+      console.warn(
+        "Google Maps API key not configured. Set VITE_GOOGLE_MAPS_API_KEY environment variable."
+      );
       return;
     }
     const script = document.createElement("script");
@@ -69,7 +73,8 @@ export default function Maps() {
           position: { lat: factory.latitude, lng: factory.longitude },
           map: map,
           title: factory.name,
-            icon: factory.verificationStatus === "verified"
+          icon:
+            factory.verificationStatus === "verified"
               ? "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
               : "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
         });
@@ -122,15 +127,24 @@ export default function Maps() {
             <div className="space-y-4">
               {/* Search Type Selector */}
               <div>
-                <label className="block text-sm font-medium mb-2">{t("maps.searchType")}</label>
-                <Select value={searchType} onValueChange={(v: any) => setSearchType(v)}>
+                <label className="block text-sm font-medium mb-2">
+                  {t("maps.searchType")}
+                </label>
+                <Select
+                  value={searchType}
+                  onValueChange={(v: any) => setSearchType(v)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="location">{t("maps.byLocation")}</SelectItem>
+                    <SelectItem value="location">
+                      {t("maps.byLocation")}
+                    </SelectItem>
                     <SelectItem value="city">{t("maps.byCity")}</SelectItem>
-                    <SelectItem value="country">{t("maps.byCountry")}</SelectItem>
+                    <SelectItem value="country">
+                      {t("maps.byCountry")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -146,7 +160,7 @@ export default function Maps() {
                       type="number"
                       step="0.0001"
                       value={latitude}
-                      onChange={(e) => setLatitude(e.target.value)}
+                      onChange={e => setLatitude(e.target.value)}
                       placeholder="e.g., 25.2048"
                     />
                   </div>
@@ -158,7 +172,7 @@ export default function Maps() {
                       type="number"
                       step="0.0001"
                       value={longitude}
-                      onChange={(e) => setLongitude(e.target.value)}
+                      onChange={e => setLongitude(e.target.value)}
                       placeholder="e.g., 55.2708"
                     />
                   </div>
@@ -169,7 +183,7 @@ export default function Maps() {
                     <Input
                       type="number"
                       value={radius}
-                      onChange={(e) => setRadius(e.target.value)}
+                      onChange={e => setRadius(e.target.value)}
                       placeholder="50"
                     />
                   </div>
@@ -180,12 +194,18 @@ export default function Maps() {
               {(searchType === "city" || searchType === "country") && (
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    {searchType === "city" ? t("maps.selectCity") : t("maps.selectCountry")}
+                    {searchType === "city"
+                      ? t("maps.selectCity")
+                      : t("maps.selectCountry")}
                   </label>
                   <Select
-                    value={searchType === "city" ? selectedCity : selectedCountry}
-                    onValueChange={(v) =>
-                      searchType === "city" ? setSelectedCity(v) : setSelectedCountry(v)
+                    value={
+                      searchType === "city" ? selectedCity : selectedCountry
+                    }
+                    onValueChange={v =>
+                      searchType === "city"
+                        ? setSelectedCity(v)
+                        : setSelectedCountry(v)
                     }
                   >
                     <SelectTrigger>
@@ -216,7 +236,11 @@ export default function Maps() {
             <CardTitle>{t("maps.factoriesMap")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div id="map" style={{ width: "100%", height: "500px" }} className="rounded-lg" />
+            <div
+              id="map"
+              style={{ width: "100%", height: "500px" }}
+              className="rounded-lg"
+            />
             {!mapLoaded && (
               <div className="flex items-center justify-center h-96">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
@@ -230,7 +254,10 @@ export default function Maps() {
           <Card>
             <CardHeader>
               <CardTitle>
-                {t("maps.foundFactories").replace("{{count}}", String(results.length))}
+                {t("maps.foundFactories").replace(
+                  "{{count}}",
+                  String(results.length)
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -240,13 +267,13 @@ export default function Maps() {
                     key={factory.id}
                     className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
                   >
-                      {factory.logoUrl && (
-                        <img
-                          src={factory.logoUrl}
-                          alt={factory.name}
-                          className="w-full h-40 object-cover"
-                        />
-                      )}
+                    {factory.logoUrl && (
+                      <img
+                        src={factory.logoUrl}
+                        alt={factory.name}
+                        className="w-full h-40 object-cover"
+                      />
+                    )}
                     <div className="p-4">
                       <h3 className="font-semibold mb-2">{factory.name}</h3>
                       <div className="text-sm text-muted-foreground space-y-1 mb-3">
@@ -275,13 +302,15 @@ export default function Maps() {
           </Card>
         )}
 
-        {results && results.length === 0 && (searchType === "location" || selectedCity || selectedCountry) && (
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-muted-foreground">{t("maps.noResults")}</p>
-            </CardContent>
-          </Card>
-        )}
+        {results &&
+          results.length === 0 &&
+          (searchType === "location" || selectedCity || selectedCountry) && (
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <p className="text-muted-foreground">{t("maps.noResults")}</p>
+              </CardContent>
+            </Card>
+          )}
       </div>
     </div>
   );

@@ -34,12 +34,14 @@ export default function BlogEditor() {
   const [preview, setPreview] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
 
-    setForm((prev) => ({
+    setForm(prev => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
@@ -55,7 +57,7 @@ export default function BlogEditor() {
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value;
-    setForm((prev) => ({
+    setForm(prev => ({
       ...prev,
       title,
       slug: generateSlug(title),
@@ -68,7 +70,7 @@ export default function BlogEditor() {
       // في بيئة الإنتاج، ستقوم بإرسال البيانات إلى API
       console.log("Saving article:", form);
       // محاكاة التأخير
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       alert("Article saved successfully!");
       setLocation("/blog");
     } catch (error) {
@@ -103,7 +105,9 @@ export default function BlogEditor() {
           </Button>
 
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-foreground">Create New Article</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              Create New Article
+            </h1>
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -217,7 +221,7 @@ More content...
                 onChange={handleChange}
                 className="w-full px-3 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                {categories.map((cat) => (
+                {categories.map(cat => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>
@@ -253,7 +257,10 @@ More content...
                   id="published"
                   className="w-4 h-4 rounded border-border"
                 />
-                <label htmlFor="published" className="text-sm text-foreground cursor-pointer">
+                <label
+                  htmlFor="published"
+                  className="text-sm text-foreground cursor-pointer"
+                >
                   Publish this article
                 </label>
               </div>
@@ -267,7 +274,10 @@ More content...
                   id="featured"
                   className="w-4 h-4 rounded border-border"
                 />
-                <label htmlFor="featured" className="text-sm text-foreground cursor-pointer">
+                <label
+                  htmlFor="featured"
+                  className="text-sm text-foreground cursor-pointer"
+                >
                   Mark as featured
                 </label>
               </div>

@@ -1,7 +1,14 @@
 import { useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Share2, Bookmark, Calendar, Clock, Tag } from "lucide-react";
+import {
+  ArrowLeft,
+  Share2,
+  Bookmark,
+  Calendar,
+  Clock,
+  Tag,
+} from "lucide-react";
 import { useLocation } from "wouter";
 import { Streamdown } from "streamdown";
 import { trpc } from "@/lib/trpc";
@@ -12,8 +19,12 @@ export default function BlogPostDetail() {
   const [, setLocation] = useLocation();
   const { language, dir } = useLanguage();
 
-  const { data: post, isLoading, error } = trpc.blog.getBySlug.useQuery({ 
-    slug: slug || "" 
+  const {
+    data: post,
+    isLoading,
+    error,
+  } = trpc.blog.getBySlug.useQuery({
+    slug: slug || "",
   });
 
   if (isLoading) {
@@ -21,7 +32,9 @@ export default function BlogPostDetail() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">{language === 'ar' ? 'جاري تحميل المقال...' : 'Loading article...'}</p>
+          <p className="text-gray-600">
+            {language === "ar" ? "جاري تحميل المقال..." : "Loading article..."}
+          </p>
         </div>
       </div>
     );
@@ -32,10 +45,13 @@ export default function BlogPostDetail() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-blue-900 mb-4">
-            {language === 'ar' ? 'المقال غير موجود' : 'Article Not Found'}
+            {language === "ar" ? "المقال غير موجود" : "Article Not Found"}
           </h1>
-          <Button onClick={() => setLocation("/blog")} className="bg-blue-900 text-white">
-            {language === 'ar' ? 'العودة للمدونة' : 'Back to Blog'}
+          <Button
+            onClick={() => setLocation("/blog")}
+            className="bg-blue-900 text-white"
+          >
+            {language === "ar" ? "العودة للمدونة" : "Back to Blog"}
           </Button>
         </div>
       </div>
@@ -54,8 +70,10 @@ export default function BlogPostDetail() {
             onClick={() => setLocation("/blog")}
             className="gap-2 text-blue-900"
           >
-            <ArrowLeft className={`w-4 h-4 ${language === 'ar' ? 'rotate-180' : ''}`} />
-            {language === 'ar' ? 'العودة للمدونة' : 'Back to Blog'}
+            <ArrowLeft
+              className={`w-4 h-4 ${language === "ar" ? "rotate-180" : ""}`}
+            />
+            {language === "ar" ? "العودة للمدونة" : "Back to Blog"}
           </Button>
           <div className="font-bold text-xl text-blue-900">IFROF</div>
         </div>
@@ -75,11 +93,13 @@ export default function BlogPostDetail() {
           <div className="flex flex-wrap gap-6 items-center text-gray-500 text-sm">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              {new Date(post.createdAt).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}
+              {new Date(post.createdAt).toLocaleDateString(
+                language === "ar" ? "ar-SA" : "en-US"
+              )}
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              {language === 'ar' ? 'قراءة 5 دقائق' : '5 min read'}
+              {language === "ar" ? "قراءة 5 دقائق" : "5 min read"}
             </div>
           </div>
         </div>
@@ -91,13 +111,16 @@ export default function BlogPostDetail() {
           <article className="prose prose-blue max-w-none">
             <Streamdown>{post.content}</Streamdown>
           </article>
-          
+
           {/* Tags */}
           {tags.length > 0 && (
             <div className="mt-12 pt-8 border-t border-gray-100">
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag: string) => (
-                  <span key={tag} className="flex items-center gap-1 text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-md">
+                  <span
+                    key={tag}
+                    className="flex items-center gap-1 text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-md"
+                  >
                     <Tag className="w-3 h-3" />
                     {tag}
                   </span>
@@ -112,11 +135,11 @@ export default function BlogPostDetail() {
           <div className="flex gap-4">
             <Button variant="outline" size="sm" className="gap-2">
               <Share2 className="w-4 h-4" />
-              {language === 'ar' ? 'مشاركة' : 'Share'}
+              {language === "ar" ? "مشاركة" : "Share"}
             </Button>
             <Button variant="outline" size="sm" className="gap-2">
               <Bookmark className="w-4 h-4" />
-              {language === 'ar' ? 'حفظ' : 'Save'}
+              {language === "ar" ? "حفظ" : "Save"}
             </Button>
           </div>
         </div>
@@ -125,7 +148,10 @@ export default function BlogPostDetail() {
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 py-12 mt-20">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sm">© 2026 IFROF. {language === 'ar' ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}</p>
+          <p className="text-sm">
+            © 2026 IFROF.{" "}
+            {language === "ar" ? "جميع الحقوق محفوظة." : "All rights reserved."}
+          </p>
         </div>
       </footer>
     </div>

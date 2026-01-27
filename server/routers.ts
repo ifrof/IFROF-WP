@@ -34,7 +34,7 @@ import { adminDashboardRouter } from "./routers/admin-dashboard";
 
 export const appRouter = router({
   system: systemRouter,
-  
+
   auth: authRouter,
 
   // Marketplace features
@@ -42,21 +42,21 @@ export const appRouter = router({
   products: productsRouter,
   inquiries: inquiriesRouter,
   messages: messagesRouter,
-  
+
   // Community features
   forum: forumRouter,
   blog: blogRouter,
-  
+
   // AI & Chat features
   chatbot: chatbotRouter,
   aiAgent: aiAgentRouter,
-  
+
   // Payment & Order features
   payments: paymentsRouter,
-  
+
   // Notifications
   notifications: notificationsRouter,
-  
+
   // Shopping features
   cart: cartRouter,
   checkout: checkoutImprovedRouter,
@@ -64,7 +64,7 @@ export const appRouter = router({
   reviews: reviewsRouter,
   profiles: profilesRouter,
   storage: storageRouter,
-  
+
   // Additional features
   services: servicesRouter,
   support: supportRouter,
@@ -75,7 +75,7 @@ export const appRouter = router({
   twoFactorAuth: twoFactorAuthRouter,
   newsletter: newsletterRouter,
   adminActions: adminActionsRouter,
-  
+
   // New critical features
   factoryVerificationAi: factoryVerificationAiRouter,
   content: contentRouter,

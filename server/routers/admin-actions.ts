@@ -7,10 +7,12 @@ import { eq, inArray } from "drizzle-orm";
 export const adminActionsRouter = router({
   // User Management
   getUsers: adminProcedure
-    .input(z.object({ 
-      role: z.enum(["buyer", "factory", "admin"]).optional(),
-      status: z.string().optional()
-    }))
+    .input(
+      z.object({
+        role: z.enum(["buyer", "factory", "admin"]).optional(),
+        status: z.string().optional(),
+      })
+    )
     .query(async ({ input }) => {
       const db = await getDb();
       let query = db.select().from(schema.users);
@@ -19,26 +21,32 @@ export const adminActionsRouter = router({
     }),
 
   updateUserStatus: adminProcedure
-    .input(z.object({ 
-      userId: z.number(), 
-      status: z.string() 
-    }))
+    .input(
+      z.object({
+        userId: z.number(),
+        status: z.string(),
+      })
+    )
     .mutation(async ({ input }) => {
       const db = await getDb();
-      await db.update(schema.users)
+      await db
+        .update(schema.users)
         .set({ status: input.status, updatedAt: new Date() })
         .where(eq(schema.users.id, input.userId));
       return { success: true };
     }),
 
   bulkUpdateStatus: adminProcedure
-    .input(z.object({ 
-      userIds: z.array(z.number()), 
-      status: z.string() 
-    }))
+    .input(
+      z.object({
+        userIds: z.array(z.number()),
+        status: z.string(),
+      })
+    )
     .mutation(async ({ input }) => {
       const db = await getDb();
-      await db.update(schema.users)
+      await db
+        .update(schema.users)
         .set({ status: input.status, updatedAt: new Date() })
         .where(inArray(schema.users.id, input.userIds));
       return { success: true };
@@ -47,7 +55,8 @@ export const adminActionsRouter = router({
   // Factory Verification
   getPendingVerifications: adminProcedure.query(async () => {
     const db = await getDb();
-    return await db.select()
+    return await db
+      .select()
       .from(schema.factories)
       .where(eq(schema.factories.verificationStatus, "pending"));
   }),
@@ -56,11 +65,12 @@ export const adminActionsRouter = router({
     .input(z.object({ factoryId: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      await db.update(schema.factories)
-        .set({ 
-          verificationStatus: "verified", 
+      await db
+        .update(schema.factories)
+        .set({
+          verificationStatus: "verified",
           verifiedAt: new Date(),
-          updatedAt: new Date() 
+          updatedAt: new Date(),
         })
         .where(eq(schema.factories.id, input.factoryId));
       return { success: true };

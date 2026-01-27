@@ -6,7 +6,9 @@ import Stripe from "stripe";
 import { nanoid } from "nanoid";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const stripe = new Stripe(stripeSecretKey || "sk_test_dummy_key_for_initialization");
+const stripe = new Stripe(
+  stripeSecretKey || "sk_test_dummy_key_for_initialization"
+);
 
 const shippingAddressSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -32,7 +34,10 @@ export const checkoutImprovedRouter = router({
     try {
       const userId = ctx.user?.id;
       if (!userId) {
-        throw new TRPCError({ code: "UNAUTHORIZED", message: "User not authenticated" });
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User not authenticated",
+        });
       }
 
       const cartItems = await db.getCartItems(userId);
@@ -113,12 +118,18 @@ export const checkoutImprovedRouter = router({
       try {
         const userId = ctx.user?.id;
         if (!userId) {
-          throw new TRPCError({ code: "UNAUTHORIZED", message: "User not authenticated" });
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "User not authenticated",
+          });
         }
 
         const cartItems = await db.getCartItems(userId);
         if (!cartItems || cartItems.length === 0) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "Cart is empty" });
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Cart is empty",
+          });
         }
 
         const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
@@ -234,11 +245,14 @@ export const checkoutImprovedRouter = router({
           });
         }
 
-        const session = await stripe.checkout.sessions.retrieve(input.sessionId);
+        const session = await stripe.checkout.sessions.retrieve(
+          input.sessionId
+        );
 
         return {
           ...order,
-          paymentStatus: session.payment_status === "paid" ? "completed" : "pending",
+          paymentStatus:
+            session.payment_status === "paid" ? "completed" : "pending",
           stripeStatus: session.status,
         };
       } catch (error) {
@@ -252,7 +266,10 @@ export const checkoutImprovedRouter = router({
     try {
       const userId = ctx.user?.id;
       if (!userId) {
-        throw new TRPCError({ code: "UNAUTHORIZED", message: "User not authenticated" });
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User not authenticated",
+        });
       }
 
       await db.clearCart(userId);

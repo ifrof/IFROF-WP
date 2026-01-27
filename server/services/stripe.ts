@@ -32,14 +32,14 @@ export async function createCheckoutSession(
 
   // Create or get Stripe customer
   let customerId = user[0].stripeCustomerId;
-  
+
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: user[0].email,
       metadata: { userId },
     });
     customerId = customer.id;
-    
+
     // Save customer ID
     await db
       .update(users)

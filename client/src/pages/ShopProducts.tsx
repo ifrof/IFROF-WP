@@ -54,14 +54,17 @@ export default function ShopProducts() {
   const [showFilters, setShowFilters] = useState(true);
 
   // Fetch all products
-  const { data: allProducts = [], isLoading: productsLoading } = trpc.products.getAll.useQuery();
+  const { data: allProducts = [], isLoading: productsLoading } =
+    trpc.products.getAll.useQuery();
 
   // Fetch factories for filter
   const { data: factories = [] } = trpc.factories.list.useQuery();
 
   // Get unique categories
   const categories = useMemo(() => {
-    const cats = new Set(allProducts.map((p: any) => p.category).filter(Boolean));
+    const cats = new Set(
+      allProducts.map((p: any) => p.category).filter(Boolean)
+    );
     return Array.from(cats) as string[];
   }, [allProducts]);
 
@@ -73,12 +76,15 @@ export default function ShopProducts() {
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.description?.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesCategory = !selectedCategory || product.category === selectedCategory;
+      const matchesCategory =
+        !selectedCategory || product.category === selectedCategory;
 
-      const matchesFactory = !selectedFactory || product.factoryId === parseInt(selectedFactory);
+      const matchesFactory =
+        !selectedFactory || product.factoryId === parseInt(selectedFactory);
 
       const matchesPrice =
-        product.basePrice >= priceRange[0] && product.basePrice <= priceRange[1];
+        product.basePrice >= priceRange[0] &&
+        product.basePrice <= priceRange[1];
 
       return matchesSearch && matchesCategory && matchesFactory && matchesPrice;
     });
@@ -92,15 +98,27 @@ export default function ShopProducts() {
         filtered.sort((a: any, b: any) => b.basePrice - a.basePrice);
         break;
       case "newest":
-        filtered.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        filtered.sort(
+          (a: any, b: any) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
         break;
       case "popular":
-        filtered.sort((a: any, b: any) => (b.featured || 0) - (a.featured || 0));
+        filtered.sort(
+          (a: any, b: any) => (b.featured || 0) - (a.featured || 0)
+        );
         break;
     }
 
     return filtered;
-  }, [allProducts, searchQuery, selectedCategory, selectedFactory, priceRange, sortBy]);
+  }, [
+    allProducts,
+    searchQuery,
+    selectedCategory,
+    selectedFactory,
+    priceRange,
+    sortBy,
+  ]);
 
   // Pagination
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
@@ -142,9 +160,13 @@ export default function ShopProducts() {
               <div className="relative">
                 <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder={language === "ar" ? "ابحث عن المنتجات..." : "Search products..."}
+                  placeholder={
+                    language === "ar"
+                      ? "ابحث عن المنتجات..."
+                      : "Search products..."
+                  }
                   value={searchQuery}
-                  onChange={(e) => {
+                  onChange={e => {
                     setSearchQuery(e.target.value);
                     setCurrentPage(1);
                   }}
@@ -178,7 +200,9 @@ export default function ShopProducts() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Sidebar */}
-          <div className={`${showFilters ? "block" : "hidden"} lg:block lg:col-span-1`}>
+          <div
+            className={`${showFilters ? "block" : "hidden"} lg:block lg:col-span-1`}
+          >
             <div className="bg-white rounded-lg border p-6 sticky top-24">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold flex items-center gap-2">
@@ -201,18 +225,25 @@ export default function ShopProducts() {
                   <label className="block text-sm font-semibold mb-2">
                     {language === "ar" ? "الفئة" : "Category"}
                   </label>
-                  <Select value={selectedCategory} onValueChange={(value) => {
-                    setSelectedCategory(value);
-                    setCurrentPage(1);
-                  }}>
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={value => {
+                      setSelectedCategory(value);
+                      setCurrentPage(1);
+                    }}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder={language === "ar" ? "اختر فئة" : "Select category"} />
+                      <SelectValue
+                        placeholder={
+                          language === "ar" ? "اختر فئة" : "Select category"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">
                         {language === "ar" ? "جميع الفئات" : "All Categories"}
                       </SelectItem>
-                      {categories.map((cat) => (
+                      {categories.map(cat => (
                         <SelectItem key={cat} value={cat}>
                           {cat}
                         </SelectItem>
@@ -226,19 +257,33 @@ export default function ShopProducts() {
                   <label className="block text-sm font-semibold mb-2">
                     {language === "ar" ? "المصنع" : "Manufacturer"}
                   </label>
-                  <Select value={selectedFactory} onValueChange={(value) => {
-                    setSelectedFactory(value);
-                    setCurrentPage(1);
-                  }}>
+                  <Select
+                    value={selectedFactory}
+                    onValueChange={value => {
+                      setSelectedFactory(value);
+                      setCurrentPage(1);
+                    }}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder={language === "ar" ? "اختر مصنع" : "Select manufacturer"} />
+                      <SelectValue
+                        placeholder={
+                          language === "ar"
+                            ? "اختر مصنع"
+                            : "Select manufacturer"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">
-                        {language === "ar" ? "جميع المصانع" : "All Manufacturers"}
+                        {language === "ar"
+                          ? "جميع المصانع"
+                          : "All Manufacturers"}
                       </SelectItem>
                       {(factories || []).map((factory: any) => (
-                        <SelectItem key={factory.id?.toString()} value={factory.id?.toString() || ""}>
+                        <SelectItem
+                          key={factory.id?.toString()}
+                          value={factory.id?.toString() || ""}
+                        >
                           {factory.name}
                         </SelectItem>
                       ))}
@@ -253,7 +298,7 @@ export default function ShopProducts() {
                   </label>
                   <Slider
                     value={priceRange}
-                    onValueChange={(value) => {
+                    onValueChange={value => {
                       setPriceRange(value as [number, number]);
                       setCurrentPage(1);
                     }}
@@ -282,10 +327,14 @@ export default function ShopProducts() {
                         {language === "ar" ? "الأحدث" : "Newest"}
                       </SelectItem>
                       <SelectItem value="price-low">
-                        {language === "ar" ? "السعر: الأقل أولاً" : "Price: Low to High"}
+                        {language === "ar"
+                          ? "السعر: الأقل أولاً"
+                          : "Price: Low to High"}
                       </SelectItem>
                       <SelectItem value="price-high">
-                        {language === "ar" ? "السعر: الأعلى أولاً" : "Price: High to Low"}
+                        {language === "ar"
+                          ? "السعر: الأعلى أولاً"
+                          : "Price: High to Low"}
                       </SelectItem>
                       <SelectItem value="popular">
                         {language === "ar" ? "الأكثر شهرة" : "Most Popular"}
@@ -332,7 +381,9 @@ export default function ShopProducts() {
                     <ShoppingCart className="w-12 h-12 mx-auto" />
                   </div>
                   <h3 className="text-lg font-semibold mb-2">
-                    {language === "ar" ? "لم يتم العثور على منتجات" : "No products found"}
+                    {language === "ar"
+                      ? "لم يتم العثور على منتجات"
+                      : "No products found"}
                   </h3>
                   <p className="text-gray-600 mb-4">
                     {language === "ar"
@@ -340,7 +391,9 @@ export default function ShopProducts() {
                       : "Try adjusting your search or filters"}
                   </p>
                   <Button onClick={handleResetFilters}>
-                    {language === "ar" ? "إعادة تعيين الفلاتر" : "Reset Filters"}
+                    {language === "ar"
+                      ? "إعادة تعيين الفلاتر"
+                      : "Reset Filters"}
                   </Button>
                 </CardContent>
               </Card>
@@ -353,11 +406,14 @@ export default function ShopProducts() {
                     <ProductSkeleton key={i} />
                   ))
                 : paginatedProducts.map((product: any) => {
-                    const factory = factories.find((f: any) => f.id === product.factoryId);
+                    const factory = factories.find(
+                      (f: any) => f.id === product.factoryId
+                    );
                     const images = product.imageUrls
                       ? JSON.parse(product.imageUrls)
                       : [];
-                    const mainImage = images[0] || "https://via.placeholder.com/400";
+                    const mainImage =
+                      images[0] || "https://via.placeholder.com/400";
 
                     return (
                       <Link key={product.id} href={`/products/${product.id}`}>
@@ -388,7 +444,9 @@ export default function ShopProducts() {
                             {factory && (
                               <div className="flex items-center gap-1 text-xs text-gray-600 mb-3">
                                 <MapPin className="w-3 h-3" />
-                                <span className="line-clamp-1">{factory.name}</span>
+                                <span className="line-clamp-1">
+                                  {factory.name}
+                                </span>
                               </div>
                             )}
 
@@ -417,7 +475,8 @@ export default function ShopProducts() {
                                 ¥{product.basePrice.toLocaleString()}
                               </span>
                               <span className="text-xs text-gray-500">
-                                {language === "ar" ? "الحد الأدنى" : "min"}: {product.minimumOrderQuantity}
+                                {language === "ar" ? "الحد الأدنى" : "min"}:{" "}
+                                {product.minimumOrderQuantity}
                               </span>
                             </div>
 
@@ -425,10 +484,14 @@ export default function ShopProducts() {
                             <Button
                               size="sm"
                               className="w-full bg-blue-600 hover:bg-blue-700"
-                              onClick={(e) => {
+                              onClick={e => {
                                 e.preventDefault();
                                 // Will be handled in Phase 3
-                                toast.info(language === "ar" ? "انتقل إلى صفحة المنتج" : "Go to product page");
+                                toast.info(
+                                  language === "ar"
+                                    ? "انتقل إلى صفحة المنتج"
+                                    : "Go to product page"
+                                );
                               }}
                             >
                               <ShoppingCart className="w-4 h-4 mr-2" />

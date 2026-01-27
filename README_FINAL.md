@@ -7,6 +7,7 @@ IFROF.COM is a comprehensive B2B marketplace platform connecting manufacturers a
 ## ✨ Features Implemented
 
 ### Phase 1: Infrastructure & Routing ✅
+
 - Complete database operations for all 17 tables
 - Full routing with zero 404 errors
 - CSRF protection and rate limiting
@@ -15,26 +16,24 @@ IFROF.COM is a comprehensive B2B marketplace platform connecting manufacturers a
 - Environment configuration for dev and production
 
 ### Phase 2: Products & Shopping Cart ✅
+
 - **Products Listing Page** (`/shop/products`)
   - 20+ real products from database
   - Pagination (20 per page)
   - Loading skeletons
   - Empty state handling
-  
 - **Search & Filters**
   - Real-time search by name/description
   - Price range slider (0-50,000 CNY)
   - Category filter
   - Manufacturer filter
   - Sort options: Newest, Price, Popular
-  
 - **Product Detail Page**
   - Image gallery with thumbnails
   - Manufacturer details and ratings
   - Specifications table
   - Related products (4 from same factory)
   - Quantity selector (1-999)
-  
 - **Shopping Cart**
   - Database-backed persistence
   - Add/remove/update operations
@@ -44,6 +43,7 @@ IFROF.COM is a comprehensive B2B marketplace platform connecting manufacturers a
 ## 📊 Database Schema
 
 17 Tables:
+
 - `users` - User authentication
 - `factories` - Manufacturer profiles
 - `products` - Product catalog
@@ -122,6 +122,7 @@ pnpm start
 ## 📋 Environment Variables
 
 ### Development (.env)
+
 ```
 NODE_ENV=development
 PORT=3000
@@ -137,6 +138,7 @@ FORCE_HTTPS=false
 ```
 
 ### Production (.env.production)
+
 ```
 NODE_ENV=production
 DATABASE_URL=mysql://user:pass@host/db
@@ -155,6 +157,7 @@ FORCE_HTTPS=true
 ## 🌐 Deployment
 
 See `DEPLOYMENT_GUIDE.md` for detailed instructions on deploying to:
+
 - Vercel (Recommended)
 - Railway
 - AWS EC2
@@ -196,18 +199,21 @@ pnpm build
 ## 📝 API Documentation
 
 ### Products
+
 - `GET /api/trpc/products.getAll` - Get all products
 - `GET /api/trpc/products.getById` - Get product by ID
 - `GET /api/trpc/products.search` - Search products
 - `POST /api/trpc/products.create` - Create product (admin)
 
 ### Cart
+
 - `GET /api/trpc/cart.getItems` - Get cart items
 - `POST /api/trpc/cart.addItem` - Add to cart
 - `POST /api/trpc/cart.removeItem` - Remove from cart
 - `POST /api/trpc/cart.updateQuantity` - Update quantity
 
 ### Factories
+
 - `GET /api/trpc/factories.list` - Get all factories
 - `GET /api/trpc/factories.getById` - Get factory by ID
 - `GET /api/trpc/factories.search` - Search factories
@@ -228,6 +234,7 @@ pnpm build
 ## 📞 Support
 
 For issues or questions:
+
 1. Check the logs: `pm2 logs ifrof`
 2. Review the deployment guide
 3. Check GitHub issues

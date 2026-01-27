@@ -12,7 +12,10 @@ import { serveStatic, setupVite } from "./vite";
 import { apiLimiter, sanitizeInput, securityHeaders } from "./middleware";
 import { authRateLimiter } from "./auth-rate-limiter";
 import { errorHandler } from "../middleware/error-handler";
-import { apiLimiter as newApiLimiter, authLimiter } from "../middleware/rate-limiter";
+import {
+  apiLimiter as newApiLimiter,
+  authLimiter,
+} from "../middleware/rate-limiter";
 import { ensureCsrfToken, getCsrfTokenHandler } from "./csrf";
 import { httpsRedirect } from "./https-redirect";
 import cookieParser from "cookie-parser";
@@ -23,7 +26,11 @@ import path from "path";
 import fs from "fs";
 import { performanceMonitor, errorTracker } from "./performance-monitor";
 import { healthCheck, metricsEndpoint } from "./health-check";
-import { aiRateLimiter, aiDailyCap, requireAuth } from "../middleware/ai-guardrails";
+import {
+  aiRateLimiter,
+  aiDailyCap,
+  requireAuth,
+} from "../middleware/ai-guardrails";
 import { validateConfig, redisRateLimiter } from "./hardening";
 import cors from "cors";
 import { registerAiChatRoutes } from "../routes/ai-chat";
@@ -75,14 +82,20 @@ async function startServer() {
     const robotsPath =
       process.env.NODE_ENV === "production"
         ? path.resolve(import.meta.dirname, "public", "robots.txt")
-        : path.resolve(import.meta.dirname, "../../client/public", "robots.txt");
+        : path.resolve(
+            import.meta.dirname,
+            "../../client/public",
+            "robots.txt"
+          );
 
     if (fs.existsSync(robotsPath)) {
       res.sendFile(robotsPath);
     } else {
       res
         .type("text/plain")
-        .send("User-agent: *\nAllow: /\nSitemap: https://ifrof.com/sitemap.xml");
+        .send(
+          "User-agent: *\nAllow: /\nSitemap: https://ifrof.com/sitemap.xml"
+        );
     }
   });
 
@@ -134,7 +147,10 @@ async function startServer() {
   app.use("/api/v2", newApiLimiter);
 
   // Redis-backed Rate Limiting for sensitive routes (10 req/min/IP)
-  const sensitiveRateLimiter = redisRateLimiter({ windowMs: 60 * 1000, maxRequests: 10 });
+  const sensitiveRateLimiter = redisRateLimiter({
+    windowMs: 60 * 1000,
+    maxRequests: 10,
+  });
 
   app.use("/api/trpc/aiAgent", sensitiveRateLimiter);
   app.use("/api/trpc/storage", sensitiveRateLimiter);

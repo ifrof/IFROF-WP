@@ -1,24 +1,30 @@
-import { useState, useEffect } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/_core/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { trpc } from '@/lib/trpc';
-import { 
-  CheckCircle, 
+import { useState, useEffect } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { trpc } from "@/lib/trpc";
+import {
+  CheckCircle,
   Loader2,
   Package,
   FileText,
   Truck,
   User,
   ArrowRight,
-  ArrowLeft
-} from 'lucide-react';
-import { Link, useLocation } from 'wouter';
-import { toast } from 'sonner';
+  ArrowLeft,
+} from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { toast } from "sonner";
 
 export default function ImportRequest() {
   const { language, dir } = useLanguage();
@@ -26,20 +32,20 @@ export default function ImportRequest() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     productId: undefined as number | undefined,
-    productName: '',
-    category: '',
-    quantity: '',
-    specifications: '',
-    deliveryDetails: '',
+    productName: "",
+    category: "",
+    quantity: "",
+    specifications: "",
+    deliveryDetails: "",
   });
 
   // Get productId from URL if present
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const pid = params.get('productId');
+    const pid = params.get("productId");
     if (pid) {
       setFormData(prev => ({ ...prev, productId: Number(pid) }));
     }
@@ -47,13 +53,17 @@ export default function ImportRequest() {
 
   const createRequest = trpc.inquiries.create.useMutation({
     onSuccess: () => {
-      toast.success(language === 'ar' ? 'تم إرسال طلبك بنجاح!' : 'Request submitted successfully!');
+      toast.success(
+        language === "ar"
+          ? "تم إرسال طلبك بنجاح!"
+          : "Request submitted successfully!"
+      );
       setStep(4);
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message);
       setIsSubmitting(false);
-    }
+    },
   });
 
   const nextStep = () => setStep(s => s + 1);
@@ -61,7 +71,7 @@ export default function ImportRequest() {
 
   const handleSubmit = async () => {
     if (!isAuthenticated) {
-      toast.error(language === 'ar' ? 'يرجى تسجيل الدخول' : 'Please login');
+      toast.error(language === "ar" ? "يرجى تسجيل الدخول" : "Please login");
       return;
     }
     setIsSubmitting(true);
@@ -82,12 +92,19 @@ export default function ImportRequest() {
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">{language === 'ar' ? 'تم الإرسال!' : 'Submitted!'}</h2>
+          <h2 className="text-2xl font-bold mb-2">
+            {language === "ar" ? "تم الإرسال!" : "Submitted!"}
+          </h2>
           <p className="text-gray-600 mb-8">
-            {language === 'ar' ? 'سنتواصل معك قريباً بعروض الأسعار.' : 'We will contact you soon with quotes.'}
+            {language === "ar"
+              ? "سنتواصل معك قريباً بعروض الأسعار."
+              : "We will contact you soon with quotes."}
           </p>
-          <Button onClick={() => setLocation('/buyer/requests')} className="w-full">
-            {language === 'ar' ? 'عرض طلباتي' : 'View My Requests'}
+          <Button
+            onClick={() => setLocation("/buyer/requests")}
+            className="w-full"
+          >
+            {language === "ar" ? "عرض طلباتي" : "View My Requests"}
           </Button>
         </Card>
       </div>
@@ -100,11 +117,13 @@ export default function ImportRequest() {
         {/* Progress Bar */}
         <div className="flex justify-between mb-8 relative">
           <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
-          {[1, 2, 3].map((i) => (
-            <div 
+          {[1, 2, 3].map(i => (
+            <div
               key={i}
               className={`w-10 h-10 rounded-full flex items-center justify-center z-10 font-bold transition-colors ${
-                step >= i ? 'bg-blue-600 text-white' : 'bg-white border-2 border-gray-200 text-gray-400'
+                step >= i
+                  ? "bg-blue-600 text-white"
+                  : "bg-white border-2 border-gray-200 text-gray-400"
               }`}
             >
               {i}
@@ -115,32 +134,50 @@ export default function ImportRequest() {
         <Card>
           <CardHeader>
             <CardTitle>
-              {step === 1 && (language === 'ar' ? 'اختيار المنتج' : 'Product Selection')}
-              {step === 2 && (language === 'ar' ? 'التفاصيل والكمية' : 'Details & Quantity')}
-              {step === 3 && (language === 'ar' ? 'معلومات التواصل' : 'Contact Information')}
+              {step === 1 &&
+                (language === "ar" ? "اختيار المنتج" : "Product Selection")}
+              {step === 2 &&
+                (language === "ar" ? "التفاصيل والكمية" : "Details & Quantity")}
+              {step === 3 &&
+                (language === "ar" ? "معلومات التواصل" : "Contact Information")}
             </CardTitle>
             <CardDescription>
-              {step === 1 && (language === 'ar' ? 'ما الذي ترغب في استيراده؟' : 'What would you like to import?')}
-              {step === 2 && (language === 'ar' ? 'حدد الكمية والمواصفات المطلوبة' : 'Specify quantity and requirements')}
-              {step === 3 && (language === 'ar' ? 'تأكيد بياناتك لإرسال الطلب' : 'Confirm your details to submit')}
+              {step === 1 &&
+                (language === "ar"
+                  ? "ما الذي ترغب في استيراده؟"
+                  : "What would you like to import?")}
+              {step === 2 &&
+                (language === "ar"
+                  ? "حدد الكمية والمواصفات المطلوبة"
+                  : "Specify quantity and requirements")}
+              {step === 3 &&
+                (language === "ar"
+                  ? "تأكيد بياناتك لإرسال الطلب"
+                  : "Confirm your details to submit")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {step === 1 && (
               <div className="space-y-4">
                 <div>
-                  <Label>{language === 'ar' ? 'اسم المنتج' : 'Product Name'}</Label>
-                  <Input 
+                  <Label>
+                    {language === "ar" ? "اسم المنتج" : "Product Name"}
+                  </Label>
+                  <Input
                     value={formData.productName}
-                    onChange={e => setFormData(f => ({ ...f, productName: e.target.value }))}
+                    onChange={e =>
+                      setFormData(f => ({ ...f, productName: e.target.value }))
+                    }
                     placeholder="e.g. Cotton T-shirts"
                   />
                 </div>
                 <div>
-                  <Label>{language === 'ar' ? 'التصنيف' : 'Category'}</Label>
-                  <Input 
+                  <Label>{language === "ar" ? "التصنيف" : "Category"}</Label>
+                  <Input
                     value={formData.category}
-                    onChange={e => setFormData(f => ({ ...f, category: e.target.value }))}
+                    onChange={e =>
+                      setFormData(f => ({ ...f, category: e.target.value }))
+                    }
                     placeholder="e.g. Apparel"
                   />
                 </div>
@@ -150,27 +187,43 @@ export default function ImportRequest() {
             {step === 2 && (
               <div className="space-y-4">
                 <div>
-                  <Label>{language === 'ar' ? 'الكمية' : 'Quantity'}</Label>
-                  <Input 
+                  <Label>{language === "ar" ? "الكمية" : "Quantity"}</Label>
+                  <Input
                     type="number"
                     value={formData.quantity}
-                    onChange={e => setFormData(f => ({ ...f, quantity: e.target.value }))}
+                    onChange={e =>
+                      setFormData(f => ({ ...f, quantity: e.target.value }))
+                    }
                     placeholder="1000"
                   />
                 </div>
                 <div>
-                  <Label>{language === 'ar' ? 'المواصفات' : 'Specifications'}</Label>
-                  <Textarea 
+                  <Label>
+                    {language === "ar" ? "المواصفات" : "Specifications"}
+                  </Label>
+                  <Textarea
                     value={formData.specifications}
-                    onChange={e => setFormData(f => ({ ...f, specifications: e.target.value }))}
+                    onChange={e =>
+                      setFormData(f => ({
+                        ...f,
+                        specifications: e.target.value,
+                      }))
+                    }
                     placeholder="Size, color, material..."
                   />
                 </div>
                 <div>
-                  <Label>{language === 'ar' ? 'تفاصيل التوصيل' : 'Delivery Details'}</Label>
-                  <Textarea 
+                  <Label>
+                    {language === "ar" ? "تفاصيل التوصيل" : "Delivery Details"}
+                  </Label>
+                  <Textarea
                     value={formData.deliveryDetails}
-                    onChange={e => setFormData(f => ({ ...f, deliveryDetails: e.target.value }))}
+                    onChange={e =>
+                      setFormData(f => ({
+                        ...f,
+                        deliveryDetails: e.target.value,
+                      }))
+                    }
                     placeholder="Shipping address, preferred method..."
                   />
                 </div>
@@ -187,9 +240,9 @@ export default function ImportRequest() {
                   <div className="text-sm text-blue-600">{user?.email}</div>
                 </div>
                 <p className="text-sm text-gray-500">
-                  {language === 'ar' 
-                    ? 'سيتم إرسال هذا الطلب إلى المصانع المناسبة وسيتواصلون معك عبر المنصة.'
-                    : 'This request will be sent to relevant factories who will contact you via the platform.'}
+                  {language === "ar"
+                    ? "سيتم إرسال هذا الطلب إلى المصانع المناسبة وسيتواصلون معك عبر المنصة."
+                    : "This request will be sent to relevant factories who will contact you via the platform."}
                 </p>
               </div>
             )}
@@ -197,18 +250,23 @@ export default function ImportRequest() {
             <div className="flex justify-between pt-4">
               {step > 1 && (
                 <Button variant="outline" onClick={prevStep}>
-                  {language === 'ar' ? 'السابق' : 'Previous'}
+                  {language === "ar" ? "السابق" : "Previous"}
                 </Button>
               )}
               <div className="flex-1" />
               {step < 3 ? (
-                <Button onClick={nextStep} disabled={step === 1 && !formData.productName}>
-                  {language === 'ar' ? 'التالي' : 'Next'}
+                <Button
+                  onClick={nextStep}
+                  disabled={step === 1 && !formData.productName}
+                >
+                  {language === "ar" ? "التالي" : "Next"}
                 </Button>
               ) : (
                 <Button onClick={handleSubmit} disabled={isSubmitting}>
-                  {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  {language === 'ar' ? 'إرسال الطلب' : 'Submit Request'}
+                  {isSubmitting && (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  )}
+                  {language === "ar" ? "إرسال الطلب" : "Submit Request"}
                 </Button>
               )}
             </div>

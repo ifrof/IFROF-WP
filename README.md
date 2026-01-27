@@ -20,3 +20,4 @@ See [`.env.example`](./.env.example) for a template.
 ```bash
 pnpm install
 pnpm build
+```

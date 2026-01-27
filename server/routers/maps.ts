@@ -4,7 +4,18 @@ import { publicProcedure, router } from "../_core/trpc";
 export const mapsRouter = router({
   // Get factories on map
   getFactoriesOnMap: publicProcedure
-    .input(z.object({ bounds: z.object({ north: z.number(), south: z.number(), east: z.number(), west: z.number() }).optional() }))
+    .input(
+      z.object({
+        bounds: z
+          .object({
+            north: z.number(),
+            south: z.number(),
+            east: z.number(),
+            west: z.number(),
+          })
+          .optional(),
+      })
+    )
     .query(async ({ input }) => {
       // TODO: Implement maps functionality
       return [];
@@ -20,7 +31,13 @@ export const mapsRouter = router({
 
   // Search nearby factories
   searchNearby: publicProcedure
-    .input(z.object({ latitude: z.number(), longitude: z.number(), radius: z.number() }))
+    .input(
+      z.object({
+        latitude: z.number(),
+        longitude: z.number(),
+        radius: z.number(),
+      })
+    )
     .query(async ({ input }) => {
       // TODO: Implement maps functionality
       return [];

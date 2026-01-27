@@ -1,7 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import AdminDashboardLayout from "@/components/AdminDashboardLayout";
-import { BarChart3, TrendingUp, Users, Package, ShoppingCart, DollarSign } from "lucide-react";
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
+  Package,
+  ShoppingCart,
+  DollarSign,
+} from "lucide-react";
 
 export default function AdminAnalytics() {
   const { language } = useLanguage();
@@ -14,7 +21,9 @@ export default function AdminAnalytics() {
             {language === "ar" ? "لوحة التحليلات" : "Analytics Dashboard"}
           </h1>
           <p className="text-muted-foreground">
-            {language === "ar" ? "تحليلات وإحصائيات المنصة" : "Platform analytics and statistics"}
+            {language === "ar"
+              ? "تحليلات وإحصائيات المنصة"
+              : "Platform analytics and statistics"}
           </p>
         </div>
 
@@ -79,7 +88,11 @@ export default function AdminAnalytics() {
               <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
                 <div className="text-center text-muted-foreground">
                   <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>{language === "ar" ? "الرسم البياني قيد التطوير" : "Chart under development"}</p>
+                  <p>
+                    {language === "ar"
+                      ? "الرسم البياني قيد التطوير"
+                      : "Chart under development"}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -96,7 +109,11 @@ export default function AdminAnalytics() {
               <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
                 <div className="text-center text-muted-foreground">
                   <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>{language === "ar" ? "الرسم البياني قيد التطوير" : "Chart under development"}</p>
+                  <p>
+                    {language === "ar"
+                      ? "الرسم البياني قيد التطوير"
+                      : "Chart under development"}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -113,7 +130,11 @@ export default function AdminAnalytics() {
               <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
                 <div className="text-center text-muted-foreground">
                   <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>{language === "ar" ? "الرسم البياني قيد التطوير" : "Chart under development"}</p>
+                  <p>
+                    {language === "ar"
+                      ? "الرسم البياني قيد التطوير"
+                      : "Chart under development"}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -130,7 +151,11 @@ export default function AdminAnalytics() {
               <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
                 <div className="text-center text-muted-foreground">
                   <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>{language === "ar" ? "الرسم البياني قيد التطوير" : "Chart under development"}</p>
+                  <p>
+                    {language === "ar"
+                      ? "الرسم البياني قيد التطوير"
+                      : "Chart under development"}
+                  </p>
                 </div>
               </div>
             </CardContent>

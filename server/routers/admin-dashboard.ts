@@ -79,7 +79,12 @@ export const adminDashboardRouter = router({
       let query = db.select().from(factories);
 
       if (input.verified !== undefined) {
-        query = query.where(eq(factories.verificationStatus, input.verified ? "verified" : "pending"));
+        query = query.where(
+          eq(
+            factories.verificationStatus,
+            input.verified ? "verified" : "pending"
+          )
+        );
       }
 
       return query.limit(pageLimit).offset(pageOffset);
@@ -111,7 +116,10 @@ export const adminDashboardRouter = router({
 
       await db
         .update(factories)
-        .set({ verificationStatus: "rejected", verificationNotes: input.reason })
+        .set({
+          verificationStatus: "rejected",
+          verificationNotes: input.reason,
+        })
         .where(eq(factories.id, input.factoryId));
 
       return { success: true };
@@ -134,11 +142,7 @@ export const adminDashboardRouter = router({
       const pageLimit = Math.min(100, Math.max(1, input.limit));
       const pageOffset = (pageNum - 1) * pageLimit;
 
-      return db
-        .select()
-        .from(orders)
-        .limit(pageLimit)
-        .offset(pageOffset);
+      return db.select().from(orders).limit(pageLimit).offset(pageOffset);
     }),
 
   getOrderDetails: protectedProcedure

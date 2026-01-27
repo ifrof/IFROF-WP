@@ -3,22 +3,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Package, ShoppingBag, MessageSquare, CheckCircle, Clock, XCircle, Truck, DollarSign } from "lucide-react";
+import {
+  Loader2,
+  Package,
+  ShoppingBag,
+  MessageSquare,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Truck,
+  DollarSign,
+} from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
 import FactoryDashboardLayout from "@/components/FactoryDashboardLayout";
 
 export default function FactoryDashboard() {
   const { t } = useLanguage();
-  
+
   // Mock factory ID - in production, this would come from user's factory association
   const factoryId = 1;
 
-  const { data: orders, isLoading: ordersLoading } = trpc.dashboard.getRecentOrders.useQuery();
-  
-  const { data: inquiries, isLoading: inquiriesLoading } = trpc.inquiries.getByFactory.useQuery(
-    { factoryId }
-  );
+  const { data: orders, isLoading: ordersLoading } =
+    trpc.dashboard.getRecentOrders.useQuery();
+
+  const { data: inquiries, isLoading: inquiriesLoading } =
+    trpc.inquiries.getByFactory.useQuery({ factoryId });
 
   const { data: products } = trpc.products.getByFactory.useQuery({ factoryId });
   const { data: services } = trpc.services.list.useQuery();
@@ -32,10 +42,10 @@ export default function FactoryDashboard() {
       delivered: { variant: "default", icon: CheckCircle },
       cancelled: { variant: "destructive", icon: XCircle },
     };
-    
+
     const config = statusMap[status] || statusMap.pending;
     const Icon = config.icon;
-    
+
     return (
       <Badge variant={config.variant as any}>
         <Icon className="w-3 h-3 mr-1" />
@@ -57,8 +67,12 @@ export default function FactoryDashboard() {
       <div className="space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.factory.title")}</h1>
-          <p className="text-muted-foreground">{t("dashboard.factory.subtitle")}</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {t("dashboard.factory.title")}
+          </h1>
+          <p className="text-muted-foreground">
+            {t("dashboard.factory.subtitle")}
+          </p>
         </div>
 
         {/* Stats Cards */}
@@ -70,7 +84,9 @@ export default function FactoryDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{(products as any[])?.length || 0}</div>
+              <div className="text-3xl font-bold">
+                {(products as any[])?.length || 0}
+              </div>
             </CardContent>
           </Card>
 
@@ -81,7 +97,9 @@ export default function FactoryDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{(services as any[])?.length || 0}</div>
+              <div className="text-3xl font-bold">
+                {(services as any[])?.length || 0}
+              </div>
             </CardContent>
           </Card>
 
@@ -93,7 +111,10 @@ export default function FactoryDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {(orders as any[])?.filter((o: any) => o.status !== "delivered" && o.status !== "cancelled").length || 0}
+                {(orders as any[])?.filter(
+                  (o: any) =>
+                    o.status !== "delivered" && o.status !== "cancelled"
+                ).length || 0}
               </div>
             </CardContent>
           </Card>
@@ -106,7 +127,9 @@ export default function FactoryDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {(inquiries as any[])?.filter((i: any) => i.status === "pending").length || 0}
+                {(inquiries as any[])?.filter(
+                  (i: any) => i.status === "pending"
+                ).length || 0}
               </div>
             </CardContent>
           </Card>
@@ -115,10 +138,18 @@ export default function FactoryDashboard() {
         {/* Main Content Tabs */}
         <Tabs defaultValue="orders" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="orders">{t("dashboard.factory.orders")}</TabsTrigger>
-            <TabsTrigger value="inquiries">{t("dashboard.factory.inquiries")}</TabsTrigger>
-            <TabsTrigger value="products">{t("dashboard.factory.products")}</TabsTrigger>
-            <TabsTrigger value="services">{t("dashboard.factory.services")}</TabsTrigger>
+            <TabsTrigger value="orders">
+              {t("dashboard.factory.orders")}
+            </TabsTrigger>
+            <TabsTrigger value="inquiries">
+              {t("dashboard.factory.inquiries")}
+            </TabsTrigger>
+            <TabsTrigger value="products">
+              {t("dashboard.factory.products")}
+            </TabsTrigger>
+            <TabsTrigger value="services">
+              {t("dashboard.factory.services")}
+            </TabsTrigger>
           </TabsList>
 
           {/* Orders Tab */}
@@ -184,9 +215,14 @@ export default function FactoryDashboard() {
                           <div className="flex flex-col items-end gap-2">
                             <Badge>{inquiry.status}</Badge>
                             {inquiry.shippingMethod && (
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                              <Badge
+                                variant="outline"
+                                className="bg-blue-50 text-blue-700 border-blue-200"
+                              >
                                 <Truck className="w-3 h-3 mr-1" />
-                                {t(`importRequest.form.shippingMethodOptions.${inquiry.shippingMethod}`)}
+                                {t(
+                                  `importRequest.form.shippingMethodOptions.${inquiry.shippingMethod}`
+                                )}
                               </Badge>
                             )}
                           </div>
@@ -195,9 +231,12 @@ export default function FactoryDashboard() {
                           {inquiry.shippingCostEstimate ? (
                             <div className="text-sm font-semibold text-green-600 flex items-center">
                               <DollarSign className="w-4 h-4 mr-1" />
-                              {t("importRequest.form.shippingCostEstimate")}: ${(inquiry.shippingCostEstimate / 100).toFixed(2)}
+                              {t("importRequest.form.shippingCostEstimate")}: $
+                              {(inquiry.shippingCostEstimate / 100).toFixed(2)}
                             </div>
-                          ) : <div></div>}
+                          ) : (
+                            <div></div>
+                          )}
                           <Button variant="outline" size="sm">
                             <MessageSquare className="w-4 h-4 mr-2" />
                             {t("dashboard.factory.respond")}
@@ -230,21 +269,37 @@ export default function FactoryDashboard() {
                 {products && (products as any[]).length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {(products as any[]).map((product: any) => {
-                      const images = product.imageUrls ? JSON.parse(product.imageUrls) : [];
+                      const images = product.imageUrls
+                        ? JSON.parse(product.imageUrls)
+                        : [];
                       return (
-                        <div key={product.id} className="border rounded-lg overflow-hidden">
+                        <div
+                          key={product.id}
+                          className="border rounded-lg overflow-hidden"
+                        >
                           <div className="w-full h-32 bg-gray-100">
                             {images.length > 0 && (
-                              <img src={images[0]} alt={product.name} className="w-full h-full object-cover" />
+                              <img
+                                src={images[0]}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                              />
                             )}
                           </div>
                           <div className="p-3">
-                            <h3 className="font-medium line-clamp-1">{product.name}</h3>
+                            <h3 className="font-medium line-clamp-1">
+                              {product.name}
+                            </h3>
                             <p className="text-lg font-bold text-blue-600 mt-2">
                               ${(product.basePrice / 100).toFixed(2)}
                             </p>
-                            <Badge variant={product.active ? "default" : "secondary"} className="mt-2">
-                              {product.active ? t("common.active") : t("common.inactive")}
+                            <Badge
+                              variant={product.active ? "default" : "secondary"}
+                              className="mt-2"
+                            >
+                              {product.active
+                                ? t("common.active")
+                                : t("common.inactive")}
                             </Badge>
                           </div>
                         </div>
@@ -273,21 +328,37 @@ export default function FactoryDashboard() {
                 {services && (services as any[]).length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {(services as any[]).map((service: any) => {
-                      const images = service.imageUrls ? JSON.parse(service.imageUrls) : [];
+                      const images = service.imageUrls
+                        ? JSON.parse(service.imageUrls)
+                        : [];
                       return (
-                        <div key={service.id} className="border rounded-lg overflow-hidden">
+                        <div
+                          key={service.id}
+                          className="border rounded-lg overflow-hidden"
+                        >
                           <div className="w-full h-32 bg-gray-100">
                             {images.length > 0 && (
-                              <img src={images[0]} alt={service.name} className="w-full h-full object-cover" />
+                              <img
+                                src={images[0]}
+                                alt={service.name}
+                                className="w-full h-full object-cover"
+                              />
                             )}
                           </div>
                           <div className="p-3">
-                            <h3 className="font-medium line-clamp-1">{service.name}</h3>
+                            <h3 className="font-medium line-clamp-1">
+                              {service.name}
+                            </h3>
                             <p className="text-lg font-bold text-purple-600 mt-2">
                               ${(service.basePrice / 100).toFixed(2)}
                             </p>
-                            <Badge variant={service.active ? "default" : "secondary"} className="mt-2">
-                              {service.active ? t("common.active") : t("common.inactive")}
+                            <Badge
+                              variant={service.active ? "default" : "secondary"}
+                              className="mt-2"
+                            >
+                              {service.active
+                                ? t("common.active")
+                                : t("common.inactive")}
                             </Badge>
                           </div>
                         </div>

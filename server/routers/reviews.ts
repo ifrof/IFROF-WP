@@ -153,8 +153,12 @@ export const reviewsRouter = router({
         };
       }
 
-      const totalRating = allReviews.reduce((sum: number, r: any) => sum + r.rating, 0);
-      const averageRating = Math.round((totalRating / allReviews.length) * 10) / 10;
+      const totalRating = allReviews.reduce(
+        (sum: number, r: any) => sum + r.rating,
+        0
+      );
+      const averageRating =
+        Math.round((totalRating / allReviews.length) * 10) / 10;
 
       return {
         averageRating,
@@ -204,10 +208,7 @@ export const reviewsRouter = router({
       if (input.images !== undefined) updateData.images = input.images;
       updateData.updatedAt = new Date();
 
-      await db
-        .update(reviews)
-        .set(updateData)
-        .where(eq(reviews.id, input.id));
+      await db.update(reviews).set(updateData).where(eq(reviews.id, input.id));
 
       // Update factory rating if rating changed
       if (input.rating !== undefined) {
@@ -295,8 +296,12 @@ export const reviewsRouter = router({
         return { rating: 0, count: 0 };
       }
 
-      const totalRating = allReviews.reduce((sum: number, r: any) => sum + r.rating, 0);
-      const averageRating = Math.round((totalRating / allReviews.length) * 10) / 10;
+      const totalRating = allReviews.reduce(
+        (sum: number, r: any) => sum + r.rating,
+        0
+      );
+      const averageRating =
+        Math.round((totalRating / allReviews.length) * 10) / 10;
 
       return {
         rating: averageRating,
@@ -313,8 +318,12 @@ async function updateFactoryRating(db: any, factoryId: number) {
     .where(eq(reviews.factoryId, factoryId));
 
   if (allReviews && allReviews.length > 0) {
-    const totalRating = allReviews.reduce((sum: number, r: any) => sum + r.rating, 0);
-    const averageRating = Math.round((totalRating / allReviews.length) * 10) / 10;
+    const totalRating = allReviews.reduce(
+      (sum: number, r: any) => sum + r.rating,
+      0
+    );
+    const averageRating =
+      Math.round((totalRating / allReviews.length) * 10) / 10;
 
     await db
       .update(factories)

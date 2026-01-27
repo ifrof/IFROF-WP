@@ -1,101 +1,127 @@
-import { useState } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { CheckCircle, AlertCircle, Search, Loader2, ArrowRight, ArrowLeft, ShieldCheck, Globe, Factory, XCircle, TrendingDown } from 'lucide-react';
-import { trpc } from '@/lib/trpc';
-import { Link } from 'wouter';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  CheckCircle,
+  AlertCircle,
+  Search,
+  Loader2,
+  ArrowRight,
+  ArrowLeft,
+  ShieldCheck,
+  Globe,
+  Factory,
+  XCircle,
+  TrendingDown,
+} from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { Link } from "wouter";
+import { Badge } from "@/components/ui/badge";
 
 const pageTranslations = {
   ar: {
-    back: 'العودة',
-    manufacturers: 'المصانع',
-    importRequest: 'طلب استيراد',
-    poweredByAI: 'Direct Factory Import - تجاوز الوسطاء',
-    title: 'ابحث عن المصنع الحقيقي (تجاوز الوسطاء)',
-    subtitle: 'لا وسيط يسحب 40% من أرباحك، ولا شركة تجارية تزعم أنها مصنع. نكشف لك الحقيقة في ثوانٍ.',
-    productOrFactory: 'اسم المنتج أو المصنع',
-    productPlaceholder: 'مثال: مصنع أثاث مكتبي في فوشان...',
-    category: 'الفئة الصناعية',
-    categoryPlaceholder: 'إلكترونيات، ملابس...',
-    searching: 'جاري كشف الوسطاء والتحقق...',
-    startVerification: 'بدء البحث عن المصنع الحقيقي الآن',
-    analyzingData: 'جاري تحليل البيانات الحية',
-    analyzingDesc: 'نقوم الآن بالبحث في السجلات التجارية الصينية لكشف الشركات التجارية الوهمية والوصول للمصنع الأم...',
-    resultsTitle: 'نتائج التحقق والتحليل المباشر',
-    results: 'نتائج',
-    verifiedSource: 'مصدر موثق',
-    directFactory: 'مصنع مباشر (بدون عمولات)',
-    tradingCompany: 'شركة تجارية (وسيط - احذر العمولات)',
-    confidence: 'نسبة اليقين',
-    aiAnalysis: 'تحليل البيانات العميق',
-    expertRecommendations: 'توصيات الخبراء لتوفير المال',
-    noResults: 'لا توجد نتائج مطابقة',
-    noResultsDesc: 'حاول تغيير كلمات البحث للوصول إلى قاعدة بيانات المصانع الحقيقية.',
-    comprehensiveSearch: 'لا للوسطاء',
-    comprehensiveSearchDesc: 'نحن نقتل الوساطة لنضمن لك السعر الأصلي من خط الإنتاج.',
-    accurateVerification: 'كشف الخداع',
-    accurateVerificationDesc: 'نكشف الشركات التي تدعي أنها مصانع وهي مجرد مكاتب تجارية تسحب أرباحك.',
-    directFactories: 'وفّر 40%',
-    directFactoriesDesc: 'الوصول للمصنع الحقيقي يعني توفير مبالغ ضخمة كانت تذهب كعمولات مخفية.',
-    searchError: 'حدث خطأ أثناء البحث. يرجى المحاولة مرة أخرى.',
+    back: "العودة",
+    manufacturers: "المصانع",
+    importRequest: "طلب استيراد",
+    poweredByAI: "Direct Factory Import - تجاوز الوسطاء",
+    title: "ابحث عن المصنع الحقيقي (تجاوز الوسطاء)",
+    subtitle:
+      "لا وسيط يسحب 40% من أرباحك، ولا شركة تجارية تزعم أنها مصنع. نكشف لك الحقيقة في ثوانٍ.",
+    productOrFactory: "اسم المنتج أو المصنع",
+    productPlaceholder: "مثال: مصنع أثاث مكتبي في فوشان...",
+    category: "الفئة الصناعية",
+    categoryPlaceholder: "إلكترونيات، ملابس...",
+    searching: "جاري كشف الوسطاء والتحقق...",
+    startVerification: "بدء البحث عن المصنع الحقيقي الآن",
+    analyzingData: "جاري تحليل البيانات الحية",
+    analyzingDesc:
+      "نقوم الآن بالبحث في السجلات التجارية الصينية لكشف الشركات التجارية الوهمية والوصول للمصنع الأم...",
+    resultsTitle: "نتائج التحقق والتحليل المباشر",
+    results: "نتائج",
+    verifiedSource: "مصدر موثق",
+    directFactory: "مصنع مباشر (بدون عمولات)",
+    tradingCompany: "شركة تجارية (وسيط - احذر العمولات)",
+    confidence: "نسبة اليقين",
+    aiAnalysis: "تحليل البيانات العميق",
+    expertRecommendations: "توصيات الخبراء لتوفير المال",
+    noResults: "لا توجد نتائج مطابقة",
+    noResultsDesc:
+      "حاول تغيير كلمات البحث للوصول إلى قاعدة بيانات المصانع الحقيقية.",
+    comprehensiveSearch: "لا للوسطاء",
+    comprehensiveSearchDesc:
+      "نحن نقتل الوساطة لنضمن لك السعر الأصلي من خط الإنتاج.",
+    accurateVerification: "كشف الخداع",
+    accurateVerificationDesc:
+      "نكشف الشركات التي تدعي أنها مصانع وهي مجرد مكاتب تجارية تسحب أرباحك.",
+    directFactories: "وفّر 40%",
+    directFactoriesDesc:
+      "الوصول للمصنع الحقيقي يعني توفير مبالغ ضخمة كانت تذهب كعمولات مخفية.",
+    searchError: "حدث خطأ أثناء البحث. يرجى المحاولة مرة أخرى.",
   },
   en: {
-    back: 'Back',
-    manufacturers: 'Manufacturers',
-    importRequest: 'Import Request',
-    poweredByAI: 'Direct Factory Import - No More Commissions',
-    title: 'Find Real Factory (Direct Factory Import)',
-    subtitle: 'No 40% middleman cuts. No trading companies pretending to be factories. We reveal the truth in seconds.',
-    productOrFactory: 'Product or Factory Name',
-    productPlaceholder: 'Example: Office furniture factory in Foshan...',
-    category: 'Industrial Category',
-    categoryPlaceholder: 'Electronics, Apparel...',
-    searching: 'Exposing Middlemen & Verifying...',
-    startVerification: 'Find Real Factory Now',
-    analyzingData: 'Analyzing Live Data',
-    analyzingDesc: 'Searching Chinese business records to expose fake trading companies and reach the parent factory...',
-    resultsTitle: 'Direct Verification Results',
-    results: 'Results',
-    verifiedSource: 'Verified Source',
-    directFactory: 'Direct Factory (Zero Commission)',
-    tradingCompany: 'Trading Company (Middleman - Watch Out)',
-    confidence: 'Certainty Rate',
-    aiAnalysis: 'Deep Data Analysis',
-    expertRecommendations: 'Expert Money-Saving Tips',
-    noResults: 'No Matching Results',
-    noResultsDesc: 'Try different keywords to access our real factory database.',
-    comprehensiveSearch: 'Direct Factory Import',
-    comprehensiveSearchDesc: 'We eliminate intermediaries to guarantee original production prices.',
-    accurateVerification: 'Expose Deception',
-    accurateVerificationDesc: 'We detect companies claiming to be factories when they are just trading offices.',
-    directFactories: 'Save 40%+',
-    directFactoriesDesc: 'Reaching the real factory means saving massive amounts lost in hidden commissions.',
-    searchError: 'An error occurred during search. Please try again.',
-  }
+    back: "Back",
+    manufacturers: "Manufacturers",
+    importRequest: "Import Request",
+    poweredByAI: "Direct Factory Import - No More Commissions",
+    title: "Find Real Factory (Direct Factory Import)",
+    subtitle:
+      "No 40% middleman cuts. No trading companies pretending to be factories. We reveal the truth in seconds.",
+    productOrFactory: "Product or Factory Name",
+    productPlaceholder: "Example: Office furniture factory in Foshan...",
+    category: "Industrial Category",
+    categoryPlaceholder: "Electronics, Apparel...",
+    searching: "Exposing Middlemen & Verifying...",
+    startVerification: "Find Real Factory Now",
+    analyzingData: "Analyzing Live Data",
+    analyzingDesc:
+      "Searching Chinese business records to expose fake trading companies and reach the parent factory...",
+    resultsTitle: "Direct Verification Results",
+    results: "Results",
+    verifiedSource: "Verified Source",
+    directFactory: "Direct Factory (Zero Commission)",
+    tradingCompany: "Trading Company (Middleman - Watch Out)",
+    confidence: "Certainty Rate",
+    aiAnalysis: "Deep Data Analysis",
+    expertRecommendations: "Expert Money-Saving Tips",
+    noResults: "No Matching Results",
+    noResultsDesc:
+      "Try different keywords to access our real factory database.",
+    comprehensiveSearch: "Direct Factory Import",
+    comprehensiveSearchDesc:
+      "We eliminate intermediaries to guarantee original production prices.",
+    accurateVerification: "Expose Deception",
+    accurateVerificationDesc:
+      "We detect companies claiming to be factories when they are just trading offices.",
+    directFactories: "Save 40%+",
+    directFactoriesDesc:
+      "Reaching the real factory means saving massive amounts lost in hidden commissions.",
+    searchError: "An error occurred during search. Please try again.",
+  },
 };
 
 export default function AISearch() {
   const { language, dir } = useLanguage();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [category, setCategory] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [category, setCategory] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const t = pageTranslations[language as keyof typeof pageTranslations] || pageTranslations.en;
+  const t =
+    pageTranslations[language as keyof typeof pageTranslations] ||
+    pageTranslations.en;
 
   const searchMutation = trpc.aiAgent.searchFactories.useMutation({
-    onSuccess: (data) => {
+    onSuccess: data => {
       setSearchResults(data.results || []);
       setRecommendations(data.recommendations || []);
       setIsSearching(false);
       setError(null);
     },
-    onError: (error) => {
+    onError: error => {
       console.error("Search API Error:", error);
       setIsSearching(false);
       setError(t.searchError);
@@ -109,15 +135,15 @@ export default function AISearch() {
     setIsSearching(true);
     setSearchResults([]);
     setError(null);
-    
+
     searchMutation.mutate({
       query: searchQuery,
-      language: language as 'ar' | 'en' | 'zh',
+      language: language as "ar" | "en" | "zh",
       category: category || undefined,
     });
   };
 
-  const BackArrow = language === 'ar' ? ArrowRight : ArrowLeft;
+  const BackArrow = language === "ar" ? ArrowRight : ArrowLeft;
 
   return (
     <div className="min-h-screen bg-gray-50" dir={dir}>
@@ -126,7 +152,10 @@ export default function AISearch() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               <Link href="/">
-                <Button variant="ghost" className="flex items-center gap-2 text-gray-600 hover:text-[#1e3a5f]">
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-gray-600 hover:text-[#1e3a5f]"
+                >
                   <BackArrow className="w-4 h-4" />
                   {t.back}
                 </Button>
@@ -165,9 +194,7 @@ export default function AISearch() {
           <Badge className="mb-4 bg-red-600 hover:bg-red-700 text-white border-none px-4 py-1 animate-pulse">
             {t.poweredByAI}
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            {t.title}
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">{t.title}</h1>
           <p className="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed font-medium">
             {t.subtitle}
           </p>
@@ -187,7 +214,7 @@ export default function AISearch() {
                   <Input
                     placeholder={t.productPlaceholder}
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     className="h-14 border-gray-200 focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/20 text-lg rounded-xl"
                   />
                 </div>
@@ -199,7 +226,7 @@ export default function AISearch() {
                   <Input
                     placeholder={t.categoryPlaceholder}
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    onChange={e => setCategory(e.target.value)}
                     className="h-14 border-gray-200 focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/20 text-lg rounded-xl"
                   />
                 </div>
@@ -233,8 +260,12 @@ export default function AISearch() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-50 mb-6">
                 <XCircle className="w-8 h-8 text-red-600" />
               </div>
-              <h3 className="text-xl font-bold mb-3">{t.comprehensiveSearch}</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">{t.comprehensiveSearchDesc}</p>
+              <h3 className="text-xl font-bold mb-3">
+                {t.comprehensiveSearch}
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {t.comprehensiveSearchDesc}
+              </p>
             </CardContent>
           </Card>
           <Card className="border-none shadow-sm bg-white hover:shadow-md transition-shadow">
@@ -242,8 +273,12 @@ export default function AISearch() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-orange-50 mb-6">
                 <Search className="w-8 h-8 text-orange-600" />
               </div>
-              <h3 className="text-xl font-bold mb-3">{t.accurateVerification}</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">{t.accurateVerificationDesc}</p>
+              <h3 className="text-xl font-bold mb-3">
+                {t.accurateVerification}
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {t.accurateVerificationDesc}
+              </p>
             </CardContent>
           </Card>
           <Card className="border-none shadow-sm bg-white hover:shadow-md transition-shadow">
@@ -252,7 +287,9 @@ export default function AISearch() {
                 <TrendingDown className="w-8 h-8 text-green-600" />
               </div>
               <h3 className="text-xl font-bold mb-3">{t.directFactories}</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">{t.directFactoriesDesc}</p>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {t.directFactoriesDesc}
+              </p>
             </CardContent>
           </Card>
         </div>

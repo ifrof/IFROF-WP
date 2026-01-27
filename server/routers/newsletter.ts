@@ -9,14 +9,14 @@ export const newsletterRouter = router({
     .input(z.object({ email: z.string().email() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
-      
+
       // Check if already exists in a real scenario
       // For now, we'll log it and return success
       console.log(`[Newsletter] New subscription request: ${input.email}`);
-      
+
       // In a full implementation, we would insert into a newsletter table
       // await db.insert(schema.newsletterSubscriptions).values({ email: input.email });
-      
+
       return { success: true, message: "Subscribed successfully" };
     }),
 });

@@ -63,7 +63,7 @@ export async function sendOrderConfirmationEmail(
   try {
     const itemsHtml = data.items
       .map(
-        (item) =>
+        item =>
           `
       <tr>
         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.productName}</td>
@@ -183,7 +183,7 @@ Order Date: ${data.orderDate.toLocaleDateString()}
 Customer: ${data.buyerName}
 
 Order Items:
-${data.items.map((item) => `- ${item.productName} x${item.quantity} @ $${(item.price / 100).toFixed(2)} = $${((item.price * item.quantity) / 100).toFixed(2)}`).join("\n")}
+${data.items.map(item => `- ${item.productName} x${item.quantity} @ $${(item.price / 100).toFixed(2)} = $${((item.price * item.quantity) / 100).toFixed(2)}`).join("\n")}
 
 Order Summary:
 Subtotal: $${(data.subtotal / 100).toFixed(2)}
@@ -209,10 +209,15 @@ Your order has been received and is being processed. You will receive a shipping
       html: htmlContent,
     });
 
-    console.log(`[Email Service] Order confirmation sent to ${data.buyerEmail}`);
+    console.log(
+      `[Email Service] Order confirmation sent to ${data.buyerEmail}`
+    );
     return true;
   } catch (error) {
-    console.error("[Email Service] Failed to send order confirmation email:", error);
+    console.error(
+      "[Email Service] Failed to send order confirmation email:",
+      error
+    );
     return false;
   }
 }
@@ -271,19 +276,28 @@ export async function sendPaymentFailedEmail(
       html: htmlContent,
     });
 
-    console.log(`[Email Service] Payment failed notification sent to ${buyerEmail}`);
+    console.log(
+      `[Email Service] Payment failed notification sent to ${buyerEmail}`
+    );
     return true;
   } catch (error) {
-    console.error("[Email Service] Failed to send payment failed email:", error);
+    console.error(
+      "[Email Service] Failed to send payment failed email:",
+      error
+    );
     return false;
   }
 }
 
-export async function sendVerificationEmail(to: string, name: string, token: string): Promise<boolean> {
+export async function sendVerificationEmail(
+  to: string,
+  name: string,
+  token: string
+): Promise<boolean> {
   const transporter = getTransporter();
   if (!transporter) return false;
 
-  const verificationUrl = `${process.env.PUBLIC_URL || 'https://ifrof.com'}/verify-email/${token}`;
+  const verificationUrl = `${process.env.PUBLIC_URL || "https://ifrof.com"}/verify-email/${token}`;
   const htmlContent = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px;">
       <h2 style="color: #2563eb;">Welcome to IFROF!</h2>
@@ -316,11 +330,15 @@ export async function sendVerificationEmail(to: string, name: string, token: str
   }
 }
 
-export async function sendPasswordResetEmail(to: string, name: string, token: string): Promise<boolean> {
+export async function sendPasswordResetEmail(
+  to: string,
+  name: string,
+  token: string
+): Promise<boolean> {
   const transporter = getTransporter();
   if (!transporter) return false;
 
-  const resetUrl = `${process.env.PUBLIC_URL || 'https://ifrof.com'}/reset-password/${token}`;
+  const resetUrl = `${process.env.PUBLIC_URL || "https://ifrof.com"}/reset-password/${token}`;
   const htmlContent = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px;">
       <h2 style="color: #2563eb;">Password Reset Request</h2>
@@ -349,7 +367,10 @@ export async function sendPasswordResetEmail(to: string, name: string, token: st
     });
     return true;
   } catch (error) {
-    console.error("[Email Service] Failed to send password reset email:", error);
+    console.error(
+      "[Email Service] Failed to send password reset email:",
+      error
+    );
     return false;
   }
 }
@@ -364,7 +385,7 @@ export async function sendImportRequestUpdateEmail(
   const transporter = getTransporter();
   if (!transporter) return false;
 
-  const requestUrl = `${process.env.PUBLIC_URL || 'https://ifrof.com'}/dashboard/requests/${requestId}`;
+  const requestUrl = `${process.env.PUBLIC_URL || "https://ifrof.com"}/dashboard/requests/${requestId}`;
   const htmlContent = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px;">
       <h2 style="color: #2563eb;">Import Request Update</h2>
@@ -391,7 +412,10 @@ export async function sendImportRequestUpdateEmail(
     });
     return true;
   } catch (error) {
-    console.error("[Email Service] Failed to send import request update email:", error);
+    console.error(
+      "[Email Service] Failed to send import request update email:",
+      error
+    );
     return false;
   }
 }

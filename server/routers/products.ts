@@ -112,7 +112,9 @@ export const productsRouter = router({
           .where(like(factories.location, `%${input.location}%`));
 
         const factoryIds = matchingFactories.map((f: any) => f.id);
-        const filtered = allProducts.filter((p: any) => factoryIds.includes(p.factoryId));
+        const filtered = allProducts.filter((p: any) =>
+          factoryIds.includes(p.factoryId)
+        );
 
         return filtered.slice(pageOffset, pageOffset + pageLimit);
       }
@@ -146,7 +148,9 @@ export const productsRouter = router({
       return db
         .select()
         .from(products)
-        .where(and(eq(products.factoryId, input.factoryId), eq(products.active, 1)))
+        .where(
+          and(eq(products.factoryId, input.factoryId), eq(products.active, 1))
+        )
         .orderBy(desc(products.createdAt))
         .limit(pageLimit)
         .offset(pageOffset);
@@ -292,16 +296,22 @@ export const productsRouter = router({
       if (input.nameAr !== undefined) updateData.nameAr = input.nameAr;
       if (input.nameEn !== undefined) updateData.nameEn = input.nameEn;
       if (input.nameZh !== undefined) updateData.nameZh = input.nameZh;
-      if (input.descriptionAr !== undefined) updateData.descriptionAr = input.descriptionAr;
-      if (input.descriptionEn !== undefined) updateData.descriptionEn = input.descriptionEn;
-      if (input.descriptionZh !== undefined) updateData.descriptionZh = input.descriptionZh;
+      if (input.descriptionAr !== undefined)
+        updateData.descriptionAr = input.descriptionAr;
+      if (input.descriptionEn !== undefined)
+        updateData.descriptionEn = input.descriptionEn;
+      if (input.descriptionZh !== undefined)
+        updateData.descriptionZh = input.descriptionZh;
       if (input.category !== undefined) updateData.category = input.category;
       if (input.tags !== undefined) updateData.tags = input.tags;
-      if (input.specifications !== undefined) updateData.specifications = input.specifications;
+      if (input.specifications !== undefined)
+        updateData.specifications = input.specifications;
       if (input.minPrice !== undefined) updateData.minPrice = input.minPrice;
       if (input.maxPrice !== undefined) updateData.maxPrice = input.maxPrice;
-      if (input.pricingTiers !== undefined) updateData.pricingTiers = input.pricingTiers;
-      if (input.minimumOrderQuantity !== undefined) updateData.minimumOrderQuantity = input.minimumOrderQuantity;
+      if (input.pricingTiers !== undefined)
+        updateData.pricingTiers = input.pricingTiers;
+      if (input.minimumOrderQuantity !== undefined)
+        updateData.minimumOrderQuantity = input.minimumOrderQuantity;
       if (input.imageUrls !== undefined) updateData.imageUrls = input.imageUrls;
       if (input.featured !== undefined) updateData.featured = input.featured;
       if (input.active !== undefined) updateData.active = input.active;
@@ -375,7 +385,10 @@ export const productsRouter = router({
     const db = await getDb();
     if (!db) return [];
 
-    const allProducts = await db.select().from(products).where(eq(products.active, 1));
+    const allProducts = await db
+      .select()
+      .from(products)
+      .where(eq(products.active, 1));
     const categories = new Set<string>();
 
     allProducts.forEach((p: any) => {
@@ -385,5 +398,3 @@ export const productsRouter = router({
     return Array.from(categories);
   }),
 });
-
-

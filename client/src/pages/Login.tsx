@@ -2,7 +2,14 @@ import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
 import { useLocation, Link } from "wouter";
@@ -17,7 +24,7 @@ export default function Login() {
   const [error, setError] = useState("");
 
   const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: (data) => {
+    onSuccess: data => {
       if (data.user.role === "buyer") {
         setLocation("/dashboard/buyer");
       } else if (data.user.role === "factory") {
@@ -27,9 +34,9 @@ export default function Login() {
       }
       window.location.reload(); // Refresh to update auth state
     },
-    onError: (err) => {
+    onError: err => {
       setError(err.message);
-    }
+    },
   });
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -41,9 +48,14 @@ export default function Login() {
   const isLoading = loginMutation.isPending;
 
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}>
+    <div
+      className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}
+    >
       <div className="mb-8">
-        <Link to="/" className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium">
+        <Link
+          to="/"
+          className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium"
+        >
           <Home className={`h-5 w-5 ${language === "ar" ? "ml-2" : "mr-2"}`} />
           {language === "ar" ? "العودة للرئيسية" : "Back to Home"}
         </Link>
@@ -60,7 +72,9 @@ export default function Login() {
             {language === "ar" ? "تسجيل الدخول" : "Login to IFROF"}
           </CardTitle>
           <CardDescription className="text-gray-500">
-            {language === "ar" ? "أدخل بياناتك للوصول إلى حسابك" : "Enter your credentials to access your account"}
+            {language === "ar"
+              ? "أدخل بياناتك للوصول إلى حسابك"
+              : "Enter your credentials to access your account"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -81,7 +95,7 @@ export default function Login() {
                   type="email"
                   placeholder="name@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   required
                   className="pl-10 h-11 border-gray-300 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
                   dir="ltr"
@@ -94,7 +108,11 @@ export default function Login() {
                 <label className="text-sm font-semibold text-gray-700">
                   {language === "ar" ? "كلمة المرور" : "Password"}
                 </label>
-                <Link to="/forgot-password" title="Forgot Password" className="text-xs text-blue-600 hover:underline">
+                <Link
+                  to="/forgot-password"
+                  title="Forgot Password"
+                  className="text-xs text-blue-600 hover:underline"
+                >
                   {language === "ar" ? "نسيت كلمة المرور؟" : "Forgot password?"}
                 </Link>
               </div>
@@ -104,7 +122,7 @@ export default function Login() {
                   type="password"
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => setPassword(e.target.value)}
                   required
                   className="pl-10 h-11 border-gray-300 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
                   dir="ltr"
@@ -113,10 +131,10 @@ export default function Login() {
             </div>
 
             <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="remember" 
-                checked={rememberMe} 
-                onCheckedChange={(checked) => setRememberMe(checked as boolean)} 
+              <Checkbox
+                id="remember"
+                checked={rememberMe}
+                onCheckedChange={checked => setRememberMe(checked as boolean)}
               />
               <label
                 htmlFor="remember"
@@ -148,7 +166,11 @@ export default function Login() {
         <CardFooter className="flex flex-col space-y-4 border-t border-gray-100 pt-6">
           <div className="text-sm text-center text-gray-500">
             {language === "ar" ? "ليس لديك حساب؟" : "Don't have an account?"}{" "}
-            <Link to="/register" title="Register" className="text-blue-600 hover:underline font-bold">
+            <Link
+              to="/register"
+              title="Register"
+              className="text-blue-600 hover:underline font-bold"
+            >
               {language === "ar" ? "سجل الآن" : "Register now"}
             </Link>
           </div>

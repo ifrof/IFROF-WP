@@ -14,7 +14,7 @@ const JSON_DB_PATH = path.join(process.cwd(), "local_db.json");
 
 function readJsonDb() {
   if (fs.existsSync(JSON_DB_PATH)) {
-    return JSON.parse(fs.readFileSync(JSON_DB_PATH, 'utf-8'));
+    return JSON.parse(fs.readFileSync(JSON_DB_PATH, "utf-8"));
   }
   return { blogPosts: [] };
 }
@@ -69,88 +69,94 @@ export const blogRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const lang = input.lang || 'ar';
+      const lang = input.lang || "ar";
       const pageNum = Math.max(1, input.page);
       const pageLimit = Math.min(100, Math.max(1, input.limit));
       const pageOffset = (pageNum - 1) * pageLimit;
-      const cacheKey = `blog:list:${lang}:${input.category || 'all'}:${input.search || 'none'}:${pageNum}`;
-      
-      return getCached(cacheKey, async () => {
-        const db = await getDb();
-        
-        // Try MySQL first
-        if (db && !db.isJsonMode) {
-          try {
-            const conditions = [eq(blogPosts.published, 1)];
-            
-            // Language filtering
-            if ((blogPosts as any).lang) {
-              conditions.push(eq((blogPosts as any).lang, lang));
+      const cacheKey = `blog:list:${lang}:${input.category || "all"}:${input.search || "none"}:${pageNum}`;
+
+      return getCached(
+        cacheKey,
+        async () => {
+          const db = await getDb();
+
+          // Try MySQL first
+          if (db && !db.isJsonMode) {
+            try {
+              const conditions = [eq(blogPosts.published, 1)];
+
+              // Language filtering
+              if ((blogPosts as any).lang) {
+                conditions.push(eq((blogPosts as any).lang, lang));
+              }
+
+              if (input.search) {
+                conditions.push(
+                  or(
+                    like(blogPosts.title, `%${input.search}%`),
+                    like((blogPosts as any).titleAr, `%${input.search}%`),
+                    like((blogPosts as any).titleEn, `%${input.search}%`)
+                  )
+                );
+              }
+              if (input.category) {
+                conditions.push(eq(blogPosts.category, input.category));
+              }
+
+              return await db
+                .select()
+                .from(blogPosts)
+                .where(and(...conditions))
+                .orderBy(desc(blogPosts.createdAt))
+                .limit(pageLimit)
+                .offset(pageOffset);
+            } catch (e) {
+              console.warn("MySQL blog list failed, falling back to JSON", e);
             }
-            
-            if (input.search) {
-              conditions.push(
-                or(
-                  like(blogPosts.title, `%${input.search}%`),
-                  like((blogPosts as any).titleAr, `%${input.search}%`),
-                  like((blogPosts as any).titleEn, `%${input.search}%`)
-                )
-              );
-            }
-            if (input.category) {
-              conditions.push(eq(blogPosts.category, input.category));
-            }
-            
-            return await db
-              .select()
-              .from(blogPosts)
-              .where(and(...conditions))
-              .orderBy(desc(blogPosts.createdAt))
-              .limit(pageLimit)
-              .offset(pageOffset);
-          } catch (e) {
-            console.warn("MySQL blog list failed, falling back to JSON", e);
           }
-        }
 
-        // Fallback to JSON
-        const data = readJsonDb();
-        const isAr = lang === 'ar';
-        
-        let posts = (data.blogPosts || []).filter((p: any) => {
-          const isPublished = p.published === 1;
-          const matchesLang = p.lang === lang || (!p.lang && isAr);
-          return isPublished && matchesLang;
-        });
-        
-        posts = posts.map((p: any) => ({
-          ...p,
-          title: (isAr && p.titleAr) ? p.titleAr : p.title,
-          excerpt: (isAr && p.excerptAr) ? p.excerptAr : p.excerpt,
-          category: (isAr && p.categoryAr) ? p.categoryAr : p.category,
-        }));
+          // Fallback to JSON
+          const data = readJsonDb();
+          const isAr = lang === "ar";
 
-        if (input.search) {
-          const search = input.search.toLowerCase();
-          posts = posts.filter((p: any) => p.title.toLowerCase().includes(search));
-        }
-        
-        if (input.category) {
-          posts = posts.filter((p: any) => p.category === input.category);
-        }
-        
-        // Apply pagination
-        return posts.slice(pageOffset, pageOffset + pageLimit);
-      }, 600); // 10 minutes cache
+          let posts = (data.blogPosts || []).filter((p: any) => {
+            const isPublished = p.published === 1;
+            const matchesLang = p.lang === lang || (!p.lang && isAr);
+            return isPublished && matchesLang;
+          });
+
+          posts = posts.map((p: any) => ({
+            ...p,
+            title: isAr && p.titleAr ? p.titleAr : p.title,
+            excerpt: isAr && p.excerptAr ? p.excerptAr : p.excerpt,
+            category: isAr && p.categoryAr ? p.categoryAr : p.category,
+          }));
+
+          if (input.search) {
+            const search = input.search.toLowerCase();
+            posts = posts.filter((p: any) =>
+              p.title.toLowerCase().includes(search)
+            );
+          }
+
+          if (input.category) {
+            posts = posts.filter((p: any) => p.category === input.category);
+          }
+
+          // Apply pagination
+          return posts.slice(pageOffset, pageOffset + pageLimit);
+        },
+        600
+      ); // 10 minutes cache
     }),
 
   // Get blog post by slug
   getBySlug: publicProcedure
     .input(z.object({ slug: z.string(), lang: z.string().optional() }))
     .query(async ({ ctx, input }) => {
-      const lang = input.lang || 'ar';
+      const lang = input.lang || "ar";
       const db = await getDb();
-      
+
       // Try MySQL first
       if (db && !db.isJsonMode) {
         try {
@@ -158,20 +164,29 @@ export const blogRouter = router({
             .select()
             .from(blogPosts)
             .where(
-              and(
-                eq(blogPosts.slug, input.slug),
-                eq(blogPosts.published, 1)
-              )
+              and(eq(blogPosts.slug, input.slug), eq(blogPosts.published, 1))
             )
             .limit(1);
           if (posts.length > 0) {
             const post = posts[0];
             return {
               ...post,
-              title: lang === 'ar' && (post as any).titleAr ? (post as any).titleAr : post.title,
-              content: lang === 'ar' && (post as any).contentAr ? (post as any).contentAr : post.content,
-              excerpt: lang === 'ar' && (post as any).excerptAr ? (post as any).excerptAr : post.excerpt,
-              category: lang === 'ar' && (post as any).categoryAr ? (post as any).categoryAr : post.category,
+              title:
+                lang === "ar" && (post as any).titleAr
+                  ? (post as any).titleAr
+                  : post.title,
+              content:
+                lang === "ar" && (post as any).contentAr
+                  ? (post as any).contentAr
+                  : post.content,
+              excerpt:
+                lang === "ar" && (post as any).excerptAr
+                  ? (post as any).excerptAr
+                  : post.excerpt,
+              category:
+                lang === "ar" && (post as any).categoryAr
+                  ? (post as any).categoryAr
+                  : post.category,
             };
           }
         } catch (e) {
@@ -181,15 +196,20 @@ export const blogRouter = router({
 
       // Fallback to JSON
       const data = readJsonDb();
-      const post = (data.blogPosts || []).find((p: any) => p.slug === input.slug && p.published === 1);
+      const post = (data.blogPosts || []).find(
+        (p: any) => p.slug === input.slug && p.published === 1
+      );
       if (!post) return null;
 
       return {
         ...post,
-        title: lang === 'ar' && post.titleAr ? post.titleAr : post.title,
-        content: lang === 'ar' && post.contentAr ? post.contentAr : post.content,
-        excerpt: lang === 'ar' && post.excerptAr ? post.excerptAr : post.excerpt,
-        category: lang === 'ar' && post.categoryAr ? post.categoryAr : post.category,
+        title: lang === "ar" && post.titleAr ? post.titleAr : post.title,
+        content:
+          lang === "ar" && post.contentAr ? post.contentAr : post.content,
+        excerpt:
+          lang === "ar" && post.excerptAr ? post.excerptAr : post.excerpt,
+        category:
+          lang === "ar" && post.categoryAr ? post.categoryAr : post.category,
       };
     }),
 
@@ -198,7 +218,7 @@ export const blogRouter = router({
     .input(createBlogPostSchema)
     .mutation(async ({ input, ctx }) => {
       // Verify admin role
-      if (ctx.user.role !== 'admin') {
+      if (ctx.user.role !== "admin") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only admins can create blog posts",
@@ -236,7 +256,7 @@ export const blogRouter = router({
     .input(updateBlogPostSchema)
     .mutation(async ({ input, ctx }) => {
       // Verify admin role
-      if (ctx.user.role !== 'admin') {
+      if (ctx.user.role !== "admin") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only admins can update blog posts",
@@ -272,8 +292,10 @@ export const blogRouter = router({
       if (input.excerptAr !== undefined) updateData.excerptAr = input.excerptAr;
       if (input.excerptEn !== undefined) updateData.excerptEn = input.excerptEn;
       if (input.category !== undefined) updateData.category = input.category;
-      if (input.categoryAr !== undefined) updateData.categoryAr = input.categoryAr;
-      if (input.categoryEn !== undefined) updateData.categoryEn = input.categoryEn;
+      if (input.categoryAr !== undefined)
+        updateData.categoryAr = input.categoryAr;
+      if (input.categoryEn !== undefined)
+        updateData.categoryEn = input.categoryEn;
       if (input.tags !== undefined) updateData.tags = input.tags;
       if (input.featured !== undefined) updateData.featured = input.featured;
       if (input.published !== undefined) updateData.published = input.published;
@@ -292,7 +314,7 @@ export const blogRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       // Verify admin role
-      if (ctx.user.role !== 'admin') {
+      if (ctx.user.role !== "admin") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only admins can delete blog posts",
@@ -325,9 +347,9 @@ export const blogRouter = router({
   getCategories: publicProcedure
     .input(z.object({ lang: z.string().optional() }))
     .query(async ({ input }) => {
-      const lang = input.lang || 'ar';
+      const lang = input.lang || "ar";
       const db = await getDb();
-      
+
       if (db && !db.isJsonMode) {
         try {
           const posts = await db
@@ -337,7 +359,10 @@ export const blogRouter = router({
 
           const categories = new Set<string>();
           posts.forEach((post: any) => {
-            const category = lang === 'ar' && post.categoryAr ? post.categoryAr : post.category;
+            const category =
+              lang === "ar" && post.categoryAr
+                ? post.categoryAr
+                : post.category;
             if (category) categories.add(category);
           });
 
@@ -352,7 +377,8 @@ export const blogRouter = router({
       const categories = new Set<string>();
       (data.blogPosts || []).forEach((post: any) => {
         if (post.published === 1) {
-          const category = lang === 'ar' && post.categoryAr ? post.categoryAr : post.category;
+          const category =
+            lang === "ar" && post.categoryAr ? post.categoryAr : post.category;
           if (category) categories.add(category);
         }
       });
@@ -362,11 +388,13 @@ export const blogRouter = router({
 
   // Get featured posts
   getFeatured: publicProcedure
-    .input(z.object({ lang: z.string().optional(), limit: z.number().default(5) }))
+    .input(
+      z.object({ lang: z.string().optional(), limit: z.number().default(5) })
+    )
     .query(async ({ input }) => {
-      const lang = input.lang || 'ar';
+      const lang = input.lang || "ar";
       const db = await getDb();
-      
+
       if (db && !db.isJsonMode) {
         try {
           const posts = await db
@@ -378,9 +406,13 @@ export const blogRouter = router({
 
           return posts.map((post: any) => ({
             ...post,
-            title: lang === 'ar' && post.titleAr ? post.titleAr : post.title,
-            excerpt: lang === 'ar' && post.excerptAr ? post.excerptAr : post.excerpt,
-            category: lang === 'ar' && post.categoryAr ? post.categoryAr : post.category,
+            title: lang === "ar" && post.titleAr ? post.titleAr : post.title,
+            excerpt:
+              lang === "ar" && post.excerptAr ? post.excerptAr : post.excerpt,
+            category:
+              lang === "ar" && post.categoryAr
+                ? post.categoryAr
+                : post.category,
           }));
         } catch (e) {
           console.warn("MySQL getFeatured failed, falling back to JSON", e);
@@ -395,9 +427,9 @@ export const blogRouter = router({
 
       return posts.map((p: any) => ({
         ...p,
-        title: lang === 'ar' && p.titleAr ? p.titleAr : p.title,
-        excerpt: lang === 'ar' && p.excerptAr ? p.excerptAr : p.excerpt,
-        category: lang === 'ar' && p.categoryAr ? p.categoryAr : p.category,
+        title: lang === "ar" && p.titleAr ? p.titleAr : p.title,
+        excerpt: lang === "ar" && p.excerptAr ? p.excerptAr : p.excerpt,
+        category: lang === "ar" && p.categoryAr ? p.categoryAr : p.category,
       }));
     }),
 });

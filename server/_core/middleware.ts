@@ -12,7 +12,7 @@ const htmlEscapes: Record<string, string> = {
 };
 
 const escapeHtml = (value: string): string =>
-  value.replace(/[&<>"']/g, (match) => htmlEscapes[match]);
+  value.replace(/[&<>"']/g, match => htmlEscapes[match]);
 
 const sanitizeValue = (value: unknown): unknown => {
   if (typeof value === "string") {
@@ -84,11 +84,7 @@ const contentSecurityPolicy = isDevelopment
           "http://localhost:*",
           "http://127.0.0.1:*",
         ],
-        styleSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          "https://fonts.googleapis.com",
-        ],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: [
           "'self'",
@@ -120,13 +116,11 @@ const contentSecurityPolicy = isDevelopment
     };
 
 const toCspDirective = (directive: string): string =>
-  directive.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`);
+  directive.replace(/[A-Z]/g, match => `-${match.toLowerCase()}`);
 
 const buildCspHeader = (directives: Record<string, string[]>): string =>
   Object.entries(directives)
-    .map(
-      ([key, values]) => `${toCspDirective(key)} ${values.join(" ")}`
-    )
+    .map(([key, values]) => `${toCspDirective(key)} ${values.join(" ")}`)
     .join("; ");
 
 const securityHeadersList: Array<[string, string]> = [

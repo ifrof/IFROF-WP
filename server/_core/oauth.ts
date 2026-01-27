@@ -31,8 +31,15 @@ export function registerOAuthRoutes(app: Express) {
       // Filter for Google only
       const loginMethod = userInfo.loginMethod ?? userInfo.platform;
       if (loginMethod !== "google") {
-        console.warn(`[OAuth] Rejected login attempt from platform: ${loginMethod}`);
-        res.status(403).json({ error: "Only Google authentication is allowed / يسمح فقط بتسجيل الدخول عبر جوجل" });
+        console.warn(
+          `[OAuth] Rejected login attempt from platform: ${loginMethod}`
+        );
+        res
+          .status(403)
+          .json({
+            error:
+              "Only Google authentication is allowed / يسمح فقط بتسجيل الدخول عبر جوجل",
+          });
         return;
       }
 

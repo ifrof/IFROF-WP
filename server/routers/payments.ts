@@ -9,9 +9,13 @@ import { nanoid } from "nanoid";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 if (!stripeSecretKey) {
-  console.warn("WARNING: STRIPE_SECRET_KEY is not set. Payment features will be disabled.");
+  console.warn(
+    "WARNING: STRIPE_SECRET_KEY is not set. Payment features will be disabled."
+  );
 }
-const stripe = new Stripe(stripeSecretKey || "sk_test_dummy_key_for_initialization");
+const stripe = new Stripe(
+  stripeSecretKey || "sk_test_dummy_key_for_initialization"
+);
 
 const createCheckoutSchema = z.object({
   factoryId: z.number(),
@@ -41,24 +45,33 @@ export const paymentsRouter = router({
 
       try {
         const origin = ctx.req.headers.origin || "https://ifrof.com";
-        
+
         // Get quote details
-        const quoteRecords = await db_instance.select().from(quotes).where(eq(quotes.id, input.quoteId));
-        if (quoteRecords.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Quote not found" });
+        const quoteRecords = await db_instance
+          .select()
+          .from(quotes)
+          .where(eq(quotes.id, input.quoteId));
+        if (quoteRecords.length === 0)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Quote not found",
+          });
         const quote = quoteRecords[0];
 
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
-          line_items: [{
-            price_data: {
-              currency: "usd",
-              product_data: {
-                name: `Platform Commission for Quote #${quote.id}`,
+          line_items: [
+            {
+              price_data: {
+                currency: "usd",
+                product_data: {
+                  name: `Platform Commission for Quote #${quote.id}`,
+                },
+                unit_amount: quote.commission,
               },
-              unit_amount: quote.commission,
+              quantity: 1,
             },
-            quantity: 1,
-          }],
+          ],
           mode: "payment",
           customer_email: ctx.user.email || undefined,
           metadata: {
@@ -72,7 +85,10 @@ export const paymentsRouter = router({
         return { checkoutUrl: session.url };
       } catch (error) {
         console.error("Stripe commission checkout error:", error);
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create checkout session" });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create checkout session",
+        });
       }
     }),
 
@@ -83,7 +99,8 @@ export const paymentsRouter = router({
       if (!process.env.STRIPE_SECRET_KEY) {
         throw new TRPCError({
           code: "SERVICE_UNAVAILABLE",
-          message: "Payment system is currently unavailable. Please contact support. / نظام الدفع غير متوفر حالياً، يرجى التواصل مع الدعم.",
+          message:
+            "Payment system is currently unavailable. Please contact support. / نظام الدفع غير متوفر حالياً، يرجى التواصل مع الدعم.",
         });
       }
 
@@ -94,11 +111,14 @@ export const paymentsRouter = router({
         const origin = ctx.req.headers.origin || "https://example.com";
 
         // Calculate total
-        const totalAmount = input.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const totalAmount = input.items.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
 
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
-          line_items: input.items.map((item) => ({
+          line_items: input.items.map(item => ({
             price_data: {
               currency: "usd",
               product_data: {
@@ -132,7 +152,8 @@ export const paymentsRouter = router({
           totalAmount: Math.round(totalAmount * 100), // Store in cents
           status: "pending",
           paymentStatus: "pending",
-          stripePaymentIntentId: session.payment_intent?.toString() || session.id,
+          stripePaymentIntentId:
+            session.payment_intent?.toString() || session.id,
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -177,11 +198,14 @@ export const paymentsRouter = router({
         }
 
         // Get session details from Stripe
-        const session = await stripe.checkout.sessions.retrieve(input.sessionId);
+        const session = await stripe.checkout.sessions.retrieve(
+          input.sessionId
+        );
 
         return {
           ...order,
-          paymentStatus: session.payment_status === "paid" ? "completed" : "pending",
+          paymentStatus:
+            session.payment_status === "paid" ? "completed" : "pending",
           stripeStatus: session.status,
         };
       } catch (error) {
@@ -192,7 +216,9 @@ export const paymentsRouter = router({
 
   // Get user's orders
   getOrders: protectedProcedure
-    .input(z.object({ limit: z.number().default(20), offset: z.number().default(0) }))
+    .input(
+      z.object({ limit: z.number().default(20), offset: z.number().default(0) })
+    )
     .query(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) return [];
@@ -247,7 +273,14 @@ export const paymentsRouter = router({
     .input(
       z.object({
         orderId: z.number(),
-        status: z.enum(["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]),
+        status: z.enum([
+          "pending",
+          "confirmed",
+          "processing",
+          "shipped",
+          "delivered",
+          "cancelled",
+        ]),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -279,7 +312,13 @@ export const paymentsRouter = router({
 
   // Get factory orders
   getFactoryOrders: protectedProcedure
-    .input(z.object({ factoryId: z.number(), limit: z.number().default(20), offset: z.number().default(0) }))
+    .input(
+      z.object({
+        factoryId: z.number(),
+        limit: z.number().default(20),
+        offset: z.number().default(0),
+      })
+    )
     .query(async ({ ctx, input }) => {
       if (ctx.user.role !== "admin" && ctx.user.role !== "factory") {
         throw new TRPCError({

@@ -2,7 +2,7 @@ import { drizzle as drizzleMysql } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import { eq, like, and, desc, or } from "drizzle-orm";
 import * as schema from "../drizzle/schema";
-import { ENV } from './_core/env';
+import { ENV } from "./_core/env";
 import path from "path";
 import fs from "fs";
 
@@ -37,14 +37,14 @@ function initJsonDb() {
     reviews: [],
     cartItems: [],
     sessions: [],
-    buyerProfiles: []
+    buyerProfiles: [],
   };
-  
+
   if (!fs.existsSync(JSON_DB_PATH)) {
     fs.writeFileSync(JSON_DB_PATH, JSON.stringify(defaultDb, null, 2));
   } else {
     try {
-      const existing = JSON.parse(fs.readFileSync(JSON_DB_PATH, 'utf-8'));
+      const existing = JSON.parse(fs.readFileSync(JSON_DB_PATH, "utf-8"));
       const merged = { ...defaultDb, ...existing };
       fs.writeFileSync(JSON_DB_PATH, JSON.stringify(merged, null, 2));
     } catch (e) {
@@ -57,10 +57,10 @@ initJsonDb();
 
 function readJsonDb() {
   try {
-    return JSON.parse(fs.readFileSync(JSON_DB_PATH, 'utf-8'));
+    return JSON.parse(fs.readFileSync(JSON_DB_PATH, "utf-8"));
   } catch (e) {
     initJsonDb();
-    return JSON.parse(fs.readFileSync(JSON_DB_PATH, 'utf-8'));
+    return JSON.parse(fs.readFileSync(JSON_DB_PATH, "utf-8"));
   }
 }
 
@@ -74,11 +74,14 @@ export async function getDb() {
     if (dbUrl) {
       try {
         const connection = await mysql.createConnection(dbUrl);
-        _db = drizzleMysql(connection, { schema, mode: 'default' });
+        _db = drizzleMysql(connection, { schema, mode: "default" });
         isJsonMode = false;
         console.log("[Database] Connected to MySQL");
       } catch (error) {
-        console.warn("[Database] Failed to connect to MySQL, using JSON mode:", error);
+        console.warn(
+          "[Database] Failed to connect to MySQL, using JSON mode:",
+          error
+        );
         isJsonMode = true;
       }
     } else {
@@ -101,7 +104,11 @@ export async function getUserById(id: number): Promise<any> {
   const db = await getDb();
   if (!isJsonMode && db) {
     try {
-      const result = await db.select().from(schema.users).where(eq(schema.users.id, id)).limit(1);
+      const result = await db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.id, id))
+        .limit(1);
       return result[0] || null;
     } catch (e) {
       console.error("[Database] getUserById MySQL error:", e);
@@ -116,7 +123,11 @@ export async function getUserByEmail(email: string): Promise<any> {
   const db = await getDb();
   if (!isJsonMode && db) {
     try {
-      const result = await db.select().from(schema.users).where(eq(schema.users.email, email)).limit(1);
+      const result = await db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.email, email))
+        .limit(1);
       return result[0] || null;
     } catch (e) {
       console.error("[Database] getUserByEmail MySQL error:", e);
@@ -131,7 +142,11 @@ export async function getUserByOpenId(openId: string) {
   const db = await getDb();
   if (!isJsonMode && db) {
     try {
-      const result = await db.select().from(schema.users).where(eq(schema.users.openId, openId)).limit(1);
+      const result = await db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.openId, openId))
+        .limit(1);
       return result[0] || null;
     } catch (e) {
       console.error("[Database] getUserByOpenId MySQL error:", e);
@@ -146,9 +161,14 @@ export async function upsertUser(user: any): Promise<any> {
   const db = await getDb();
   if (!isJsonMode && db) {
     try {
-      const existing = await db.select().from(schema.users).where(eq(schema.users.openId, user.openId)).limit(1);
+      const existing = await db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.openId, user.openId))
+        .limit(1);
       if (existing.length > 0) {
-        await db.update(schema.users)
+        await db
+          .update(schema.users)
           .set({ ...user, lastSignedIn: new Date(), updatedAt: new Date() })
           .where(eq(schema.users.openId, user.openId));
         return { ...existing[0], ...user };
@@ -163,14 +183,16 @@ export async function upsertUser(user: any): Promise<any> {
 
   // JSON fallback
   const dbData = readJsonDb();
-  const existingIndex = dbData.users.findIndex((u: any) => u.email === user.email || u.openId === user.openId);
-  
+  const existingIndex = dbData.users.findIndex(
+    (u: any) => u.email === user.email || u.openId === user.openId
+  );
+
   if (existingIndex >= 0) {
-    const updatedUser = { 
-      ...dbData.users[existingIndex], 
-      ...user, 
+    const updatedUser = {
+      ...dbData.users[existingIndex],
+      ...user,
       lastSignedIn: new Date().toISOString(),
-      updatedAt: new Date().toISOString() 
+      updatedAt: new Date().toISOString(),
     };
     dbData.users[existingIndex] = updatedUser;
     writeJsonDb(dbData);
@@ -181,7 +203,7 @@ export async function upsertUser(user: any): Promise<any> {
       ...user,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      lastSignedIn: new Date().toISOString()
+      lastSignedIn: new Date().toISOString(),
     };
     dbData.users.push(newUser);
     writeJsonDb(dbData);
@@ -211,7 +233,11 @@ export async function getSession(id: string): Promise<any> {
   const db = await getDb();
   if (!isJsonMode && db) {
     try {
-      const result = await db.select().from(schema.sessions).where(eq(schema.sessions.id, id)).limit(1);
+      const result = await db
+        .select()
+        .from(schema.sessions)
+        .where(eq(schema.sessions.id, id))
+        .limit(1);
       return result[0] || null;
     } catch (e) {
       console.error("[Database] getSession MySQL error:", e);

@@ -38,7 +38,7 @@ export default function Cart() {
   const utils = trpc.useUtils();
 
   const { data: cartItems, isLoading } = trpc.cart.getItems.useQuery();
-  
+
   const updateQuantityMutation = trpc.cart.updateQuantity.useMutation({
     onSuccess: () => {
       utils.cart.getItems.invalidate();
@@ -76,10 +76,13 @@ export default function Cart() {
 
   const calculateTotal = () => {
     if (!cartItems) return 0;
-    return (cartItems as CartItemData[]).reduce((total: number, item: CartItemData) => {
-      const price = item.product?.basePrice || item.service?.basePrice || 0;
-      return total + price * item.cartItem.quantity;
-    }, 0);
+    return (cartItems as CartItemData[]).reduce(
+      (total: number, item: CartItemData) => {
+        const price = item.product?.basePrice || item.service?.basePrice || 0;
+        return total + price * item.cartItem.quantity;
+      },
+      0
+    );
   };
 
   const handleCheckout = () => {
@@ -116,7 +119,9 @@ export default function Cart() {
             <CardContent className="pt-6 text-center">
               <ShoppingCart className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
               <p className="text-xl font-medium mb-2">{t("cart.empty")}</p>
-              <p className="text-muted-foreground mb-4">{t("cart.emptyDescription")}</p>
+              <p className="text-muted-foreground mb-4">
+                {t("cart.emptyDescription")}
+              </p>
               <Link href="/factory">
                 <Button className="bg-orange-500 hover:bg-orange-600">
                   {t("cart.continueShopping")}
@@ -143,9 +148,11 @@ export default function Cart() {
               </div>
 
               <div className="space-y-4">
-                {(cartItems as CartItemData[]).map((item) => {
+                {(cartItems as CartItemData[]).map(item => {
                   const itemData = item.product || item.service;
-                  const images = itemData?.imageUrls ? JSON.parse(itemData.imageUrls) : [];
+                  const images = itemData?.imageUrls
+                    ? JSON.parse(itemData.imageUrls)
+                    : [];
                   const price = itemData?.basePrice || 0;
 
                   return (
@@ -171,18 +178,26 @@ export default function Cart() {
                           <div className="flex-1">
                             <div className="flex justify-between">
                               <div>
-                                <h3 className="font-medium text-lg">{itemData?.name}</h3>
+                                <h3 className="font-medium text-lg">
+                                  {itemData?.name}
+                                </h3>
                                 <p className="text-sm text-muted-foreground">
                                   {t("cart.from")}: {item.factory?.name}
                                 </p>
                                 {itemData?.category && (
-                                  <p className="text-sm text-muted-foreground">{itemData.category}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {itemData.category}
+                                  </p>
                                 )}
                               </div>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleRemoveItem(item.product?.id || item.service?.id || 0)}
+                                onClick={() =>
+                                  handleRemoveItem(
+                                    item.product?.id || item.service?.id || 0
+                                  )
+                                }
                                 disabled={removeItemMutation.isPending}
                               >
                                 <Trash2 className="w-4 h-4 text-red-500" />
@@ -196,7 +211,10 @@ export default function Cart() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() =>
-                                    handleQuantityChange(item.product?.id || item.service?.id || 0, item.cartItem.quantity - 1)
+                                    handleQuantityChange(
+                                      item.product?.id || item.service?.id || 0,
+                                      item.cartItem.quantity - 1
+                                    )
                                   }
                                   disabled={item.cartItem.quantity <= 1}
                                 >
@@ -205,8 +223,11 @@ export default function Cart() {
                                 <Input
                                   type="number"
                                   value={item.cartItem.quantity}
-                                  onChange={(e) =>
-                                    handleQuantityChange(item.product?.id || item.service?.id || 0, parseInt(e.target.value) || 1)
+                                  onChange={e =>
+                                    handleQuantityChange(
+                                      item.product?.id || item.service?.id || 0,
+                                      parseInt(e.target.value) || 1
+                                    )
                                   }
                                   className="w-16 text-center"
                                   min={1}
@@ -215,7 +236,10 @@ export default function Cart() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() =>
-                                    handleQuantityChange(item.product?.id || item.service?.id || 0, item.cartItem.quantity + 1)
+                                    handleQuantityChange(
+                                      item.product?.id || item.service?.id || 0,
+                                      item.cartItem.quantity + 1
+                                    )
                                   }
                                 >
                                   +
@@ -225,10 +249,15 @@ export default function Cart() {
                               {/* Price */}
                               <div className="text-right">
                                 <p className="text-sm text-muted-foreground">
-                                  ${(price / 100).toFixed(2)} × {item.cartItem.quantity}
+                                  ${(price / 100).toFixed(2)} ×{" "}
+                                  {item.cartItem.quantity}
                                 </p>
                                 <p className="text-xl font-bold text-blue-600">
-                                  ${((price * item.cartItem.quantity) / 100).toFixed(2)}
+                                  $
+                                  {(
+                                    (price * item.cartItem.quantity) /
+                                    100
+                                  ).toFixed(2)}
                                 </p>
                               </div>
                             </div>
@@ -250,12 +279,20 @@ export default function Cart() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t("cart.subtotal")}:</span>
-                      <span className="font-medium">${(calculateTotal() / 100).toFixed(2)}</span>
+                      <span className="text-muted-foreground">
+                        {t("cart.subtotal")}:
+                      </span>
+                      <span className="font-medium">
+                        ${(calculateTotal() / 100).toFixed(2)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t("cart.shipping")}:</span>
-                      <span className="font-medium">{t("cart.calculatedAtCheckout")}</span>
+                      <span className="text-muted-foreground">
+                        {t("cart.shipping")}:
+                      </span>
+                      <span className="font-medium">
+                        {t("cart.calculatedAtCheckout")}
+                      </span>
                     </div>
                     <div className="border-t pt-2">
                       <div className="flex justify-between text-lg">

@@ -136,15 +136,16 @@ export class DataEncryption {
 
   constructor(keyString: string) {
     // Key should be 32 bytes for aes-256
-    this.encryptionKey = crypto
-      .createHash("sha256")
-      .update(keyString)
-      .digest();
+    this.encryptionKey = crypto.createHash("sha256").update(keyString).digest();
   }
 
   encrypt(data: string): string {
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv(this.algorithm, this.encryptionKey, iv);
+    const cipher = crypto.createCipheriv(
+      this.algorithm,
+      this.encryptionKey,
+      iv
+    );
 
     let encrypted = cipher.update(data, "utf8", "hex");
     encrypted += cipher.final("hex");
@@ -260,7 +261,7 @@ export class RBACManager {
   hasPermission(role: UserRole, resource: string, action: string): boolean {
     const permissions = this.rolePermissions.get(role) || [];
     return permissions.some(
-      (p) => p.resource === resource && p.action === action
+      p => p.resource === resource && p.action === action
     );
   }
 
@@ -270,7 +271,7 @@ export class RBACManager {
 
   canAccessResource(role: UserRole, resource: string): boolean {
     const permissions = this.rolePermissions.get(role) || [];
-    return permissions.some((p) => p.resource === resource);
+    return permissions.some(p => p.resource === resource);
   }
 }
 
@@ -292,7 +293,7 @@ export class RateLimiter {
     const requests = this.requests.get(identifier) || [];
 
     // Remove old requests outside the window
-    const validRequests = requests.filter((time) => now - time < this.windowMs);
+    const validRequests = requests.filter(time => now - time < this.windowMs);
 
     if (validRequests.length >= this.maxRequests) {
       return false;
@@ -338,7 +339,7 @@ export class AuditLogger {
   }
 
   getLogs(userId?: number, action?: string): AuditLog[] {
-    return this.logs.filter((log) => {
+    return this.logs.filter(log => {
       if (userId && log.userId !== userId) return false;
       if (action && log.action !== action) return false;
       return true;

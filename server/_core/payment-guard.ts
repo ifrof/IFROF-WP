@@ -16,17 +16,15 @@ export async function requireActiveSubscription(userId: number) {
     .select()
     .from(orders)
     .where(
-      and(
-        eq(orders.buyerId, userId),
-        eq(orders.paymentStatus, "completed")
-      )
+      and(eq(orders.buyerId, userId), eq(orders.paymentStatus, "completed"))
     )
     .limit(1);
 
   if (!activeOrder || activeOrder.length === 0) {
     throw new TRPCError({
       code: "PAYMENT_REQUIRED",
-      message: "Active subscription required. Please complete payment to access factory database.",
+      message:
+        "Active subscription required. Please complete payment to access factory database.",
     });
   }
 
@@ -41,10 +39,7 @@ export async function checkPaymentStatus(userId: number) {
     .select()
     .from(orders)
     .where(
-      and(
-        eq(orders.buyerId, userId),
-        eq(orders.paymentStatus, "completed")
-      )
+      and(eq(orders.buyerId, userId), eq(orders.paymentStatus, "completed"))
     )
     .limit(1);
 

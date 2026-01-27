@@ -4,14 +4,14 @@ This document records the results of a security audit performed on the `ifrof/IF
 
 ## Audit Results
 
-| Check Item | Status | Findings |
-| :--- | :--- | :--- |
-| `.env` files presence | **Passed** | No `.env` file found in the repository root. |
-| `.env.example` check | **Passed** | `.env.example` exists but contains only placeholders and documentation. |
+| Check Item              | Status     | Findings                                                                                                                |
+| :---------------------- | :--------- | :---------------------------------------------------------------------------------------------------------------------- |
+| `.env` files presence   | **Passed** | No `.env` file found in the repository root.                                                                            |
+| `.env.example` check    | **Passed** | `.env.example` exists but contains only placeholders and documentation.                                                 |
 | `.env.production` check | **Passed** | `.env.production` exists but contains only placeholders (e.g., `CHANGE_THIS_PASSWORD`) and non-sensitive configuration. |
-| `.gitignore` validation | **Passed** | `.gitignore` correctly includes `.env`, `.env.local`, and other environment file patterns. |
-| Hardcoded Secrets | **Passed** | Scanned codebase for `process.env` usage; no hardcoded secret values were found in the logic. |
-| Database Credentials | **Passed** | No real database passwords found in `drizzle.config.ts` or `server/db.ts`. |
+| `.gitignore` validation | **Passed** | `.gitignore` correctly includes `.env`, `.env.local`, and other environment file patterns.                              |
+| Hardcoded Secrets       | **Passed** | Scanned codebase for `process.env` usage; no hardcoded secret values were found in the logic.                           |
+| Database Credentials    | **Passed** | No real database passwords found in `drizzle.config.ts` or `server/db.ts`.                                              |
 
 ## Recommendations
 
@@ -21,4 +21,5 @@ This document records the results of a security audit performed on the `ifrof/IF
 4.  **Remove `.env.production`:** While it currently contains no real secrets, it is best practice to remove it from the repository and rely solely on documentation and environment-specific variables set in the hosting platform.
 
 ---
-*Audit performed on Jan 22, 2026.*
+
+_Audit performed on Jan 22, 2026._

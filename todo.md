@@ -1,9 +1,11 @@
 # IFROF Platform - Production Deployment TODO
 
 ## Project Overview
+
 IFROF is a B2B marketplace platform connecting buyers directly with verified Chinese manufacturers. The platform features an AI-powered Smart Assistant, multi-language support (Arabic/English), comprehensive dashboards for factories and buyers, and a complete e-commerce marketplace.
 
 ## Core Infrastructure
+
 - [x] Database schema with 12 tables (users, factories, products, orders, etc.)
 - [x] Authentication system (Manus OAuth integration)
 - [x] tRPC API setup with all routers
@@ -12,6 +14,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [x] Theme system (Light/Dark mode)
 
 ## Marketplace Features
+
 - [x] Factory listing and verification system
 - [x] Product catalog with pricing tiers
 - [x] Buyer inquiry system
@@ -21,29 +24,34 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [x] Order tracking and status updates
 
 ## Dashboard Features
+
 - [x] Factory Dashboard (manage products, inquiries, orders)
 - [x] Buyer Dashboard (view orders, inquiries, history)
 - [x] Admin Dashboard (manage factories, users, platform)
 
 ## AI & Smart Features
+
 - [x] IFROF Smart Assistant (AI-powered search and recommendations)
 - [x] Chatbot for customer support
 - [x] AI factory verification system
 - [x] Smart sourcing recommendations
 
 ## Community & Content
+
 - [x] Blog system with posts and categories
 - [x] Forum with Q&A functionality
 - [x] User ratings and reviews
 - [x] Notifications system
 
 ## Payment Integration
+
 - [x] Stripe payment processing setup
 - [x] Order payment tracking
 - [x] Payment status management
 - [ ] Webhook handlers for payment events (TODO: Configure in production)
 
 ## Production Deployment
+
 - [ ] Configure STRIPE_SECRET_KEY environment variable
 - [ ] Configure OAUTH_SERVER_URL environment variable
 - [ ] Set up production database connection
@@ -56,6 +64,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Security audit and hardening
 
 ## Testing & QA
+
 - [ ] Unit tests for all routers
 - [ ] Integration tests for payment flow
 - [ ] E2E tests for user workflows
@@ -64,6 +73,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Browser compatibility testing
 
 ## Documentation
+
 - [ ] API documentation
 - [ ] User guide for buyers
 - [ ] User guide for factories
@@ -72,6 +82,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Troubleshooting guide
 
 ## Performance Optimization
+
 - [ ] Image optimization and lazy loading
 - [ ] Database query optimization
 - [ ] Caching strategy implementation
@@ -79,6 +90,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Frontend bundle optimization
 
 ## Security Enhancements
+
 - [ ] Rate limiting on API endpoints
 - [ ] Input validation and sanitization
 - [ ] SQL injection prevention
@@ -87,6 +99,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Data encryption for sensitive fields
 
 ## Analytics & Monitoring
+
 - [ ] Google Analytics integration
 - [ ] Error tracking (Sentry)
 - [ ] Performance monitoring
@@ -94,6 +107,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Conversion tracking
 
 ## Future Features (Post-Launch)
+
 - [ ] Video product demonstrations
 - [ ] Live chat support
 - [ ] Advanced search filters
@@ -106,12 +120,14 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] API for third-party integrations
 
 ## Known Issues & Fixes Applied
+
 - [x] Fixed Stripe initialization to handle missing API key gracefully
 - [x] Updated AI Agent naming to "IFROF Smart Assistant" throughout platform
 - [x] Fixed OAuth configuration warnings
 - [x] Integrated all merged code from three source files
 
 ## Deployment Checklist
+
 - [ ] All environment variables configured
 - [ ] Database migrations applied
 - [ ] Static assets uploaded to CDN
@@ -129,6 +145,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Rollback procedure documented
 
 ## Launch Readiness
+
 - [ ] Final code review
 - [ ] Security audit completed
 - [ ] Load testing completed
@@ -145,6 +162,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 ### Phase 1: Fix Critical Database and Router Errors (59 TypeScript Errors)
 
 #### Database Functions Missing in server/db.ts
+
 - [x] Add `getAllFactories()` function (rename from getFactories)
 - [x] Add `searchFactories(query: string)` function
 - [x] Add `createFactory(data)` function
@@ -167,6 +185,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [x] Add `updateBlogPost(id, data)` function
 
 #### Router Fixes
+
 - [x] Fix inquiries.ts - replace dynamic require with proper imports
 - [x] Fix forum.ts - replace dynamic require with proper imports
 - [x] Fix factories.ts - fix function name from `getAllFactories` to `getFactories`
@@ -174,11 +193,13 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [x] Update routers.ts to import all new routers
 
 #### Missing Pages/Components
+
 - [ ] Remove or implement ProductDetail.tsx (references missing 'reviews' and 'cart')
 - [ ] Remove or implement Services.tsx (references missing 'services' and 'cart')
 - [ ] Remove or implement Support.tsx (references missing 'support')
 
 #### TypeScript Errors to Fix
+
 - [ ] Fix forum.ts database helper functions (getForumPostById, updateForumAnswer, updateForumPost)
 - [ ] Fix inquiries.ts database helper functions
 - [ ] Fix all missing type definitions in routers
@@ -186,6 +207,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Run TypeScript compiler check: pnpm check
 
 ### Testing - REQUIRED BEFORE LAUNCH
+
 - [ ] Write unit tests for authentication flow (useAuth hook)
 - [ ] Write unit tests for import request submission
 - [ ] Write unit tests for AI chat responses
@@ -197,6 +219,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Achieve minimum 80% code coverage
 
 ### Performance & SEO Optimization
+
 - [ ] Add meta tags and Open Graph tags to all pages
 - [ ] Implement dynamic meta tags based on content
 - [ ] Optimize images and implement lazy loading
@@ -214,6 +237,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Enable gzip compression
 
 ### Security Hardening
+
 - [ ] Validate all user inputs (server-side)
 - [ ] Implement CSRF protection
 - [ ] Add rate limiting on API endpoints
@@ -226,6 +250,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Add XSS protection
 
 ## Maintenance & Support
+
 - [ ] Daily uptime monitoring
 - [ ] Weekly performance review
 - [ ] Monthly security updates
@@ -234,10 +259,10 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Bug tracking and prioritization
 - [ ] Performance optimization cycles
 
-
 ## Blog System - Complete ✅
 
 ### Blog Pages
+
 - [x] Blog listing page with search and categories
 - [x] Blog post detail page with comments section
 - [x] Blog editor for Admin with markdown support
@@ -250,6 +275,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [x] Share and bookmark functionality
 
 ### Blog Articles Published
+
 - [x] How to Identify Real Factories vs Trading Companies
 - [x] Top 10 Supplier Verification Tips That Save Money
 - [x] Red Flags That Indicate a Scam Supplier
@@ -262,6 +288,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 ## Critical Features - User Requested (Priority)
 
 ### 1. Shipment Tracking System
+
 - [ ] Create shipments table in database
 - [ ] Add tracking number field
 - [ ] Implement real-time tracking updates
@@ -271,6 +298,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Display tracking timeline on order details
 
 ### 2. Phone Number Registration & Activity Tracking
+
 - [ ] Add phone number field to users table
 - [ ] Implement phone number verification (OTP)
 - [ ] Create phone-based login option
@@ -281,6 +309,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] GDPR compliance for data storage
 
 ### 3. Direct Messaging System (Customer-Manufacturer)
+
 - [ ] Create messages table in database
 - [ ] Build real-time messaging UI
 - [ ] Add message notifications
@@ -291,6 +320,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Implement message read/unread status
 
 ### 4. Product Portfolio & History Gallery
+
 - [ ] Create product portfolio table
 - [ ] Add image upload functionality (S3)
 - [ ] Create gallery UI component
@@ -303,6 +333,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 ## New Features - Paid Subscription & Premium Services
 
 ### Naming Suggestions for Premium Service (اقتراحات الأسماء)
+
 - [ ] Implement one of these premium service names:
   - **"IFROF Pro" / "IFROF Professional"** - للمشترين المحترفين
   - **"IFROF Elite" / "IFROF Premium"** - للخدمات المتقدمة
@@ -311,6 +342,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
   - **"IFROF Smart Search Pro"** - للبحث الذكي المتقدم
 
 ### Paid Subscription System ($91.19)
+
 - [ ] Create subscription plans table in database
 - [ ] Implement payment processing for $91.19 monthly/annual subscription
 - [ ] Add subscription status tracking (active, expired, cancelled)
@@ -321,6 +353,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Implement subscription cancellation flow
 
 ### China-Only Factories Feature
+
 - [ ] Add country field to factories table (default: China)
 - [ ] Filter factories to show only China by default
 - [ ] Add country selector dropdown in search interface
@@ -330,6 +363,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Update factory verification to include country validation
 
 ### Premium Features Behind Paywall
+
 - [ ] Advanced AI search (unlimited queries)
 - [ ] Direct factory contact information
 - [ ] Factory verification reports
@@ -340,6 +374,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Advanced analytics dashboard
 
 ### UI/UX Updates
+
 - [ ] Create subscription pricing page
 - [ ] Add "Upgrade to Pro" buttons throughout the platform
 - [ ] Create premium feature badges
@@ -347,10 +382,10 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [ ] Add subscription status indicator in user profile
 - [ ] Create onboarding flow for new subscribers
 
-
 ## New Features - User Requested (Latest)
 
 ### 1. Image/File Upload in Import Requests
+
 - [x] Add file upload field to ImportRequest form
 - [x] Support multiple file types (images, PDFs, documents)
 - [x] Integrate with S3 storage (ready)
@@ -360,6 +395,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [x] Add drag-and-drop support
 
 ### 2. AI-Powered Smart Chat
+
 - [x] Create intelligent chatbot component (AIChat.tsx)
 - [x] Integrate with LLM for AI responses (ready)
 - [x] Support multi-language (Arabic/English)
@@ -370,6 +406,7 @@ IFROF is a B2B marketplace platform connecting buyers directly with verified Chi
 - [x] Implement chat export functionality (ready)
 
 ### 3. Fix Blog Display & Navigation
+
 - [x] Add Blog link to main navigation
 - [x] Fix blog page rendering
 - [x] Ensure all 8 articles display correctly

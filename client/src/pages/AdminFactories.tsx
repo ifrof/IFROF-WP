@@ -5,24 +5,43 @@ import { trpc } from "@/lib/trpc";
 import { Loader2, CheckCircle, XCircle, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import AdminDashboardLayout from "@/components/AdminDashboardLayout";
 
 export default function AdminFactories() {
   const { language } = useLanguage();
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const { data: factories, isLoading: factoriesLoading, refetch } = trpc.admin.getFactories.useQuery({ 
-    status: statusFilter === "all" ? undefined : statusFilter 
+  const {
+    data: factories,
+    isLoading: factoriesLoading,
+    refetch,
+  } = trpc.admin.getFactories.useQuery({
+    status: statusFilter === "all" ? undefined : statusFilter,
   });
 
   const updateStatusMutation = trpc.admin.updateFactoryStatus.useMutation({
     onSuccess: () => {
-      toast.success(language === "ar" ? "تم تحديث حالة المصنع" : "Factory status updated");
+      toast.success(
+        language === "ar" ? "تم تحديث حالة المصنع" : "Factory status updated"
+      );
       refetch();
-    }
+    },
   });
 
   const handleStatusChange = (id: number, status: any) => {
@@ -38,7 +57,9 @@ export default function AdminFactories() {
               {language === "ar" ? "إدارة المصانع" : "Factory Management"}
             </h1>
             <p className="text-muted-foreground">
-              {language === "ar" ? "مراجعة واعتماد طلبات انضمام المصانع" : "Review and approve factory applications"}
+              {language === "ar"
+                ? "مراجعة واعتماد طلبات انضمام المصانع"
+                : "Review and approve factory applications"}
             </p>
           </div>
 
@@ -47,7 +68,9 @@ export default function AdminFactories() {
               <SelectValue placeholder="Filter Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{language === "ar" ? "الكل" : "All Status"}</SelectItem>
+              <SelectItem value="all">
+                {language === "ar" ? "الكل" : "All Status"}
+              </SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="verified">Verified</SelectItem>
               <SelectItem value="rejected">Rejected</SelectItem>
@@ -65,10 +88,18 @@ export default function AdminFactories() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{language === "ar" ? "المصنع" : "Factory"}</TableHead>
-                    <TableHead>{language === "ar" ? "الموقع" : "Location"}</TableHead>
-                    <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
-                    <TableHead className="text-right">{language === "ar" ? "إجراءات" : "Actions"}</TableHead>
+                    <TableHead>
+                      {language === "ar" ? "المصنع" : "Factory"}
+                    </TableHead>
+                    <TableHead>
+                      {language === "ar" ? "الموقع" : "Location"}
+                    </TableHead>
+                    <TableHead>
+                      {language === "ar" ? "الحالة" : "Status"}
+                    </TableHead>
+                    <TableHead className="text-right">
+                      {language === "ar" ? "إجراءات" : "Actions"}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -81,34 +112,46 @@ export default function AdminFactories() {
                           </div>
                           <div>
                             <div className="font-medium">{factory.name}</div>
-                            <div className="text-xs text-gray-500">{factory.contactEmail}</div>
+                            <div className="text-xs text-gray-500">
+                              {factory.contactEmail}
+                            </div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>{factory.location}</TableCell>
                       <TableCell>
-                        <Badge variant={factory.verificationStatus === 'verified' ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={
+                            factory.verificationStatus === "verified"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
                           {factory.verificationStatus}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right space-x-2">
-                        {factory.verificationStatus !== 'verified' && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                        {factory.verificationStatus !== "verified" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="text-green-600 border-green-200 hover:bg-green-50"
-                            onClick={() => handleStatusChange(factory.id, 'verified')}
+                            onClick={() =>
+                              handleStatusChange(factory.id, "verified")
+                            }
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
                             {language === "ar" ? "اعتماد" : "Approve"}
                           </Button>
                         )}
-                        {factory.verificationStatus !== 'rejected' && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                        {factory.verificationStatus !== "rejected" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="text-red-600 border-red-200 hover:bg-red-50"
-                            onClick={() => handleStatusChange(factory.id, 'rejected')}
+                            onClick={() =>
+                              handleStatusChange(factory.id, "rejected")
+                            }
                           >
                             <XCircle className="w-4 h-4 mr-1" />
                             {language === "ar" ? "رفض" : "Reject"}
@@ -119,7 +162,10 @@ export default function AdminFactories() {
                   ))}
                   {factories?.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                      <TableCell
+                        colSpan={4}
+                        className="text-center py-12 text-muted-foreground"
+                      >
                         No factories found matching the filter.
                       </TableCell>
                     </TableRow>

@@ -22,13 +22,13 @@ export function convertCurrency(
   to: Currency = "USD"
 ): number {
   if (from === to) return amount;
-  
+
   // Convert to USD first
   const amountInUSD = amount / EXCHANGE_RATES[from];
-  
+
   // Convert to target currency
   const convertedAmount = amountInUSD * EXCHANGE_RATES[to];
-  
+
   return Math.round(convertedAmount);
 }
 
@@ -38,9 +38,12 @@ export function convertCurrency(
  * @param currency Currency code
  * @returns Formatted string
  */
-export function formatCurrency(amount: number, currency: Currency = "USD"): string {
+export function formatCurrency(
+  amount: number,
+  currency: Currency = "USD"
+): string {
   const value = amount / 100;
-  
+
   switch (currency) {
     case "USD":
       return `$${value.toFixed(2)}`;

@@ -87,13 +87,16 @@ export const profilesRouter = router({
       } else {
         // Update existing profile
         const updateData: any = {};
-        if (input.companyName !== undefined) updateData.companyName = input.companyName;
-        if (input.businessType !== undefined) updateData.businessType = input.businessType;
+        if (input.companyName !== undefined)
+          updateData.companyName = input.companyName;
+        if (input.businessType !== undefined)
+          updateData.businessType = input.businessType;
         if (input.address !== undefined) updateData.address = input.address;
         if (input.city !== undefined) updateData.city = input.city;
         if (input.country !== undefined) updateData.country = input.country;
         if (input.zipCode !== undefined) updateData.zipCode = input.zipCode;
-        if (input.interests !== undefined) updateData.interests = input.interests;
+        if (input.interests !== undefined)
+          updateData.interests = input.interests;
         updateData.updatedAt = new Date();
 
         await db
@@ -202,19 +205,27 @@ export const profilesRouter = router({
       // Build update object
       const updateData: any = {};
       if (input.name !== undefined) updateData.name = input.name;
-      if (input.description !== undefined) updateData.description = input.description;
+      if (input.description !== undefined)
+        updateData.description = input.description;
       if (input.location !== undefined) updateData.location = input.location;
       if (input.latitude !== undefined) updateData.latitude = input.latitude;
       if (input.longitude !== undefined) updateData.longitude = input.longitude;
-      if (input.contactEmail !== undefined) updateData.contactEmail = input.contactEmail;
-      if (input.contactPhone !== undefined) updateData.contactPhone = input.contactPhone;
-      if (input.certifications !== undefined) updateData.certifications = input.certifications;
-      if (input.productCategories !== undefined) updateData.productCategories = input.productCategories;
-      if (input.productionCapacity !== undefined) updateData.productionCapacity = input.productionCapacity;
-      if (input.minimumOrderQuantity !== undefined) updateData.minimumOrderQuantity = input.minimumOrderQuantity;
+      if (input.contactEmail !== undefined)
+        updateData.contactEmail = input.contactEmail;
+      if (input.contactPhone !== undefined)
+        updateData.contactPhone = input.contactPhone;
+      if (input.certifications !== undefined)
+        updateData.certifications = input.certifications;
+      if (input.productCategories !== undefined)
+        updateData.productCategories = input.productCategories;
+      if (input.productionCapacity !== undefined)
+        updateData.productionCapacity = input.productionCapacity;
+      if (input.minimumOrderQuantity !== undefined)
+        updateData.minimumOrderQuantity = input.minimumOrderQuantity;
       if (input.logoUrl !== undefined) updateData.logoUrl = input.logoUrl;
       if (input.bannerUrl !== undefined) updateData.bannerUrl = input.bannerUrl;
-      if (input.certificationProofs !== undefined) updateData.certificationProofs = input.certificationProofs;
+      if (input.certificationProofs !== undefined)
+        updateData.certificationProofs = input.certificationProofs;
       updateData.updatedAt = new Date();
 
       await db
@@ -244,10 +255,7 @@ export const profilesRouter = router({
       if (input.phone !== undefined) updateData.phone = input.phone;
       updateData.updatedAt = new Date();
 
-      await db
-        .update(users)
-        .set(updateData)
-        .where(eq(users.id, ctx.user.id));
+      await db.update(users).set(updateData).where(eq(users.id, ctx.user.id));
 
       return { success: true };
     }),

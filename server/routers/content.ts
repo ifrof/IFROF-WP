@@ -30,7 +30,11 @@ const contentData: Record<string, Record<string, any>> = {
         {
           name: "الخطة الاحترافية",
           price: "$299",
-          features: ["بحث غير محدود", "دعم مخصص", "التحقق من المصانع بالذكاء الاصطناعي"],
+          features: [
+            "بحث غير محدود",
+            "دعم مخصص",
+            "التحقق من المصانع بالذكاء الاصطناعي",
+          ],
         },
       ],
     },
@@ -56,7 +60,11 @@ const contentData: Record<string, Record<string, any>> = {
         {
           name: "Professional Plan",
           price: "$299",
-          features: ["Unlimited Search", "Dedicated Support", "AI Factory Verification"],
+          features: [
+            "Unlimited Search",
+            "Dedicated Support",
+            "AI Factory Verification",
+          ],
         },
       ],
     },
@@ -90,15 +98,13 @@ const contentData: Record<string, Record<string, any>> = {
 };
 
 export const contentRouter = router({
-  getContent: publicProcedure
-    .input(contentSchema)
-    .query(({ input }) => {
-      const content = contentData[input.language]?.[input.page];
-      if (!content) {
-        return contentData["en"][input.page] || null;
-      }
-      return content;
-    }),
+  getContent: publicProcedure.input(contentSchema).query(({ input }) => {
+    const content = contentData[input.language]?.[input.page];
+    if (!content) {
+      return contentData["en"][input.page] || null;
+    }
+    return content;
+  }),
 
   getAllContent: publicProcedure
     .input(z.object({ language: z.enum(languages) }))

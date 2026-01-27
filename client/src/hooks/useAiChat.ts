@@ -14,7 +14,9 @@ type UseAiChatResult = {
   reset: () => void;
 };
 
-export function useAiChat(initialMessages: ChatMessage[] = []): UseAiChatResult {
+export function useAiChat(
+  initialMessages: ChatMessage[] = []
+): UseAiChatResult {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +26,10 @@ export function useAiChat(initialMessages: ChatMessage[] = []): UseAiChatResult 
       const messageContent = content ?? input;
       if (!messageContent.trim()) return;
 
-      const nextMessages = [...messages, { role: "user", content: messageContent } as ChatMessage];
+      const nextMessages = [
+        ...messages,
+        { role: "user", content: messageContent } as ChatMessage,
+      ];
       setMessages(nextMessages);
       setInput("");
       setIsLoading(true);
@@ -49,7 +54,10 @@ export function useAiChat(initialMessages: ChatMessage[] = []): UseAiChatResult 
         const decoder = new TextDecoder();
         let assistantContent = "";
 
-        setMessages(current => [...current, { role: "assistant", content: "" }]);
+        setMessages(current => [
+          ...current,
+          { role: "assistant", content: "" },
+        ]);
 
         while (true) {
           const { value, done } = await reader.read();
@@ -59,7 +67,10 @@ export function useAiChat(initialMessages: ChatMessage[] = []): UseAiChatResult 
             const updated = [...current];
             const lastIndex = updated.length - 1;
             if (lastIndex >= 0 && updated[lastIndex].role === "assistant") {
-              updated[lastIndex] = { ...updated[lastIndex], content: assistantContent };
+              updated[lastIndex] = {
+                ...updated[lastIndex],
+                content: assistantContent,
+              };
             }
             return updated;
           });

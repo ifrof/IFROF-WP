@@ -1,25 +1,25 @@
-import { Router } from 'express';
-import * as dbModule from '../db';
+import { Router } from "express";
+import * as dbModule from "../db";
 const db = dbModule as any;
 
 const router = Router();
 
-router.get('/sitemap.xml', async (req, res) => {
+router.get("/sitemap.xml", async (req, res) => {
   try {
-    const baseUrl = 'https://ifrof.com';
-    const today = new Date().toISOString().split('T')[0];
-    const langs = ['ar', 'en', 'zh'];
+    const baseUrl = "https://ifrof.com";
+    const today = new Date().toISOString().split("T")[0];
+    const langs = ["ar", "en", "zh"];
 
     // Static pages
     const staticPages = [
-      '',
-      '/marketplace',
-      '/factory-investigator',
-      '/faq',
-      '/about',
-      '/contact',
-      '/privacy',
-      '/terms'
+      "",
+      "/marketplace",
+      "/factory-investigator",
+      "/faq",
+      "/about",
+      "/contact",
+      "/privacy",
+      "/terms",
     ];
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -28,14 +28,14 @@ router.get('/sitemap.xml', async (req, res) => {
     // Add static pages for each language
     staticPages.forEach(page => {
       langs.forEach(lang => {
-        const url = `${baseUrl}${page}${page.includes('?') ? '&' : '?'}lang=${lang}`;
+        const url = `${baseUrl}${page}${page.includes("?") ? "&" : "?"}lang=${lang}`;
         xml += `
   <url>
     <loc>${url}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
-    <priority>${page === '' ? '1.0' : '0.8'}</priority>
-    ${langs.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${baseUrl}${page}${page.includes('?') ? '&' : '?'}lang=${l}"/>`).join('\n    ')}
+    <priority>${page === "" ? "1.0" : "0.8"}</priority>
+    ${langs.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${baseUrl}${page}${page.includes("?") ? "&" : "?"}lang=${l}"/>`).join("\n    ")}
   </url>`;
       });
     });
@@ -51,7 +51,7 @@ router.get('/sitemap.xml', async (req, res) => {
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-    ${langs.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${baseUrl}/products/${product.id}?lang=${l}"/>`).join('\n    ')}
+    ${langs.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${baseUrl}/products/${product.id}?lang=${l}"/>`).join("\n    ")}
   </url>`;
       });
     });
@@ -67,7 +67,7 @@ router.get('/sitemap.xml', async (req, res) => {
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
-    ${langs.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${baseUrl}/blog/${post.slug}?lang=${l}"/>`).join('\n    ')}
+    ${langs.map(l => `<xhtml:link rel="alternate" hreflang="${l}" href="${baseUrl}/blog/${post.slug}?lang=${l}"/>`).join("\n    ")}
   </url>`;
       });
     });
@@ -84,13 +84,13 @@ router.get('/sitemap.xml', async (req, res) => {
   </url>`;
     });
 
-    xml += '\n</urlset>';
+    xml += "\n</urlset>";
 
-    res.header('Content-Type', 'application/xml');
+    res.header("Content-Type", "application/xml");
     res.send(xml);
   } catch (error) {
-    console.error('Sitemap error:', error);
-    res.status(500).send('Error generating sitemap');
+    console.error("Sitemap error:", error);
+    res.status(500).send("Error generating sitemap");
   }
 });
 

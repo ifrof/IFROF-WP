@@ -41,13 +41,13 @@ const systemPromptAr = `أنت محقق IFROF الذكي للمصانع، مسا
 - لا تستخدم أي روابط خارجية.`;
 
 // Simple language detection function (placeholder for a more robust solution)
-function detectLanguage(text: string): 'ar' | 'en' {
+function detectLanguage(text: string): "ar" | "en" {
   // Check for common Arabic characters
   const arabicRegex = /[\u0600-\u06FF]/;
   if (arabicRegex.test(text)) {
-    return 'ar';
+    return "ar";
   }
-  return 'en';
+  return "en";
 }
 
 export const chatbotRouter = router({
@@ -76,10 +76,13 @@ export const chatbotRouter = router({
 
       // 3. Determine language and select system prompt
       const userLang = detectLanguage(input.content);
-      const systemPrompt = userLang === 'ar' ? systemPromptAr : systemPromptEn;
+      const systemPrompt = userLang === "ar" ? systemPromptAr : systemPromptEn;
 
       // 4. Build messages for LLM
-      const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+      const messages: Array<{
+        role: "system" | "user" | "assistant";
+        content: string;
+      }> = [
         { role: "system", content: systemPrompt },
         // History is reversed because we fetched it in descending order (newest first)
         ...history.reverse().map((msg: any) => ({
@@ -93,9 +96,12 @@ export const chatbotRouter = router({
         messages: messages,
       });
 
-      const aiContent = typeof response.choices[0]?.message?.content === "string"
-        ? response.choices[0].message.content
-        : (userLang === 'ar' ? "أعتذر، لم أتمكن من توليد استجابة. يرجى المحاولة مرة أخرى." : "I apologize, I could not generate a response. Please try again.");
+      const aiContent =
+        typeof response.choices[0]?.message?.content === "string"
+          ? response.choices[0].message.content
+          : userLang === "ar"
+            ? "أعتذر، لم أتمكن من توليد استجابة. يرجى المحاولة مرة أخرى."
+            : "I apologize, I could not generate a response. Please try again.";
 
       // 6. Save AI response
       await db.insert(chatMessages).values({
@@ -127,27 +133,28 @@ export const chatbotRouter = router({
     }),
 
   // Get all sessions for a user
-  getSessions: protectedProcedure
-    .query(async ({ ctx }) => {
-      const db = await getDb();
-      if (!db) return [];
+  getSessions: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return [];
 
-      const messages = await db
-        .select()
-        .from(chatMessages)
-        .where(eq(chatMessages.userId, ctx.user.id));
+    const messages = await db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.userId, ctx.user.id));
 
-      // Group by session and get latest message
-      const sessions = new Map<string, typeof messages[0]>();
-      messages.forEach((msg: any) => {
-        const existing = sessions.get(msg.sessionId);
-        if (!existing || msg.createdAt > existing.createdAt) {
-          sessions.set(msg.sessionId, msg);
-        }
-      });
+    // Group by session and get latest message
+    const sessions = new Map<string, (typeof messages)[0]>();
+    messages.forEach((msg: any) => {
+      const existing = sessions.get(msg.sessionId);
+      if (!existing || msg.createdAt > existing.createdAt) {
+        sessions.set(msg.sessionId, msg);
+      }
+    });
 
-      return Array.from(sessions.values()).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    }),
+    return Array.from(sessions.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+  }),
 
   // Clear chat history
   clearHistory: protectedProcedure

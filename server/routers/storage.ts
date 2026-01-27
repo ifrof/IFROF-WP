@@ -28,11 +28,17 @@ export const storageRouter = router({
       }
 
       // Validate MIME type
-      const allowedMimes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+      const allowedMimes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif",
+      ];
       if (!allowedMimes.includes(input.mimetype)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed",
+          message:
+            "Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed",
         });
       }
 
@@ -138,7 +144,12 @@ export const storageRouter = router({
           }
 
           // Validate MIME type
-          const allowedMimes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+          const allowedMimes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/gif",
+          ];
           if (!allowedMimes.includes(file.mimetype)) {
             results.push({
               filename: file.filename,
@@ -169,8 +180,8 @@ export const storageRouter = router({
 
       return {
         results,
-        successCount: results.filter((r) => r.success).length,
-        failureCount: results.filter((r) => !r.success).length,
+        successCount: results.filter(r => r.success).length,
+        failureCount: results.filter(r => !r.success).length,
       };
     }),
 });

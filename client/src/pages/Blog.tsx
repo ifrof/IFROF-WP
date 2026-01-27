@@ -1,5 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Calendar, User, ArrowRight, Search } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
@@ -12,7 +18,9 @@ export default function Blog() {
   // Ensure t is defined even if context fails for some reason
   const safeT = t || ((key: string) => key);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(
+    undefined
+  );
 
   // Fetch blog posts
   const { data: posts = [], isLoading } = trpc.blog.list.useQuery({
@@ -21,9 +29,10 @@ export default function Blog() {
     lang: language,
   });
 
-  const categories = language === 'ar' 
-    ? ["تكنولوجيا", "تجارة", "لوجستيات", "جودة", "نصائح"]
-    : ["Technology", "Trade", "Logistics", "Quality", "Tips"];
+  const categories =
+    language === "ar"
+      ? ["تكنولوجيا", "تجارة", "لوجستيات", "جودة", "نصائح"]
+      : ["Technology", "Trade", "Logistics", "Quality", "Tips"];
 
   return (
     <div className="min-h-screen bg-white" dir={dir}>
@@ -37,25 +46,36 @@ export default function Blog() {
             <span className="font-bold text-xl text-blue-900">IFROF</span>
           </Link>
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
-              {language === 'ar' ? 'الرئيسية' : 'Home'}
+            <Link
+              href="/"
+              className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium"
+            >
+              {language === "ar" ? "الرئيسية" : "Home"}
             </Link>
-            <a href="/#how-it-works" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
-              {language === 'ar' ? 'كيف يعمل' : 'How It Works'}
+            <a
+              href="/#how-it-works"
+              className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium"
+            >
+              {language === "ar" ? "كيف يعمل" : "How It Works"}
             </a>
-            <Link href="/factory-investigator" className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium">
-              {language === 'ar' ? 'Factory Investigator' : 'Factory Investigator'}
+            <Link
+              href="/factory-investigator"
+              className="text-gray-700 hover:text-blue-900 transition-colors text-sm font-medium"
+            >
+              {language === "ar"
+                ? "Factory Investigator"
+                : "Factory Investigator"}
             </Link>
-            
+
             <Link href="/login">
               <Button variant="ghost" className="text-blue-900 font-medium">
-                {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+                {language === "ar" ? "تسجيل الدخول" : "Login"}
               </Button>
             </Link>
 
             <Link href="/import-request">
               <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold">
-                {language === 'ar' ? 'ابدأ طلب استيراد' : 'Start Import'}
+                {language === "ar" ? "ابدأ طلب استيراد" : "Start Import"}
               </Button>
             </Link>
           </div>
@@ -66,12 +86,12 @@ export default function Blog() {
       <section className="bg-gradient-to-b from-blue-50 to-white py-16 md:py-24">
         <div className="container text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">
-            {language === 'ar' ? 'مدونة IFROF' : 'IFROF Blog'}
+            {language === "ar" ? "مدونة IFROF" : "IFROF Blog"}
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            {language === 'ar' 
-              ? 'اكتشف أحدث المقالات والنصائح حول التجارة الإلكترونية والمصانع والتكنولوجيا'
-              : 'Discover the latest articles and tips on e-commerce, factories, and technology'}
+            {language === "ar"
+              ? "اكتشف أحدث المقالات والنصائح حول التجارة الإلكترونية والمصانع والتكنولوجيا"
+              : "Discover the latest articles and tips on e-commerce, factories, and technology"}
           </p>
         </div>
       </section>
@@ -82,13 +102,21 @@ export default function Blog() {
           {/* Search Bar */}
           <div className="mb-8">
             <div className="relative">
-              <Search className={language === 'ar' ? "absolute right-4 top-3.5 w-5 h-5 text-gray-400" : "absolute left-4 top-3.5 w-5 h-5 text-gray-400"} />
+              <Search
+                className={
+                  language === "ar"
+                    ? "absolute right-4 top-3.5 w-5 h-5 text-gray-400"
+                    : "absolute left-4 top-3.5 w-5 h-5 text-gray-400"
+                }
+              />
               <input
                 type="text"
-                placeholder={language === 'ar' ? "ابحث عن مقالات..." : "Search articles..."}
+                placeholder={
+                  language === "ar" ? "ابحث عن مقالات..." : "Search articles..."
+                }
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full ${language === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                onChange={e => setSearchQuery(e.target.value)}
+                className={`w-full ${language === "ar" ? "pr-12 pl-4" : "pl-12 pr-4"} py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
               />
             </div>
           </div>
@@ -103,9 +131,9 @@ export default function Blog() {
                   : "bg-white text-gray-700 border border-gray-300 hover:border-blue-900"
               }`}
             >
-              {language === 'ar' ? 'الكل' : 'All'}
+              {language === "ar" ? "الكل" : "All"}
             </button>
-            {categories.map((cat) => (
+            {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
@@ -127,11 +155,19 @@ export default function Blog() {
         <div className="container">
           {isLoading ? (
             <div className="text-center py-12">
-              <p className="text-gray-600">{language === 'ar' ? 'جاري تحميل المقالات...' : 'Loading articles...'}</p>
+              <p className="text-gray-600">
+                {language === "ar"
+                  ? "جاري تحميل المقالات..."
+                  : "Loading articles..."}
+              </p>
             </div>
           ) : posts.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">{language === 'ar' ? 'لا توجد مقالات حالياً' : 'No articles found'}</p>
+              <p className="text-gray-600 text-lg">
+                {language === "ar"
+                  ? "لا توجد مقالات حالياً"
+                  : "No articles found"}
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -150,11 +186,12 @@ export default function Blog() {
                     <CardHeader>
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-sm font-semibold text-orange-500 bg-orange-50 px-3 py-1 rounded-full">
-                          {post.category || (language === 'ar' ? "عام" : "General")}
+                          {post.category ||
+                            (language === "ar" ? "عام" : "General")}
                         </span>
                         {post.featured && (
                           <span className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                            {language === 'ar' ? "مميز" : "Featured"}
+                            {language === "ar" ? "مميز" : "Featured"}
                           </span>
                         )}
                       </div>
@@ -171,10 +208,14 @@ export default function Blog() {
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            {new Date(post.createdAt).toLocaleDateString(language === 'ar' ? "ar-SA" : "en-US")}
+                            {new Date(post.createdAt).toLocaleDateString(
+                              language === "ar" ? "ar-SA" : "en-US"
+                            )}
                           </div>
                         </div>
-                        <ArrowRight className={`w-5 h-5 text-orange-500 ${language === 'en' ? '' : 'rotate-180'}`} />
+                        <ArrowRight
+                          className={`w-5 h-5 text-orange-500 ${language === "en" ? "" : "rotate-180"}`}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -219,33 +260,80 @@ export default function Blog() {
                 </div>
                 <span className="font-bold text-white">IFROF</span>
               </div>
-              <p className="text-sm">منصة ذكية للبحث عن المصانع وإدارة العمليات التجارية</p>
+              <p className="text-sm">
+                منصة ذكية للبحث عن المصانع وإدارة العمليات التجارية
+              </p>
             </div>
 
             <div>
               <h4 className="font-bold text-white mb-4">الروابط</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/" className="hover:text-white transition-colors">الرئيسية</Link></li>
-                <li><a href="/#features" className="hover:text-white transition-colors">المميزات</a></li>
-                <li><a href="/#services" className="hover:text-white transition-colors">الخدمات</a></li>
+                <li>
+                  <Link href="/" className="hover:text-white transition-colors">
+                    الرئيسية
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="/#features"
+                    className="hover:text-white transition-colors"
+                  >
+                    المميزات
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/#services"
+                    className="hover:text-white transition-colors"
+                  >
+                    الخدمات
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-bold text-white mb-4">الشركة</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">عن الشركة</a></li>
-                <li><Link href="/blog" className="hover:text-white transition-colors">المدونة</Link></li>
-                <li><a href="#" className="hover:text-white transition-colors">الوظائف</a></li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    عن الشركة
+                  </a>
+                </li>
+                <li>
+                  <Link
+                    href="/blog"
+                    className="hover:text-white transition-colors"
+                  >
+                    المدونة
+                  </Link>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    الوظائف
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-bold text-white mb-4">القانونية</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">سياسة الخصوصية</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">شروط الاستخدام</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">اتصل بنا</a></li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    سياسة الخصوصية
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    شروط الاستخدام
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    اتصل بنا
+                  </a>
+                </li>
               </ul>
             </div>
           </div>

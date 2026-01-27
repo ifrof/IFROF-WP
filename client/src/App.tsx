@@ -35,7 +35,9 @@ const Profile = lazy(() => import("@/pages/Profile"));
 const About = lazy(() => import("@/pages/About"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
-const PublicFactoryListings = lazy(() => import("@/pages/PublicFactoryListings"));
+const PublicFactoryListings = lazy(
+  () => import("@/pages/PublicFactoryListings")
+);
 const FactoryPublicProfile = lazy(() => import("@/pages/FactoryPublicProfile"));
 const VerifyFactory = lazy(() => import("@/pages/VerifyFactory"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
@@ -45,10 +47,10 @@ const NotFound = lazy(() => import("@/pages/NotFound"));
 
 function AppContent() {
   const { dir, language } = useLanguage();
-  
+
   useEffect(() => {
-    document.documentElement.dir = dir || 'ltr';
-    document.documentElement.lang = language || 'en';
+    document.documentElement.dir = dir || "ltr";
+    document.documentElement.lang = language || "en";
   }, [dir, language]);
 
   return (
@@ -56,7 +58,13 @@ function AppContent() {
       <GA4 />
       <GTM />
       <Toaster />
-      <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>}>
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        }
+      >
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/blog" component={Blog} />

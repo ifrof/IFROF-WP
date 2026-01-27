@@ -9,8 +9,12 @@ export default function FactoryListings() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Product Listings</h1>
-            <p className="text-muted-foreground">Manage your factory products and marketplace listings.</p>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Product Listings
+            </h1>
+            <p className="text-muted-foreground">
+              Manage your factory products and marketplace listings.
+            </p>
           </div>
           <Button className="gap-2">
             <Plus className="h-4 w-4" />

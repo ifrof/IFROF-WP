@@ -3,11 +3,13 @@
 ## I. STRATEGIC ARCHITECTURE
 
 ### A. Core Value Proposition
+
 **Problem:** Buyers waste 40% on middlemen. Factories lose 30% to brokers.  
 **Solution:** Direct connection = Win-Win (Buyers save 40%, Factories earn 30% more).  
 **Differentiation:** AI-verified factories (not just listed), transparent pricing, guaranteed quality.
 
 ### B. Business Model (Revenue Streams)
+
 ```
 1. Subscription Tiers (Buyers)
    - Starter: $99/mo (5 searches/month)
@@ -29,6 +31,7 @@
 ## II. TECHNICAL ARCHITECTURE
 
 ### A. System Design (Microservices)
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    CDN (Cloudflare)                      │
@@ -58,6 +61,7 @@
 ```
 
 ### B. Database Schema (Optimized)
+
 ```sql
 -- Core Tables
 CREATE TABLE users (
@@ -138,6 +142,7 @@ CREATE TABLE searches (
 ```
 
 ### C. API Endpoints (tRPC Routers)
+
 ```typescript
 // Buyers
 POST /trpc/search.factories
@@ -184,6 +189,7 @@ POST /trpc/admin.verifyFactory
 ```
 
 ### D. Caching Strategy (Redis)
+
 ```typescript
 // Cache Layers
 1. Browser Cache (1 hour)
@@ -217,6 +223,7 @@ POST /trpc/admin.verifyFactory
 ## III. FRONTEND ARCHITECTURE
 
 ### A. Design System (Atomic)
+
 ```
 Atoms: Button, Input, Badge, Icon
 Molecules: SearchBar, ProductCard, FactoryCard
@@ -226,6 +233,7 @@ Pages: / , /search, /factory/:id, /dashboard
 ```
 
 ### B. User Psychology (Conversion Optimization)
+
 ```
 1. Trust Signals (First 2 seconds)
    - Verified badge on factories
@@ -256,6 +264,7 @@ Pages: / , /search, /factory/:id, /dashboard
 ```
 
 ### C. Performance Targets
+
 ```
 LCP: < 1.5s (vs Alibaba: 2.1s)
 FCP: < 0.8s
@@ -269,6 +278,7 @@ TTFB: < 50ms
 ## IV. SECURITY ARCHITECTURE
 
 ### A. Defense Layers
+
 ```
 Layer 1: DDoS Protection (Cloudflare)
 Layer 2: WAF (Web Application Firewall)
@@ -280,6 +290,7 @@ Layer 7: Authorization (RBAC + ABAC)
 ```
 
 ### B. Data Protection
+
 ```
 - PII encrypted at rest (AES-256)
 - Payment data: PCI DSS compliant
@@ -289,6 +300,7 @@ Layer 7: Authorization (RBAC + ABAC)
 ```
 
 ### C. Compliance
+
 ```
 - GDPR (EU users)
 - CCPA (California users)
@@ -301,6 +313,7 @@ Layer 7: Authorization (RBAC + ABAC)
 ## V. GROWTH HACKING STRATEGY
 
 ### A. User Acquisition
+
 ```
 1. SEO (Organic)
    - Target: "Import from China", "Factory direct", "Alibaba alternative"
@@ -325,6 +338,7 @@ Layer 7: Authorization (RBAC + ABAC)
 ```
 
 ### B. Retention Metrics
+
 ```
 - Week 1 Retention: 40%
 - Month 1 Retention: 20%
@@ -333,6 +347,7 @@ Layer 7: Authorization (RBAC + ABAC)
 ```
 
 ### C. Monetization Funnel
+
 ```
 Free Trial (7 days)
   ↓ (40% convert)
@@ -350,6 +365,7 @@ Lifetime Value: $2,500+
 ## VI. OPERATIONAL EXCELLENCE
 
 ### A. Monitoring & Alerts
+
 ```
 Critical Metrics:
 - API response time > 500ms → Page
@@ -361,6 +377,7 @@ Critical Metrics:
 ```
 
 ### B. Incident Response
+
 ```
 P0 (Critical): < 15 min response, < 1 hour resolution
 P1 (High): < 1 hour response, < 4 hour resolution
@@ -369,6 +386,7 @@ P3 (Low): < 24 hour response, < 1 week resolution
 ```
 
 ### C. Deployment Pipeline
+
 ```
 1. Code commit to main
 2. Automated tests (unit + integration + e2e)
@@ -386,24 +404,28 @@ P3 (Low): < 24 hour response, < 1 week resolution
 ## VII. SCALING ROADMAP
 
 ### Phase 1 (Month 1-3): MVP Launch
+
 - 1,000 factories
 - 10,000 buyers
 - $100K GMV
 - 99.9% uptime
 
 ### Phase 2 (Month 4-6): Growth
+
 - 10,000 factories
 - 100,000 buyers
 - $5M GMV
 - 99.95% uptime
 
 ### Phase 3 (Month 7-12): Scale
+
 - 50,000 factories
 - 500,000 buyers
 - $50M GMV
 - 99.99% uptime
 
 ### Phase 4 (Year 2): Global
+
 - 200,000 factories
 - 2M buyers
 - $500M GMV
@@ -413,14 +435,14 @@ P3 (Low): < 24 hour response, < 1 week resolution
 
 ## VIII. COMPETITIVE ADVANTAGES
 
-| Aspect | IFROF | Alibaba | Amazon |
-|--------|-------|---------|--------|
-| Commission | 2% | 5% | 15% |
-| Verification | AI + Manual | Manual | Manual |
-| Lead Time | 24h response | 48h response | 24h response |
-| Transparency | 100% | 70% | 80% |
-| Direct Connection | Yes | No (broker) | No (seller) |
-| Pricing | Transparent | Hidden | Transparent |
+| Aspect            | IFROF        | Alibaba      | Amazon       |
+| ----------------- | ------------ | ------------ | ------------ |
+| Commission        | 2%           | 5%           | 15%          |
+| Verification      | AI + Manual  | Manual       | Manual       |
+| Lead Time         | 24h response | 48h response | 24h response |
+| Transparency      | 100%         | 70%          | 80%          |
+| Direct Connection | Yes          | No (broker)  | No (seller)  |
+| Pricing           | Transparent  | Hidden       | Transparent  |
 
 ---
 

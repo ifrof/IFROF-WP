@@ -4,23 +4,31 @@ import { getDb } from "../db";
 import { orders, notifications, users } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import express from "express";
-import { sendOrderConfirmationEmail, sendPaymentFailedEmail } from "./email-service";
+import {
+  sendOrderConfirmationEmail,
+  sendPaymentFailedEmail,
+} from "./email-service";
 
-const stripeMode = process.env.STRIPE_MODE || 'test';
-const stripeSecretKey = stripeMode === 'live' 
-  ? process.env.STRIPE_SECRET_KEY_LIVE 
-  : process.env.STRIPE_SECRET_KEY_TEST;
+const stripeMode = process.env.STRIPE_MODE || "test";
+const stripeSecretKey =
+  stripeMode === "live"
+    ? process.env.STRIPE_SECRET_KEY_LIVE
+    : process.env.STRIPE_SECRET_KEY_TEST;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 if (!stripeSecretKey) {
-  console.warn(`WARNING: STRIPE_SECRET_KEY_${stripeMode.toUpperCase()} is not set`);
+  console.warn(
+    `WARNING: STRIPE_SECRET_KEY_${stripeMode.toUpperCase()} is not set`
+  );
 }
 
 if (!webhookSecret) {
   console.warn("WARNING: STRIPE_WEBHOOK_SECRET is not set");
 }
 
-const stripe = new Stripe(stripeSecretKey || "sk_test_dummy_key_for_initialization");
+const stripe = new Stripe(
+  stripeSecretKey || "sk_test_dummy_key_for_initialization"
+);
 
 export function registerStripeWebhook(app: Express) {
   app.post(
@@ -53,7 +61,10 @@ export function registerStripeWebhook(app: Express) {
         switch (event.type) {
           case "checkout.session.completed": {
             const session = event.data.object as Stripe.Checkout.Session;
-            console.log("[Stripe Webhook] Checkout session completed:", session.id);
+            console.log(
+              "[Stripe Webhook] Checkout session completed:",
+              session.id
+            );
 
             const orderRecords = await db
               .select()
@@ -72,7 +83,9 @@ export function registerStripeWebhook(app: Express) {
                 })
                 .where(eq(orders.id, order.id));
 
-              console.log(`[Stripe Webhook] Order ${order.orderNumber} payment confirmed`);
+              console.log(
+                `[Stripe Webhook] Order ${order.orderNumber} payment confirmed`
+              );
 
               const userRecords = await db
                 .select()
@@ -85,7 +98,9 @@ export function registerStripeWebhook(app: Express) {
                 const shipping = Math.round(order.totalAmount * 0.1);
                 const tax = Math.round(order.totalAmount * 0.08);
                 const subtotal = order.totalAmount - shipping - tax;
-                const shippingAddress = JSON.parse(order.shippingAddress || "{}");
+                const shippingAddress = JSON.parse(
+                  order.shippingAddress || "{}"
+                );
 
                 await sendOrderConfirmationEmail({
                   buyerName: user.name || "Valued Customer",
@@ -93,7 +108,8 @@ export function registerStripeWebhook(app: Express) {
                   orderNumber: order.orderNumber,
                   orderDate: order.createdAt,
                   items: items.map((item: any) => ({
-                    productName: item.productName || `Product #${item.productId}`,
+                    productName:
+                      item.productName || `Product #${item.productId}`,
                     quantity: item.quantity,
                     price: item.price * 100,
                   })),
@@ -126,13 +142,16 @@ export function registerStripeWebhook(app: Express) {
               // Handle commission payment for import requests
               const quoteId = parseInt(session.metadata.quote_id);
               const requestId = parseInt(session.metadata.request_id);
-              
+
               const schema = await import("../../drizzle/schema");
-              await db.update(schema.importRequests)
+              await db
+                .update(schema.importRequests)
                 .set({ status: "paid", updatedAt: new Date() })
                 .where(eq(schema.importRequests.id, requestId));
-              
-              console.log(`[Stripe Webhook] Commission paid for quote ${quoteId}, request ${requestId} marked as paid`);
+
+              console.log(
+                `[Stripe Webhook] Commission paid for quote ${quoteId}, request ${requestId} marked as paid`
+              );
             }
             break;
           }
@@ -177,7 +196,12 @@ export function registerStripeWebhook(app: Express) {
             const orderRecords = await db
               .select()
               .from(orders)
-              .where(eq(orders.stripePaymentIntentId, charge.payment_intent?.toString() || ""));
+              .where(
+                eq(
+                  orders.stripePaymentIntentId,
+                  charge.payment_intent?.toString() || ""
+                )
+              );
 
             if (orderRecords.length > 0) {
               const order = orderRecords[0];
@@ -191,7 +215,9 @@ export function registerStripeWebhook(app: Express) {
                 })
                 .where(eq(orders.id, order.id));
 
-              console.log(`[Stripe Webhook] Order ${order.orderNumber} refunded`);
+              console.log(
+                `[Stripe Webhook] Order ${order.orderNumber} refunded`
+              );
 
               await db.insert(notifications).values({
                 userId: order.buyerId,

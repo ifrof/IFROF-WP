@@ -1,9 +1,23 @@
 import { useParams, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Package, MapPin, CreditCard, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  Loader2,
+  Package,
+  MapPin,
+  CreditCard,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function OrderDetail() {
@@ -77,8 +91,12 @@ export default function OrderDetail() {
             <CardContent className="pt-6 text-center">
               <AlertCircle className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
               <p className="text-xl font-medium mb-2">Order Not Found</p>
-              <p className="text-muted-foreground mb-4">The order you are looking for does not exist.</p>
-              <Button onClick={() => setLocation("/orders")}>Back to Orders</Button>
+              <p className="text-muted-foreground mb-4">
+                The order you are looking for does not exist.
+              </p>
+              <Button onClick={() => setLocation("/orders")}>
+                Back to Orders
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -133,20 +151,28 @@ export default function OrderDetail() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Last Updated</p>
+                    <p className="text-sm text-muted-foreground">
+                      Last Updated
+                    </p>
                     <p className="text-lg font-semibold">
                       {new Date(order.updatedAt).toLocaleDateString()}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Order Status</p>
+                    <p className="text-sm text-muted-foreground">
+                      Order Status
+                    </p>
                     <Badge className={getStatusColor(order.status)}>
                       {order.status}
                     </Badge>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Payment Status</p>
-                    <Badge className={getPaymentStatusColor(order.paymentStatus)}>
+                    <p className="text-sm text-muted-foreground">
+                      Payment Status
+                    </p>
+                    <Badge
+                      className={getPaymentStatusColor(order.paymentStatus)}
+                    >
                       {order.paymentStatus}
                     </Badge>
                   </div>
@@ -162,13 +188,22 @@ export default function OrderDetail() {
               <CardContent>
                 <div className="space-y-4">
                   {items.map((item: any, idx: number) => (
-                    <div key={idx} className="flex justify-between items-center pb-4 border-b last:border-b-0">
+                    <div
+                      key={idx}
+                      className="flex justify-between items-center pb-4 border-b last:border-b-0"
+                    >
                       <div>
-                        <p className="font-medium">{item.productName || `Product #${item.productId}`}</p>
-                        <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
+                        <p className="font-medium">
+                          {item.productName || `Product #${item.productId}`}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Quantity: {item.quantity}
+                        </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">${((item.price * item.quantity) / 100).toFixed(2)}</p>
+                        <p className="font-semibold">
+                          ${((item.price * item.quantity) / 100).toFixed(2)}
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           ${(item.price / 100).toFixed(2)} each
                         </p>
@@ -190,14 +225,20 @@ export default function OrderDetail() {
               <CardContent>
                 <div className="space-y-2">
                   <p className="font-medium">{shippingAddress.fullName}</p>
-                  <p className="text-muted-foreground">{shippingAddress.address}</p>
+                  <p className="text-muted-foreground">
+                    {shippingAddress.address}
+                  </p>
                   <p className="text-muted-foreground">
                     {shippingAddress.city}
                     {shippingAddress.state && `, ${shippingAddress.state}`}
                     {shippingAddress.zipCode && ` ${shippingAddress.zipCode}`}
                   </p>
-                  <p className="text-muted-foreground">{shippingAddress.country}</p>
-                  <p className="text-muted-foreground">Phone: {shippingAddress.phone}</p>
+                  <p className="text-muted-foreground">
+                    {shippingAddress.country}
+                  </p>
+                  <p className="text-muted-foreground">
+                    Phone: {shippingAddress.phone}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -217,15 +258,21 @@ export default function OrderDetail() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal:</span>
-                    <span className="font-medium">${(subtotal / 100).toFixed(2)}</span>
+                    <span className="font-medium">
+                      ${(subtotal / 100).toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping:</span>
-                    <span className="font-medium">${(shipping / 100).toFixed(2)}</span>
+                    <span className="font-medium">
+                      ${(shipping / 100).toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax:</span>
-                    <span className="font-medium">${(tax / 100).toFixed(2)}</span>
+                    <span className="font-medium">
+                      ${(tax / 100).toFixed(2)}
+                    </span>
                   </div>
                   <div className="border-t pt-2">
                     <div className="flex justify-between text-lg">
@@ -269,7 +316,9 @@ export default function OrderDetail() {
                 </div>
                 {order.stripePaymentIntentId && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Transaction ID</p>
+                    <p className="text-sm text-muted-foreground">
+                      Transaction ID
+                    </p>
                     <p className="text-xs font-mono break-all text-muted-foreground">
                       {order.stripePaymentIntentId}
                     </p>

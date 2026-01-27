@@ -40,7 +40,8 @@ export default function PrivacyPolicy() {
 
           <h2>{t("privacy.contact")}</h2>
           <p>
-            {t("privacy.contactEmail")}: <a href="mailto:privacy@ifrof.com">privacy@ifrof.com</a>
+            {t("privacy.contactEmail")}:{" "}
+            <a href="mailto:privacy@ifrof.com">privacy@ifrof.com</a>
           </p>
         </div>
       </div>

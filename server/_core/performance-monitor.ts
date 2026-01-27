@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 
 interface PerformanceMetrics {
   timestamp: string;
@@ -16,20 +16,24 @@ const maxLogSize = 1000;
 /**
  * Middleware to monitor request performance
  */
-export function performanceMonitor(req: Request, res: Response, next: NextFunction) {
+export function performanceMonitor(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const startTime = Date.now();
 
   // Capture response finish event
-  res.on('finish', () => {
+  res.on("finish", () => {
     const duration = Date.now() - startTime;
-    
+
     const metrics: PerformanceMetrics = {
       timestamp: new Date().toISOString(),
       method: req.method,
       path: req.path,
       duration,
       statusCode: res.statusCode,
-      userAgent: req.headers['user-agent'],
+      userAgent: req.headers["user-agent"],
     };
 
     // Log slow requests
@@ -63,7 +67,9 @@ export function getPerformanceStats() {
   const totalRequests = performanceLog.length;
   const totalDuration = performanceLog.reduce((sum, m) => sum + m.duration, 0);
   const averageDuration = totalDuration / totalRequests;
-  const slowRequests = performanceLog.filter(m => m.duration > slowQueryThreshold).length;
+  const slowRequests = performanceLog.filter(
+    m => m.duration > slowQueryThreshold
+  ).length;
   const errorRequests = performanceLog.filter(m => m.statusCode >= 400).length;
   const errorRate = (errorRequests / totalRequests) * 100;
 
@@ -80,7 +86,12 @@ export function getPerformanceStats() {
 /**
  * Error tracking middleware
  */
-export function errorTracker(err: Error, req: Request, res: Response, next: NextFunction) {
+export function errorTracker(
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const errorDetails = {
     timestamp: new Date().toISOString(),
     message: err.message,
@@ -89,10 +100,10 @@ export function errorTracker(err: Error, req: Request, res: Response, next: Next
     path: req.path,
     query: req.query,
     body: req.body,
-    userAgent: req.headers['user-agent'],
+    userAgent: req.headers["user-agent"],
   };
 
-  console.error('[ERROR]', JSON.stringify(errorDetails, null, 2));
+  console.error("[ERROR]", JSON.stringify(errorDetails, null, 2));
 
   // In production, you would send this to a service like Sentry
   if (process.env.SENTRY_DSN) {
@@ -100,8 +111,11 @@ export function errorTracker(err: Error, req: Request, res: Response, next: Next
   }
 
   res.status(500).json({
-    error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
+    error: "Internal Server Error",
+    message:
+      process.env.NODE_ENV === "development"
+        ? err.message
+        : "Something went wrong",
   });
 }
 
@@ -109,11 +123,17 @@ export function errorTracker(err: Error, req: Request, res: Response, next: Next
  * Database query performance monitor
  */
 export class QueryMonitor {
-  private static queries: Array<{ query: string; duration: number; timestamp: string }> = [];
+  private static queries: Array<{
+    query: string;
+    duration: number;
+    timestamp: string;
+  }> = [];
 
   static logQuery(query: string, duration: number) {
     if (duration > slowQueryThreshold) {
-      console.warn(`[SLOW QUERY] ${duration}ms - ${query.substring(0, 100)}...`);
+      console.warn(
+        `[SLOW QUERY] ${duration}ms - ${query.substring(0, 100)}...`
+      );
     }
 
     this.queries.push({
@@ -140,7 +160,9 @@ export class QueryMonitor {
     const totalQueries = this.queries.length;
     const totalDuration = this.queries.reduce((sum, q) => sum + q.duration, 0);
     const averageDuration = totalDuration / totalQueries;
-    const slowQueries = this.queries.filter(q => q.duration > slowQueryThreshold).length;
+    const slowQueries = this.queries.filter(
+      q => q.duration > slowQueryThreshold
+    ).length;
 
     return {
       totalQueries,

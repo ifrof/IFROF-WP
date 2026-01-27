@@ -12,22 +12,34 @@ export default function About() {
     {
       icon: Globe,
       title: language === "ar" ? "النزاهة" : "Integrity",
-      desc: language === "ar" ? "نحن نؤمن بالشفافية والصدق في جميع تعاملاتنا." : "We believe in transparency and honesty in all our dealings.",
+      desc:
+        language === "ar"
+          ? "نحن نؤمن بالشفافية والصدق في جميع تعاملاتنا."
+          : "We believe in transparency and honesty in all our dealings.",
     },
     {
       icon: Target,
       title: language === "ar" ? "الدقة" : "Precision",
-      desc: language === "ar" ? "نحرص على تقديم معلومات دقيقة وموثوقة عن المصانع." : "We ensure providing accurate and reliable information about factories.",
+      desc:
+        language === "ar"
+          ? "نحرص على تقديم معلومات دقيقة وموثوقة عن المصانع."
+          : "We ensure providing accurate and reliable information about factories.",
     },
     {
       icon: Users,
       title: language === "ar" ? "التعاون" : "Collaboration",
-      desc: language === "ar" ? "نبني جسور التواصل بين الشرق والغرب." : "We build bridges of communication between East and West.",
+      desc:
+        language === "ar"
+          ? "نبني جسور التواصل بين الشرق والغرب."
+          : "We build bridges of communication between East and West.",
     },
     {
       icon: Shield,
       title: language === "ar" ? "العالمية" : "Global Reach",
-      desc: language === "ar" ? "نخدم العملاء في جميع أنحاء العالم للوصول للصين." : "We serve clients worldwide to reach China.",
+      desc:
+        language === "ar"
+          ? "نخدم العملاء في جميع أنحاء العالم للوصول للصين."
+          : "We serve clients worldwide to reach China.",
     },
   ];
 
@@ -43,8 +55,8 @@ export default function About() {
             {language === "ar" ? "عن IFROF" : "About IFROF"}
           </h1>
           <p className="text-xl text-blue-100 leading-relaxed">
-            {language === "ar" 
-              ? "IFROF هي منصة رائدة تهدف إلى تبسيط عملية الاستيراد من الصين من خلال ربط المشترين العالميين بمصانع موثوقة ومتحقق منها." 
+            {language === "ar"
+              ? "IFROF هي منصة رائدة تهدف إلى تبسيط عملية الاستيراد من الصين من خلال ربط المشترين العالميين بمصانع موثوقة ومتحقق منها."
               : "IFROF is a leading platform aimed at simplifying the import process from China by connecting global buyers with reliable and verified factories."}
           </p>
         </div>
@@ -54,7 +66,9 @@ export default function About() {
         {/* Mission & Vision */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold">{language === "ar" ? "مهمتنا" : "Our Mission"}</h2>
+            <h2 className="text-3xl font-bold">
+              {language === "ar" ? "مهمتنا" : "Our Mission"}
+            </h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
               {language === "ar"
                 ? "مهمتنا هي تمكين الشركات الصغيرة والمتوسطة من الوصول إلى قدرات التصنيع الصينية بكل سهولة وأمان، مع ضمان أعلى معايير الجودة والشفافية."
@@ -62,7 +76,9 @@ export default function About() {
             </p>
           </div>
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold">{language === "ar" ? "رؤيتنا" : "Our Vision"}</h2>
+            <h2 className="text-3xl font-bold">
+              {language === "ar" ? "رؤيتنا" : "Our Vision"}
+            </h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
               {language === "ar"
                 ? "أن نكون المنصة الأولى عالمياً في تسهيل التجارة الدولية المباشرة مع المصانع، وإزالة كافة العوائق الجغرافية واللغوية."
@@ -73,7 +89,9 @@ export default function About() {
 
         {/* Values */}
         <div className="mb-20">
-          <h2 className="text-3xl font-bold mb-12 text-center">{language === "ar" ? "قيمنا" : "Our Values"}</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            {language === "ar" ? "قيمنا" : "Our Values"}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => {
               const Icon = value.icon;
@@ -84,7 +102,9 @@ export default function About() {
                       <Icon className="w-10 h-10 text-primary" />
                     </div>
                     <h3 className="font-bold text-lg mb-2">{value.title}</h3>
-                    <p className="text-sm text-muted-foreground">{value.desc}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {value.desc}
+                    </p>
                   </CardContent>
                 </Card>
               );
@@ -94,41 +114,64 @@ export default function About() {
 
         {/* Stats */}
         <div className="bg-muted/30 rounded-2xl p-12 mb-20">
-          <h2 className="text-3xl font-bold mb-12 text-center">{language === "ar" ? "أرقامنا" : "Our Stats"}</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            {language === "ar" ? "أرقامنا" : "Our Stats"}
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="text-4xl font-bold text-primary mb-2">500+</div>
-              <p className="text-muted-foreground">{language === "ar" ? "مصنع موثوق" : "Verified Factories"}</p>
+              <p className="text-muted-foreground">
+                {language === "ar" ? "مصنع موثوق" : "Verified Factories"}
+              </p>
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-primary mb-2">5000+</div>
-              <p className="text-muted-foreground">{language === "ar" ? "طلب ناجح" : "Successful Orders"}</p>
+              <p className="text-muted-foreground">
+                {language === "ar" ? "طلب ناجح" : "Successful Orders"}
+              </p>
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-primary mb-2">50+</div>
-              <p className="text-muted-foreground">{language === "ar" ? "دولة مخدومة" : "Countries Served"}</p>
+              <p className="text-muted-foreground">
+                {language === "ar" ? "دولة مخدومة" : "Countries Served"}
+              </p>
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-primary mb-2">24/7</div>
-              <p className="text-muted-foreground">{language === "ar" ? "دعم فني" : "Support"}</p>
+              <p className="text-muted-foreground">
+                {language === "ar" ? "دعم فني" : "Support"}
+              </p>
             </div>
           </div>
         </div>
 
         {/* CTA */}
         <div className="text-center bg-primary text-white rounded-2xl p-12">
-          <h2 className="text-3xl font-bold mb-4">{language === "ar" ? "ابدأ رحلتك معنا اليوم" : "Start Your Journey Today"}</h2>
+          <h2 className="text-3xl font-bold mb-4">
+            {language === "ar"
+              ? "ابدأ رحلتك معنا اليوم"
+              : "Start Your Journey Today"}
+          </h2>
           <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
-            {language === "ar" 
-              ? "انضم إلى آلاف المستوردين الذين يثقون في IFROF للوصول إلى أفضل المصانع الصينية." 
+            {language === "ar"
+              ? "انضم إلى آلاف المستوردين الذين يثقون في IFROF للوصول إلى أفضل المصانع الصينية."
               : "Join thousands of importers who trust IFROF to reach the best Chinese factories."}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/factory">
-              <Button size="lg" className="bg-white text-primary hover:bg-blue-50">{language === "ar" ? "تصفح السوق" : "Explore Marketplace"}</Button>
+              <Button
+                size="lg"
+                className="bg-white text-primary hover:bg-blue-50"
+              >
+                {language === "ar" ? "تصفح السوق" : "Explore Marketplace"}
+              </Button>
             </Link>
             <Link href="/contact">
-              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white text-white hover:bg-white/10"
+              >
                 {language === "ar" ? "اتصل بنا" : "Contact Us"}
               </Button>
             </Link>

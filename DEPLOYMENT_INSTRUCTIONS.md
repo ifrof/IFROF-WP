@@ -3,10 +3,12 @@
 ## 🚀 Deploy to Railway in 5 Steps
 
 ### Step 1: Access Railway Project
+
 Your Railway project is already set up at:
 https://railway.com/project/5dd1a85e-95d6-410a-9bde-741b1a1fde56/service/92466a46-9237-4479-8205-799fc15bb727
 
 ### Step 2: Add MySQL Database
+
 1. In Railway dashboard, click **"New"** → **"Database"** → **"MySQL"**
 2. Railway will automatically provision the database
 3. The `DATABASE_URL` will be automatically available to your service
@@ -61,6 +63,7 @@ Proxy: No (disable if using Cloudflare)
 ```
 
 For www subdomain:
+
 ```
 Type: CNAME
 Name: www
@@ -88,21 +91,25 @@ After deployment, verify:
 ## 🔧 Troubleshooting
 
 ### Build Fails
+
 - Check **Deployments** tab for error logs
 - Verify all environment variables are set
 - Ensure MySQL service is running
 
 ### Database Connection Error
+
 - Verify MySQL service is running in Railway
 - Check that `DATABASE_URL` variable reference is correct: `${{MySQL.DATABASE_URL}}`
 - Wait a few minutes for MySQL to fully initialize
 
 ### Domain Not Working
+
 - Verify DNS records are correctly configured
 - DNS propagation can take 5-60 minutes
 - Try accessing via Railway's generated domain first
 
 ### OAuth/Login Issues
+
 - Ensure `VITE_OAUTH_PORTAL_URL` is exactly: `https://auth.manus.im`
 - Verify `VITE_APP_ID` is registered with Manus
 - Check that HTTPS is enabled (Railway provides this automatically)
@@ -110,20 +117,24 @@ After deployment, verify:
 ## 📊 Monitoring
 
 ### View Logs
+
 1. Go to your service in Railway
 2. Click **"Deployments"**
 3. Select latest deployment
 4. View real-time logs
 
 ### Health Check
+
 Test the health endpoint:
+
 ```bash
 curl https://ifrof.com/api/health
 ```
 
 Expected response:
+
 ```json
-{"status":"ok","timestamp":"2026-01-23T..."}
+{ "status": "ok", "timestamp": "2026-01-23T..." }
 ```
 
 ## 🔄 Automatic Deployments
@@ -137,6 +148,7 @@ git push origin main
 ```
 
 Railway will automatically:
+
 1. Detect the push
 2. Build the new version
 3. Deploy with zero downtime

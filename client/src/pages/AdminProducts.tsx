@@ -1,17 +1,43 @@
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Plus, Edit2, Search, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
 interface ProductFormData {
@@ -47,14 +73,22 @@ export default function AdminProducts() {
   });
 
   const { data: factories } = trpc.factories.list.useQuery();
-  const { data: products, isLoading: productsLoading, refetch } = trpc.admin.getProducts.useQuery({ search });
+  const {
+    data: products,
+    isLoading: productsLoading,
+    refetch,
+  } = trpc.admin.getProducts.useQuery({ search });
 
   const createMutation = trpc.admin.createProduct.useMutation();
   const updateMutation = trpc.admin.updateProduct.useMutation();
   const deleteMutation = trpc.admin.deleteProduct.useMutation();
 
   if (authLoading) {
-    return <div className="flex items-center justify-center min-h-screen"><Loader2 className="animate-spin" /></div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="animate-spin" />
+      </div>
+    );
   }
 
   if (!user || user.role !== "admin") {
@@ -62,8 +96,14 @@ export default function AdminProducts() {
       <div className="flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>{language === "ar" ? "ممنوع الوصول" : "Access Denied"}</CardTitle>
-            <CardDescription>{language === "ar" ? "يجب أن تكون مسؤولاً للوصول إلى هذه الصفحة" : "You must be an admin to access this page."}</CardDescription>
+            <CardTitle>
+              {language === "ar" ? "ممنوع الوصول" : "Access Denied"}
+            </CardTitle>
+            <CardDescription>
+              {language === "ar"
+                ? "يجب أن تكون مسؤولاً للوصول إلى هذه الصفحة"
+                : "You must be an admin to access this page."}
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -74,7 +114,9 @@ export default function AdminProducts() {
     e.preventDefault();
 
     if (!formData.factoryId) {
-      toast.error(language === "ar" ? "يرجى اختيار مصنع" : "Please select a factory");
+      toast.error(
+        language === "ar" ? "يرجى اختيار مصنع" : "Please select a factory"
+      );
       return;
     }
 
@@ -86,14 +128,22 @@ export default function AdminProducts() {
           basePrice: Math.round(parseFloat(formData.basePrice) * 100),
           minimumOrderQuantity: parseInt(formData.minimumOrderQuantity),
         });
-        toast.success(language === "ar" ? "تم تحديث المنتج بنجاح" : "Product updated successfully");
+        toast.success(
+          language === "ar"
+            ? "تم تحديث المنتج بنجاح"
+            : "Product updated successfully"
+        );
       } else {
         await createMutation.mutateAsync({
           ...formData,
           basePrice: Math.round(parseFloat(formData.basePrice) * 100),
           minimumOrderQuantity: parseInt(formData.minimumOrderQuantity),
         });
-        toast.success(language === "ar" ? "تم إنشاء المنتج بنجاح" : "Product created successfully");
+        toast.success(
+          language === "ar"
+            ? "تم إنشاء المنتج بنجاح"
+            : "Product created successfully"
+        );
       }
 
       setFormData({
@@ -112,7 +162,9 @@ export default function AdminProducts() {
       setIsOpen(false);
       refetch();
     } catch (error) {
-      toast.error(language === "ar" ? "فشل في حفظ المنتج" : "Failed to save product");
+      toast.error(
+        language === "ar" ? "فشل في حفظ المنتج" : "Failed to save product"
+      );
     }
   };
 
@@ -134,13 +186,21 @@ export default function AdminProducts() {
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm(language === "ar" ? "هل أنت متأكد من حذف هذا المنتج؟" : "Are you sure you want to delete this product?")) {
+    if (
+      confirm(
+        language === "ar"
+          ? "هل أنت متأكد من حذف هذا المنتج؟"
+          : "Are you sure you want to delete this product?"
+      )
+    ) {
       try {
         await deleteMutation.mutateAsync({ id });
         toast.success(language === "ar" ? "تم حذف المنتج" : "Product deleted");
         refetch();
       } catch (error) {
-        toast.error(language === "ar" ? "فشل في حذف المنتج" : "Failed to delete product");
+        toast.error(
+          language === "ar" ? "فشل في حذف المنتج" : "Failed to delete product"
+        );
       }
     }
   };
@@ -154,7 +214,9 @@ export default function AdminProducts() {
               {language === "ar" ? "إدارة المنتجات" : "Product Management"}
             </h1>
             <p className="text-muted-foreground mt-2">
-              {language === "ar" ? "إضافة وتعديل وحذف المنتجات للمصانع" : "Add and manage products for factories"}
+              {language === "ar"
+                ? "إضافة وتعديل وحذف المنتجات للمصانع"
+                : "Add and manage products for factories"}
             </p>
           </div>
 
@@ -172,32 +234,56 @@ export default function AdminProducts() {
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>{editingId ? (language === "ar" ? "تعديل المنتج" : "Edit Product") : (language === "ar" ? "إضافة منتج جديد" : "Add New Product")}</DialogTitle>
+                  <DialogTitle>
+                    {editingId
+                      ? language === "ar"
+                        ? "تعديل المنتج"
+                        : "Edit Product"
+                      : language === "ar"
+                        ? "إضافة منتج جديد"
+                        : "Add New Product"}
+                  </DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label>{language === "ar" ? "المصنع *" : "Factory *"}</Label>
-                    <Select 
-                      value={formData.factoryId.toString()} 
-                      onValueChange={(v) => setFormData({...formData, factoryId: parseInt(v)})}
+                    <Label>
+                      {language === "ar" ? "المصنع *" : "Factory *"}
+                    </Label>
+                    <Select
+                      value={formData.factoryId.toString()}
+                      onValueChange={v =>
+                        setFormData({ ...formData, factoryId: parseInt(v) })
+                      }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={language === "ar" ? "اختر مصنعاً" : "Select a factory"} />
+                        <SelectValue
+                          placeholder={
+                            language === "ar"
+                              ? "اختر مصنعاً"
+                              : "Select a factory"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {factories?.map((f: any) => (
-                          <SelectItem key={f.id} value={f.id.toString()}>{f.name}</SelectItem>
+                          <SelectItem key={f.id} value={f.id.toString()}>
+                            {f.name}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <Label>{language === "ar" ? "اسم المنتج *" : "Product Name *"}</Label>
+                    <Label>
+                      {language === "ar" ? "اسم المنتج *" : "Product Name *"}
+                    </Label>
                     <Input
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={e =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -206,7 +292,12 @@ export default function AdminProducts() {
                     <Label>{language === "ar" ? "الوصف" : "Description"}</Label>
                     <Textarea
                       value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      onChange={e =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
                       rows={3}
                     />
                   </div>
@@ -216,27 +307,50 @@ export default function AdminProducts() {
                       <Label>{language === "ar" ? "الفئة" : "Category"}</Label>
                       <Input
                         value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        onChange={e =>
+                          setFormData({ ...formData, category: e.target.value })
+                        }
                       />
                     </div>
                     <div>
-                      <Label>{language === "ar" ? "السعر الأساسي ($) *" : "Base Price ($) *"}</Label>
+                      <Label>
+                        {language === "ar"
+                          ? "السعر الأساسي ($) *"
+                          : "Base Price ($) *"}
+                      </Label>
                       <Input
                         type="number"
                         step="0.01"
                         value={formData.basePrice}
-                        onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
+                        onChange={e =>
+                          setFormData({
+                            ...formData,
+                            basePrice: e.target.value,
+                          })
+                        }
                         required
                       />
                     </div>
                   </div>
 
                   <div className="flex justify-end gap-2 pt-4">
-                    <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsOpen(false)}
+                    >
                       {language === "ar" ? "إلغاء" : "Cancel"}
                     </Button>
-                    <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                      {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    <Button
+                      type="submit"
+                      disabled={
+                        createMutation.isPending || updateMutation.isPending
+                      }
+                    >
+                      {(createMutation.isPending ||
+                        updateMutation.isPending) && (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      )}
                       {language === "ar" ? "حفظ" : "Save Product"}
                     </Button>
                   </div>
@@ -251,10 +365,12 @@ export default function AdminProducts() {
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                placeholder={language === "ar" ? "بحث عن منتج..." : "Search products..."}
+                placeholder={
+                  language === "ar" ? "بحث عن منتج..." : "Search products..."
+                }
                 className="pl-10"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={e => setSearch(e.target.value)}
               />
             </div>
           </CardHeader>
@@ -267,31 +383,57 @@ export default function AdminProducts() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{language === "ar" ? "المنتج" : "Product"}</TableHead>
-                    <TableHead>{language === "ar" ? "الفئة" : "Category"}</TableHead>
-                    <TableHead>{language === "ar" ? "السعر" : "Price"}</TableHead>
-                    <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
-                    <TableHead className="text-right">{language === "ar" ? "إجراءات" : "Actions"}</TableHead>
+                    <TableHead>
+                      {language === "ar" ? "المنتج" : "Product"}
+                    </TableHead>
+                    <TableHead>
+                      {language === "ar" ? "الفئة" : "Category"}
+                    </TableHead>
+                    <TableHead>
+                      {language === "ar" ? "السعر" : "Price"}
+                    </TableHead>
+                    <TableHead>
+                      {language === "ar" ? "الحالة" : "Status"}
+                    </TableHead>
+                    <TableHead className="text-right">
+                      {language === "ar" ? "إجراءات" : "Actions"}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {products?.map((product: any) => (
                     <TableRow key={product.id}>
-                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell className="font-medium">
+                        {product.name}
+                      </TableCell>
                       <TableCell>{product.category}</TableCell>
-                      <TableCell>${(product.basePrice / 100).toFixed(2)}</TableCell>
                       <TableCell>
-                        <Badge variant={product.active ? "default" : "secondary"}>
-                          {product.active ? (language === "ar" ? "نشط" : "Active") : (language === "ar" ? "غير نشط" : "Inactive")}
+                        ${(product.basePrice / 100).toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={product.active ? "default" : "secondary"}
+                        >
+                          {product.active
+                            ? language === "ar"
+                              ? "نشط"
+                              : "Active"
+                            : language === "ar"
+                              ? "غير نشط"
+                              : "Inactive"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right space-x-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(product)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(product)}
+                        >
                           <Edit2 className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="text-red-500"
                           onClick={() => handleDelete(product.id)}
                         >

@@ -20,10 +20,20 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, Factory, FileText, Settings, Home, ShieldCheck } from "lucide-react";
+import {
+  LayoutDashboard,
+  LogOut,
+  PanelLeft,
+  Users,
+  Factory,
+  FileText,
+  Settings,
+  Home,
+  ShieldCheck,
+} from "lucide-react";
 import { CSSProperties, useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
+import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const SIDEBAR_WIDTH_KEY = "admin-sidebar-width";
@@ -38,7 +48,7 @@ export default function AdminDashboardLayout({
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
-  
+
   const { loading, user } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -48,7 +58,7 @@ export default function AdminDashboardLayout({
   }, [sidebarWidth]);
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'admin')) {
+    if (!loading && (!user || user.role !== "admin")) {
       setLocation("/login");
     }
   }, [user, loading, setLocation]);
@@ -59,12 +69,14 @@ export default function AdminDashboardLayout({
   }
 
   // If not admin, don't render content but still maintain hook consistency by not returning early before hooks
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== "admin") {
     return null;
   }
 
   return (
-    <SidebarProvider style={{ "--sidebar-width": `${sidebarWidth}px` } as CSSProperties}>
+    <SidebarProvider
+      style={{ "--sidebar-width": `${sidebarWidth}px` } as CSSProperties}
+    >
       <AdminDashboardLayoutContent setSidebarWidth={setSidebarWidth}>
         {children}
       </AdminDashboardLayoutContent>
@@ -87,13 +99,37 @@ function AdminDashboardLayoutContent({
   const { t, language } = useLanguage();
 
   const menuItems = [
-    { icon: LayoutDashboard, label: language === 'ar' ? "نظرة عامة" : "Overview", path: "/admin" },
-    { icon: Users, label: language === 'ar' ? "إدارة المستخدمين" : "Manage Users", path: "/admin/users" },
-    { icon: Factory, label: language === 'ar' ? "إدارة المصانع" : "Manage Factories", path: "/admin/factories" },
-    { icon: FileText, label: language === 'ar' ? "إدارة الطلبات" : "Manage Requests", path: "/admin/requests" },
-    { icon: ShieldCheck, label: language === 'ar' ? "الصلاحيات" : "Permissions", path: "/admin/permissions" },
-    { icon: Settings, label: language === 'ar' ? "إعدادات النظام" : "Settings", path: "/admin/settings" },
-    { icon: Home, label: language === 'ar' ? "الرئيسية" : "Home", path: "/" },
+    {
+      icon: LayoutDashboard,
+      label: language === "ar" ? "نظرة عامة" : "Overview",
+      path: "/admin",
+    },
+    {
+      icon: Users,
+      label: language === "ar" ? "إدارة المستخدمين" : "Manage Users",
+      path: "/admin/users",
+    },
+    {
+      icon: Factory,
+      label: language === "ar" ? "إدارة المصانع" : "Manage Factories",
+      path: "/admin/factories",
+    },
+    {
+      icon: FileText,
+      label: language === "ar" ? "إدارة الطلبات" : "Manage Requests",
+      path: "/admin/requests",
+    },
+    {
+      icon: ShieldCheck,
+      label: language === "ar" ? "الصلاحيات" : "Permissions",
+      path: "/admin/permissions",
+    },
+    {
+      icon: Settings,
+      label: language === "ar" ? "إعدادات النظام" : "Settings",
+      path: "/admin/settings",
+    },
+    { icon: Home, label: language === "ar" ? "الرئيسية" : "Home", path: "/" },
   ];
 
   const activeMenuItem = menuItems.find(item => location === item.path);
@@ -103,10 +139,15 @@ function AdminDashboardLayoutContent({
       <Sidebar collapsible="icon" className="border-r shadow-sm">
         <SidebarHeader className="h-16 justify-center border-b bg-slate-900 text-white">
           <div className="flex items-center gap-3 px-2 w-full">
-            <button onClick={toggleSidebar} className="h-8 w-8 flex items-center justify-center hover:bg-slate-800 rounded-lg shrink-0">
+            <button
+              onClick={toggleSidebar}
+              className="h-8 w-8 flex items-center justify-center hover:bg-slate-800 rounded-lg shrink-0"
+            >
               <PanelLeft className="h-4 w-4" />
             </button>
-            {!isCollapsed && <span className="font-bold truncate">IFROF Admin</span>}
+            {!isCollapsed && (
+              <span className="font-bold truncate">IFROF Admin</span>
+            )}
           </div>
         </SidebarHeader>
         <SidebarContent className="gap-0 py-4">
@@ -121,7 +162,9 @@ function AdminDashboardLayoutContent({
                     tooltip={item.label}
                     className={`h-11 mb-1 rounded-md ${isActive ? "bg-primary/10 text-primary" : "hover:bg-accent"}`}
                   >
-                    <item.icon className={`h-5 w-5 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                    <item.icon
+                      className={`h-5 w-5 ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                    />
                     <span>{item.label}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -139,8 +182,12 @@ function AdminDashboardLayoutContent({
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-                  <p className="text-sm font-semibold truncate">{user?.name || "Admin"}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                  <p className="text-sm font-semibold truncate">
+                    {user?.name || "Admin"}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {user?.email}
+                  </p>
                 </div>
               </button>
             </DropdownMenuTrigger>
@@ -157,7 +204,9 @@ function AdminDashboardLayoutContent({
         {isMobile && (
           <div className="flex border-b h-14 items-center px-4 bg-background sticky top-0 z-40">
             <SidebarTrigger className="h-9 w-9 mr-2" />
-            <span className="font-semibold">{activeMenuItem?.label ?? "Admin Panel"}</span>
+            <span className="font-semibold">
+              {activeMenuItem?.label ?? "Admin Panel"}
+            </span>
           </div>
         )}
         <main className="flex-1 p-6 max-w-7xl mx-auto w-full">{children}</main>
