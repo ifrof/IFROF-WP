@@ -18,6 +18,7 @@ interface FactoryVerificationResult {
   confidence: number; // 0-100
   reasoning: string;
   isDirectFactory: boolean;
+  source?: string;
 }
 
 interface SearchResult {
@@ -50,151 +51,82 @@ export const aiAgentRouter = router({
   // Search for factories with AI verification
   searchFactories: publicProcedure
     .input(searchQuerySchema)
-    .mutation(async ({ input, ctx }): Promise<SearchResult> => {
+    .mutation(async ({ input }): Promise<SearchResult> => {
       console.log(`[AI Agent] Starting search for: "${input.query}" in ${input.language}`);
 
       try {
-        // 1. Perform real-time search using DuckDuckGo (with timeout)
         const searchQuery = `${input.query} ${input.category || ""} factory manufacturer China supplier`;
         const searchResults = await withTimeout(searchDuckDuckGo(searchQuery), 15000, "Web Search");
 
-        console.log(`[AI Agent] DuckDuckGo returned ${searchResults.length} results`);
-
-        // Build search context for LLM - Optimization: Limit to top 3 results and truncate
         let searchContext = "";
         if (searchResults.length > 0) {
           searchContext = searchResults
             .slice(0, 3)
-            .map(
-              (r, i) => `Result ${i + 1}:
-Title: ${r.title}
-Link: ${r.link}
-Snippet: ${r.snippet}`
-            )
+            .map((r, i) => `Result ${i + 1}:\nTitle: ${r.title}\nLink: ${r.link}\nSnippet: ${r.snippet}`)
             .join("\n\n")
-            .substring(0, 2000); // Guard: Max 2000 chars for context
+            .substring(0, 2000);
         } else {
-          searchContext = "No search results were found. Please provide general guidance based on the query.";
+          searchContext = "No search results were found.";
         }
 
-        // 2. Use LLM to analyze search results and identify real factories
-        const systemPrompt =
-          input.language === "ar"
+        const systemPrompt = input.language === "ar"
             ? `أنت محقق ذكي متخصص في البحث عن المصانع الصينية المباشرة. حلل النتائج وحدد المصانع الحقيقية. أرجع JSON فقط.`
             : `You are an AI investigator specialized in finding direct Chinese manufacturers. Analyze results and identify real factories. Return JSON only.`;
 
-        const userPrompt =
-          input.language === "ar"
-            ? `بناءً على نتائج البحث التالية عن "${input.query}"، استخرج قائمة بـ 5 مصانع/موردين محتملين وقم بتقييمها:
+        const userPrompt = input.language === "ar"
+            ? `بناءً على نتائج البحث التالية عن "${input.query}":\n\n${searchContext}\n\nاستخرج قائمة بـ 5 مصانع/موردين محتملين وقم بتقييمها.`
+            : `Based on the following search results for "${input.query}":\n\n${searchContext}\n\nextract a list of 5 potential factories/suppliers and evaluate them.`;
 
-تأكد من أن النتائج تحتوي على مصانع مباشرة فقط. قدم 5 نتائج على الأقل مع درجة ثقة لكل واحدة.`
-          : `Search for factories matching these criteria:
-- Query: ${input.query}
-${input.category ? `- Category: ${input.category}` : ''}
-${input.minCapacity ? `- Minimum Production Capacity: ${input.minCapacity}` : ''}
-${input.maxPrice ? `- Maximum Price: ${input.maxPrice}` : ''}
-
-المطلوب إرجاعه بصيغة JSON:
-{
-  "results": [
-    {
-      "name": "اسم المصنع أو المورد",
-      "type": "direct_manufacturer أو commercial_company أو trader أو unknown",
-      "confidence": رقم من 0 إلى 100,
-      "reasoning": "سبب التصنيف",
-      "source": "رابط المصدر إن وجد"
-    }
-  ],
-  "recommendations": ["توصية 1", "توصية 2"]
-}`
-            : `Based on the following search results for "${input.query}", extract a list of 5 potential factories/suppliers and evaluate them:
-
-${searchContext}
-
-Return in JSON format:
-{
-  "results": [
-    {
-      "name": "Factory or supplier name",
-      "type": "direct_manufacturer or commercial_company or trader or unknown",
-      "confidence": number from 0 to 100,
-      "reasoning": "Reason for classification",
-      "source": "Source URL if available"
-    }
-  ],
-  "recommendations": ["Recommendation 1", "Recommendation 2"]
-}`;
-
-        console.log(`[AI Agent] Invoking LLM for analysis...`);
-
-        const response = await withTimeout(
-          invokeLLM({
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: userPrompt },
-            ],
-            max_tokens: 1500, // Guard: Limit output tokens
-            timeoutMs: 20000, // 20s timeout for LLM
-            response_format: {
-              type: "json_schema",
-              json_schema: {
-                name: "factory_search_results",
-                strict: true,
-                schema: {
-                  type: "object",
-                  properties: {
-                    results: {
-                      type: "array",
-                      items: {
-                        type: "object",
-                        properties: {
-                          name: { type: "string" },
-                          type: {
-                            type: "string",
-                            enum: ["direct_manufacturer", "trader", "commercial_company", "unknown"],
-                          },
-                          confidence: { type: "number" },
-                          reasoning: { type: "string" },
-                          source: { type: "string" },
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          max_tokens: 1500,
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "factory_search_results",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  results: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        type: {
+                          type: "string",
+                          enum: ["direct_manufacturer", "trader", "commercial_company", "unknown"],
                         },
-                        required: ["name", "type", "confidence", "reasoning"],
+                        confidence: { type: "number" },
+                        reasoning: { type: "string" },
+                        source: { type: "string" },
                       },
-                    },
-                    recommendations: {
-                      type: "array",
-                      items: { type: "string" },
+                      required: ["name", "type", "confidence", "reasoning"],
                     },
                   },
-                  required: ["results", "recommendations"],
+                  recommendations: {
+                    type: "array",
+                    items: { type: "string" },
+                  },
                 },
+                required: ["results", "recommendations"],
               },
             },
-          }),
-          30000,
-          "AI Analysis"
-        );
+          },
+        });
 
         const content = response.choices[0]?.message.content;
-        if (!content || typeof content !== "string") {
-          console.error(`[AI Agent] LLM returned empty or invalid content`);
-          throw new Error("No response from AI");
-        }
-
-        const content = response.choices[0]?.message.content;
-        if (!content || typeof content !== "string") {
-          console.error(`[AI Agent] LLM returned empty or invalid content`);
-          throw new Error("No response from AI");
-        }
+        if (!content || typeof content !== "string") throw new Error("No response from AI");
 
         const parsed = JSON.parse(content);
-        console.log(
-          `[AI Agent] Successfully parsed ${parsed.results?.length || 0} factory results`
-        );
-
         return {
           query: input.query,
           language: input.language,
-          results: directFactories.map((r: any) => ({
+          results: (parsed.results || []).map((r: any) => ({
             name: r.name,
             type: r.type,
             confidence: r.confidence,
@@ -205,28 +137,21 @@ Return in JSON format:
           recommendations: parsed.recommendations || [],
         };
       } catch (error: any) {
-        console.error("[AI Agent] Search error:", error?.message || error);
         throw new TRPCError({
           code: error?.code === "TIMEOUT" ? "TIMEOUT" : "INTERNAL_SERVER_ERROR",
-          message: error?.message || "Failed to search factories via AI. Please try again later.",
+          message: error?.message || "Failed to search factories via AI",
         });
       }
     }),
 
-  // Verify if a specific factory is direct
   verifyFactory: publicProcedure
-    .input(
-      z.object({
-        factoryName: z.string(),
-        factoryInfo: z.string().optional(),
-        language: z.enum(["ar", "en", "zh"]).default("ar"),
-      })
-    )
-    .mutation(async ({ input, ctx }): Promise<FactoryVerificationResult> => {
-      console.log(`[AI Agent] Verifying factory: "${input.factoryName}"`);
-
+    .input(z.object({
+      factoryName: z.string(),
+      factoryInfo: z.string().optional(),
+      language: z.enum(["ar", "en", "zh"]).default("ar"),
+    }))
+    .mutation(async ({ input }): Promise<FactoryVerificationResult> => {
       try {
-        // Real-time verification using search (with timeout)
         const searchQuery = `${input.factoryName} ${input.factoryInfo || ""} factory manufacturer China`;
         const searchResults = await withTimeout(searchDuckDuckGo(searchQuery), 10000, "Web Search");
 
@@ -236,60 +161,43 @@ Return in JSON format:
           .join("\n")
           .substring(0, 1000);
 
-        const systemPrompt =
-          input.language === "ar"
+        const systemPrompt = input.language === "ar"
             ? `أنت خبير في التحقق من المصانع الصينية. حلل البيانات وقرر ما إذا كان المصنع حقيقياً أم وسيطاً. أرجع JSON.`
             : `You are an expert in verifying Chinese factories. Analyze the data and decide if the factory is real or an intermediary. Return JSON.`;
 
-        const userPrompt = `Verify this factory: ${input.factoryName}
-Context from web search:
-${searchContext || "No search context found."}
+        const userPrompt = `Verify this factory: ${input.factoryName}\nContext: ${searchContext}\nInfo: ${input.factoryInfo || "None"}`;
 
-Additional Info: ${input.factoryInfo || "None"}
-
-        const userPrompt = input.language === 'ar'
-          ? `تحقق من هذا المصنع: ${input.factoryName}${input.factoryInfo ? `\nمعلومات إضافية: ${input.factoryInfo}` : ''}`
-          : `Verify this factory: ${input.factoryName}${input.factoryInfo ? `\nAdditional information: ${input.factoryInfo}` : ''}`;
-
-        const response = await withTimeout(
-          invokeLLM({
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: userPrompt },
-            ],
-            max_tokens: 500, // Guard: Small limit for verification
-            timeoutMs: 15000, // 15s timeout for LLM
-            response_format: {
-              type: "json_schema",
-              json_schema: {
-                name: "factory_verification",
-                strict: true,
-                schema: {
-                  type: "object",
-                  properties: {
-                    type: {
-                      type: "string",
-                      enum: ["direct_manufacturer", "trader", "commercial_company", "unknown"],
-                    },
-                    confidence: { type: "number" },
-                    reasoning: { type: "string" },
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          max_tokens: 500,
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "factory_verification",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  type: {
+                    type: "string",
+                    enum: ["direct_manufacturer", "trader", "commercial_company", "unknown"],
                   },
-                  required: ["type", "confidence", "reasoning"],
+                  confidence: { type: "number" },
+                  reasoning: { type: "string" },
                 },
+                required: ["type", "confidence", "reasoning"],
               },
             },
-          }),
-          20000,
-          "AI Verification"
-        );
+          },
+        });
 
         const content = response.choices[0]?.message.content;
-        if (!content || typeof content !== "string") {
-          throw new Error("No response from AI");
-        }
+        if (!content || typeof content !== "string") throw new Error("No response from AI");
 
         const parsed = JSON.parse(content);
-
         return {
           name: input.factoryName,
           type: parsed.type,
@@ -298,9 +206,8 @@ Additional Info: ${input.factoryInfo || "None"}
           isDirectFactory: parsed.type === "direct_manufacturer" && parsed.confidence >= 70,
         };
       } catch (error: any) {
-        console.error("[AI Agent] Factory verification error:", error?.message || error);
         throw new TRPCError({
-          code: error?.code === "TIMEOUT" ? "TIMEOUT" : "INTERNAL_SERVER_ERROR",
+          code: "INTERNAL_SERVER_ERROR",
           message: error?.message || "Failed to verify factory",
         });
       }

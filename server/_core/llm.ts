@@ -1,4 +1,5 @@
 import { ENV } from "./env";
+import { TRPCError } from "@trpc/server";
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
@@ -30,6 +31,7 @@ export type Message = {
   content: MessageContent | MessageContent[];
   name?: string;
   tool_call_id?: string;
+  tool_calls?: ToolCall[];
 };
 
 export type Tool = {
@@ -41,22 +43,25 @@ export type Tool = {
   };
 };
 
-export type ToolChoice =
-  | "none"
-  | "auto"
-  | { type: "function"; function: { name: string } };
-
-export type OutputSchema = any;
-
-export type ResponseFormat = {
-  type: "text" | "json_object" | "json_schema";
-  json_schema?: any;
-};
+export type ToolChoicePrimitive = "none" | "auto" | "required";
+export type ToolChoiceByName = { name: string };
+export type ToolChoiceExplicit = { type: "function"; function: { name: string } };
 
 export type ToolChoice =
   | ToolChoicePrimitive
   | ToolChoiceByName
   | ToolChoiceExplicit;
+
+export type OutputSchema = {
+  name: string;
+  schema: any;
+  strict?: boolean;
+};
+
+export type ResponseFormat = {
+  type: "text" | "json_object" | "json_schema";
+  json_schema?: any;
+};
 
 export type InvokeParams = {
   messages: Message[];
@@ -69,6 +74,7 @@ export type InvokeParams = {
   output_schema?: OutputSchema;
   responseFormat?: ResponseFormat;
   response_format?: ResponseFormat;
+  timeoutMs?: number;
 };
 
 export type ToolCall = {
@@ -108,74 +114,6 @@ const normalizeMessage = (m: Message) => ({
   ...(m.tool_calls ? { tool_calls: m.tool_calls } : {}),
 });
 
-const normalizeToolChoice = (choice: any) => {
-  if (!choice) return undefined;
-  if (typeof choice === "string") return choice;
-  return choice;
-};
-
-const normalizeResponseFormat = (params: any) => {
-  const format = params.responseFormat || params.response_format;
-  if (format) return format;
-
-  const schema = params.outputSchema || params.output_schema;
-  if (schema) {
-    return {
-      type: "json_schema",
-      json_schema: {
-        name: "output",
-        strict: true,
-        schema,
-      },
-    };
-  }
-
-  if (part.type === "text") {
-    return part;
-  }
-
-  if (part.type === "image_url") {
-    return part;
-  }
-
-  if (part.type === "file_url") {
-    return part;
-  }
-
-  throw new Error("Unsupported message content part");
-};
-
-/**
- * Resolves the API URL and key based on available environment variables.
- */
-const resolveApiConfig = (): { url: string; key: string; model: string } => {
-  if (ENV.forgeApiUrl && ENV.forgeApiKey) {
-    return {
-      role,
-      name,
-      tool_call_id,
-      content,
-    };
-  }
-
-  const contentParts = ensureArray(message.content).map(normalizeContentPart);
-
-  // If there's only text content, collapse to a single string for compatibility
-  if (contentParts.length === 1 && contentParts[0].type === "text") {
-    return {
-      role,
-      name,
-      content: contentParts[0].text,
-    };
-  }
-
-  return {
-    role,
-    name,
-    content: contentParts,
-  };
-};
-
 const normalizeToolChoice = (
   toolChoice: ToolChoice | undefined,
   tools: Tool[] | undefined
@@ -192,38 +130,20 @@ const normalizeToolChoice = (
         "tool_choice 'required' was provided but no tools were configured"
       );
     }
-
-    if (tools.length > 1) {
-      throw new Error(
-        "tool_choice 'required' needs a single tool or specify the tool name explicitly"
-      );
-    }
-
     return {
       type: "function",
       function: { name: tools[0].function.name },
     };
   }
 
-  if ("name" in toolChoice) {
+  if (typeof toolChoice === "object" && "name" in toolChoice) {
     return {
       type: "function",
-      function: { name: toolChoice.name },
+      function: { name: (toolChoice as ToolChoiceByName).name },
     };
   }
 
-  return toolChoice;
-};
-
-const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-    : "https://api.openai.com/v1/chat/completions";
-
-const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
-  }
+  return toolChoice as ToolChoiceExplicit;
 };
 
 const normalizeResponseFormat = ({
@@ -236,111 +156,81 @@ const normalizeResponseFormat = ({
   response_format?: ResponseFormat;
   outputSchema?: OutputSchema;
   output_schema?: OutputSchema;
-}):
-  | { type: "json_schema"; json_schema: JsonSchema }
-  | { type: "text" }
-  | { type: "json_object" }
-  | undefined => {
+}): ResponseFormat | undefined => {
   const explicitFormat = responseFormat || response_format;
-  if (explicitFormat) {
-    if (
-      explicitFormat.type === "json_schema" &&
-      !explicitFormat.json_schema?.schema
-    ) {
-      throw new Error(
-        "responseFormat json_schema requires a defined schema object"
-      );
-    }
-    return explicitFormat;
-  }
+  if (explicitFormat) return explicitFormat;
 
   const schema = outputSchema || output_schema;
   if (!schema) return undefined;
-
-  if (!schema.name || !schema.schema) {
-    throw new Error("outputSchema requires both name and schema");
-  }
 
   return {
     type: "json_schema",
     json_schema: {
       name: schema.name,
+      strict: schema.strict ?? true,
       schema: schema.schema,
-      ...(typeof schema.strict === "boolean" ? { strict: schema.strict } : {}),
     },
   };
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  assertApiKey();
+  if (!ENV.forgeApiKey) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
 
   const {
     messages,
     tools,
     toolChoice,
     tool_choice,
+    maxTokens,
+    max_tokens,
     outputSchema,
     output_schema,
     responseFormat,
     response_format,
+    timeoutMs = 60000,
   } = params;
 
   const payload: Record<string, unknown> = {
     model: "gemini-2.5-flash",
     messages: messages.map(normalizeMessage),
+    max_tokens: maxTokens ?? max_tokens ?? 1000,
   };
 
   if (tools && tools.length > 0) {
     payload.tools = tools;
   }
 
-  const normalizedToolChoice = normalizeToolChoice(toolChoice || tool_choice);
+  const normalizedToolChoice = normalizeToolChoice(toolChoice || tool_choice, tools);
   if (normalizedToolChoice) {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  // Guardrail default; still overrideable via params
-  payload.max_tokens = maxTokens ?? max_tokens ?? 1000;
-
-  const normalizedResponseFormat = normalizeResponseFormat({
+  const normalizedFormat = normalizeResponseFormat({
     responseFormat,
     response_format,
     outputSchema,
     output_schema,
   });
 
-  if (normalizedResponseFormat) {
-    // Groq doesn't support json_schema response_format like OpenAI does; fall back to json_object + instructions
-    if (
-      normalizedResponseFormat.type === "json_schema" &&
-      apiConfig.url.includes("groq.com")
-    ) {
-      payload.response_format = { type: "json_object" };
-
-      const schemaInstructions =
-        `\n\nYou MUST respond with valid JSON that matches this exact schema:\n` +
-        `${JSON.stringify(normalizedResponseFormat.json_schema.schema, null, 2)}`;
-
-      const msgs = payload.messages as any[];
-      if (msgs.length > 0 && msgs[0].role === "system") {
-        msgs[0].content += schemaInstructions;
-      } else {
-        msgs.unshift({ role: "system", content: schemaInstructions });
-      }
-    } else {
-      payload.response_format = normalizedResponseFormat;
-    }
+  if (normalizedFormat) {
+    payload.response_format = normalizedFormat;
   }
+
+  const apiUrl = ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
+    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
+    : "https://api.openai.com/v1/chat/completions";
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetch(apiConfig.url, {
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        authorization: `Bearer ${apiConfig.key}`,
+        authorization: `Bearer ${ENV.forgeApiKey}`,
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
@@ -348,36 +238,13 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(
-        `[LLM] Error: ${response.status} ${response.statusText} – ${errorText}`
-      );
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`,
       });
     }
 
-    const result = (await response.json()) as InvokeResult;
-    const duration = Date.now() - startTime;
-    const usage = result.usage || {
-      prompt_tokens: 0,
-      completion_tokens: 0,
-      total_tokens: 0,
-    };
-
-    console.log(
-      JSON.stringify({
-        level: "info",
-        message: "LLM_INVOKE_SUCCESS",
-        model: apiConfig.model,
-        latency_ms: duration,
-        input_tokens: usage.prompt_tokens,
-        output_tokens: usage.completion_tokens,
-        total_tokens: usage.total_tokens,
-      })
-    );
-
-    return result;
+    return (await response.json()) as InvokeResult;
   } catch (error: any) {
     if (error?.name === "AbortError") {
       throw new TRPCError({
@@ -389,6 +256,4 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   } finally {
     clearTimeout(timeout);
   }
-
-  return (await response.json()) as InvokeResult;
 }

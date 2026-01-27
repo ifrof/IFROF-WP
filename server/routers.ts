@@ -1,11 +1,8 @@
-import { COOKIE_NAME } from "@shared/const";
-import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { router } from "./_core/trpc";
 
 // Import all feature routers
 import { factoriesRouter, productsRouter } from "./routers/factories";
-import { authImprovedRouter } from "./routers/auth-improved";
 import { inquiriesRouter, messagesRouter } from "./routers/inquiries";
 import { forumRouter } from "./routers/forum";
 import { chatbotRouter } from "./routers/chatbot";
@@ -14,8 +11,6 @@ import { notificationsRouter } from "./routers/notifications";
 import { blogRouter } from "./routers/blog";
 import { aiAgentRouter } from "./routers/aiAgent";
 import { cartRouter } from "./routers/cart";
-import { checkoutImprovedRouter } from "./routers/checkout-improved";
-// import { checkoutRouter } from "./routers/checkout"; // Removed to fix build error
 import { reviewsRouter } from "./routers/reviews";
 import { servicesRouter } from "./routers/services";
 import { supportRouter } from "./routers/support";
@@ -34,8 +29,6 @@ import { searchRouter } from "./routers/search";
 export const appRouter = router({
   system: systemRouter,
   
-  auth: authImprovedRouter,
-
   // Marketplace features
   factories: factoriesRouter,
   products: productsRouter,
@@ -59,11 +52,7 @@ export const appRouter = router({
 
   // Shopping features
   cart: cartRouter,
-  checkout: checkoutImprovedRouter,
-  // checkoutOld: checkoutRouter, // Removed to fix build error
   reviews: reviewsRouter,
-  profiles: profilesRouter,
-  storage: storageRouter,
 
   // Additional features
   services: servicesRouter,

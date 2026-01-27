@@ -74,7 +74,9 @@ export async function upsertUser(user: any): Promise<any> {
     writeJsonDb(dbData);
     return newUser;
   }
+}
 
+export async function getUserByEmail(email: string) {
   const dbData = readJsonDb();
   return dbData.users.find((u: any) => u.email === email) || null;
 }
