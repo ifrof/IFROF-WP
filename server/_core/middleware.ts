@@ -104,14 +104,15 @@ const contentSecurityPolicy = isDevelopment
         ],
       },
     }
-  : {
+    : {
       directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "https:", "blob:"],
-        scriptSrc: ["'self'"],
-        connectSrc: ["'self'", apiOrigin],
+        defaultSrc: ["*"],
+        styleSrc: ["* ", "'unsafe-inline'"],
+        fontSrc: ["* ", "data:"],
+        imgSrc: ["* ", "data:", "blob:"],
+        scriptSrc: ["* ", "'unsafe-inline'", "'unsafe-eval'"],
+        connectSrc: ["*"],
+        frameSrc: ["*"],
       },
     };
 
