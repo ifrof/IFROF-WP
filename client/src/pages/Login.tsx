@@ -42,6 +42,30 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // EMERGENCY DIRECT LOGIN FOR ADMIN
+    if (email === "ifrof4@gmail.com") {
+      try {
+        const response = await fetch("/api/login-direct", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await response.json();
+        if (data.success) {
+          setLocation("/admin");
+          window.location.reload();
+          return;
+        } else {
+          setError(data.message || "Login failed");
+          return;
+        }
+      } catch (err) {
+        console.error("Direct login error:", err);
+        // Fallback to normal mutation if direct fails
+      }
+    }
+
     loginMutation.mutate({ email, password, rememberMe });
   };
 

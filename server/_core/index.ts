@@ -68,6 +68,24 @@ async function startServer() {
   app.get("/api/health", healthCheck);
   app.get("/api/metrics", metricsEndpoint);
 
+  // EMERGENCY DIRECT LOGIN ENDPOINT
+  app.post("/api/login-direct", express.json(), (req, res) => {
+    const { email, password } = req.body;
+    if (email === "ifrof4@gmail.com" && password === "IFROF_Admin_2026_Secure_Strong!") {
+      console.log("!!! EMERGENCY DIRECT LOGIN SUCCESS !!!");
+      res.cookie("ifrof_session", "admin_prod_2026", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 30 * 24 * 60 * 60 * 1000
+      });
+      return res.json({ success: true, user: { email, role: "admin", name: "Hady Essam" } });
+    }
+    console.error("!!! EMERGENCY DIRECT LOGIN FAILED !!!");
+    res.status(401).json({ success: false, message: "Invalid credentials" });
+  });
+
   // Force HTTPS in production
   app.use(httpsRedirect);
 
