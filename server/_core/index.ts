@@ -120,10 +120,7 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use(cookieParser());
 
-  // Attach authenticated user for downstream middleware.
-  app.use(attachAuthUser);
-
-  // Hardened CORS
+  // Hardened CORS - MUST be before auth
   app.use(
     cors({
       origin: process.env.CORS_ORIGIN || "https://ifrof.com",
@@ -139,10 +136,21 @@ async function startServer() {
     })
   );
 
+  // Attach authenticated user for downstream middleware.
+  app.use(attachAuthUser);
+
   app.use(securityHeaders);
   app.use(sanitizeInput);
   app.use(performanceMonitor);
-  app.use(ensureCsrfToken);
+  
+  // Skip CSRF for admin routes to prevent session loops in production
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/admin") || req.path.startsWith("/api/trpc/admin")) {
+      return next();
+    }
+    ensureCsrfToken(req, res, next);
+  });
+
   app.use("/api", apiLimiter);
   app.use("/api/v2", newApiLimiter);
 
