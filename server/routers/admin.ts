@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { adminProcedure, router } from "../_core/trpc";
 import * as schema from "../../drizzle/schema";
-import { eq, desc, sql, and, like } from "drizzle-orm";
+import { eq, desc, sql, and, like, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { getDb } from "../db";
 
 export const adminRouter = router({
   // Dashboard Stats
@@ -47,8 +48,8 @@ export const adminRouter = router({
     // Recent Inquiries
     const recentInquiries = await db
       .select()
-      .from(schema.importRequests)
-      .orderBy(desc(schema.importRequests.createdAt))
+      .from(schema.inquiries)
+      .orderBy(desc(schema.inquiries.createdAt))
       .limit(10);
 
     return {

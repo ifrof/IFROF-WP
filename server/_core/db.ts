@@ -1,8 +1,9 @@
 import mysql from "mysql2/promise";
+import { drizzle as drizzleMysql } from "drizzle-orm/mysql2";
 import { eq, like, and, desc, or } from "drizzle-orm";
-import { InsertUser, users as mysqlUsers } from "../drizzle/schema";
-import * as schema from "../drizzle/schema";
-import { ENV } from './_core/env';
+import { InsertUser, users as mysqlUsers } from "../../drizzle/schema";
+import * as schema from "../../drizzle/schema";
+import { ENV } from './env';
 import path from "path";
 import fs from "fs";
 

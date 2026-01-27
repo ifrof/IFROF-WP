@@ -620,7 +620,7 @@ export type InsertActivityLog = typeof activityLogs.$inferInsert;
  */
 export const productPortfolio = mysqlTable("product_portfolio", {
   id: int("id").autoincrement().primaryKey(),
-  factoryId: int("factoryId").notNull(),
+  factoryId: int("factoryId").notNull().references(() => factories.id),
   productName: varchar("productName", { length: 255 }).notNull(),
   category: varchar("category", { length: 100 }),
   description: text("description"),
