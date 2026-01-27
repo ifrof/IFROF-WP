@@ -15,8 +15,8 @@ export function getRedisClient(): Redis | null {
         lazyConnect: true,
       });
 
-      redis.on("error", err => {
-        console.error("Redis connection error:", err);
+      redis.on('error', (err) => {
+        // Silently handle Redis errors - app should work without Redis
       });
 
       redis.on("connect", () => {
@@ -24,12 +24,12 @@ export function getRedisClient(): Redis | null {
       });
 
       // Connect asynchronously
-      redis.connect().catch(err => {
-        console.error("Failed to connect to Redis:", err);
+      redis.connect().catch((err) => {
+        // Silently fail - app should work without Redis
         redis = null;
       });
     } catch (error) {
-      console.error("Failed to initialize Redis:", error);
+      // Silently fail - app should work without Redis
       redis = null;
     }
   }
@@ -53,7 +53,7 @@ export async function getCached<T>(
       return JSON.parse(cached);
     }
   } catch (error) {
-    console.error(`Cache get error for key ${key}:`, error);
+    // Silently fail - fallback to source
   }
 
   const result = await fallback();
@@ -61,7 +61,7 @@ export async function getCached<T>(
   try {
     await client.setex(key, ttl, JSON.stringify(result));
   } catch (error) {
-    console.error(`Cache set error for key ${key}:`, error);
+    // Silently fail - fallback to source
   }
 
   return result;
@@ -80,7 +80,7 @@ export async function invalidateCache(pattern: string): Promise<void> {
       await client.del(...keys);
     }
   } catch (error) {
-    console.error(`Cache invalidation error for pattern ${pattern}:`, error);
+    // Silently fail
   }
 }
 
@@ -98,6 +98,6 @@ export async function setCached(
   try {
     await client.setex(key, ttl, JSON.stringify(value));
   } catch (error) {
-    console.error(`Cache set error for key ${key}:`, error);
+    // Silently fail
   }
 }
