@@ -1,15 +1,13 @@
 import { z } from "zod";
 import { adminProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
 import * as schema from "../../drizzle/schema";
-import { eq, desc, sql, and, like, or } from "drizzle-orm";
+import { eq, desc, sql, and, like } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const adminRouter = router({
   // Dashboard Stats
   getStats: adminProcedure.query(async ({ ctx }) => {
-    const db = await getDb();
-if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+    const db = ctx.db;
     
     // Total Products
     const productsCount = await db.select({ count: sql<number>`count(*)` }).from(schema.products);
@@ -31,12 +29,6 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
       .orderBy(desc(schema.orders.createdAt))
       .limit(10);
 
-    // Recent Inquiries
-    const recentInquiries = await db.select()
-      .from(schema.importRequests)
-      .orderBy(desc(schema.importRequests.createdAt))
-      .limit(10);
-
     return {
       stats: {
         products: productsCount[0]?.count || 0,
@@ -44,8 +36,7 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
         users: usersCount[0]?.count || 0,
         revenue: (revenue[0]?.total || 0) / 100, // Convert cents to dollars
       },
-      recentOrders,
-      recentInquiries
+      recentOrders
     };
   }),
 
@@ -57,16 +48,11 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
       search: z.string().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const db = await getDb();
-if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const db = ctx.db;
       let query = db.select().from(schema.products);
       
       if (input.search) {
-        query = query.where(or(
-          like(schema.products.nameAr, `%${input.search}%`),
-          like(schema.products.nameEn, `%${input.search}%`),
-          like(schema.products.nameZh, `%${input.search}%`)
-        ));
+        query = query.where(like(schema.products.name, `%${input.search}%`));
       }
       
       const products = await query
@@ -88,8 +74,7 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
       imageUrls: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const db = ctx.db;
       const result = await db.insert(schema.products).values({
         ...input,
         active: 1,
@@ -109,8 +94,7 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
       active: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const db = ctx.db;
       const { id, ...data } = input;
       await db.update(schema.products)
         .set(data)
@@ -121,8 +105,7 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
   deleteProduct: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const db = ctx.db;
       // Soft delete by setting active to 0
       await db.update(schema.products)
         .set({ active: 0 })
@@ -138,8 +121,7 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
       offset: z.number().default(0),
     }))
     .query(async ({ ctx, input }) => {
-      const db = await getDb();
-if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const db = ctx.db;
       let query = db.select().from(schema.orders);
       
       if (input.status) {
@@ -160,8 +142,7 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
       status: z.enum(["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]),
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const db = ctx.db;
       await db.update(schema.orders)
         .set({ status: input.status })
         .where(eq(schema.orders.id, input.id));
@@ -176,8 +157,7 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
       search: z.string().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const db = await getDb();
-if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const db = ctx.db;
       let query = db.select().from(schema.users);
       
       if (input.search) {
@@ -192,7 +172,7 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
         .offset(input.offset)
         .orderBy(desc(schema.users.createdAt));
         
-      return users.map((u: any) => {
+      return users.map(u => {
         const { password, ...userWithoutPassword } = u;
         return userWithoutPassword;
       });
@@ -204,8 +184,7 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
       role: z.enum(["user", "admin", "factory", "buyer"]),
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const db = ctx.db;
       await db.update(schema.users)
         .set({ role: input.role })
         .where(eq(schema.users.id, input.id));
@@ -218,8 +197,7 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
       status: z.string().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const db = await getDb();
-if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const db = ctx.db;
       let query = db.select().from(schema.factories);
       
       if (input.status) {
@@ -235,8 +213,7 @@ if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database
       status: z.enum(["pending", "verified", "rejected"]),
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const db = ctx.db;
       await db.update(schema.factories)
         .set({ verificationStatus: input.status })
         .where(eq(schema.factories.id, input.id));
