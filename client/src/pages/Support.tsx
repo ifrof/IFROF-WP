@@ -13,7 +13,14 @@ import {
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Mail, MessageSquare, AlertTriangle, Loader2, Send, CheckCircle2 } from "lucide-react";
+import {
+  Mail,
+  MessageSquare,
+  AlertTriangle,
+  Loader2,
+  Send,
+  CheckCircle2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "wouter";
 
@@ -26,9 +33,12 @@ export default function Support() {
   const [priority, setPriority] = useState<string>("medium");
 
   const { data: user } = trpc.auth.me.useQuery();
-  const { data: myTickets, refetch } = trpc.support.getTickets.useQuery(undefined, {
-    enabled: !!user,
-  });
+  const { data: myTickets, refetch } = trpc.support.getTickets.useQuery(
+    undefined,
+    {
+      enabled: !!user,
+    }
+  );
   const createTicketMutation = trpc.support.createTicket.useMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,7 +69,10 @@ export default function Support() {
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { variant: any; label: string }> = {
       open: { variant: "default", label: t("support.status.open") },
-      in_progress: { variant: "secondary", label: t("support.status.inProgress") },
+      in_progress: {
+        variant: "secondary",
+        label: t("support.status.inProgress"),
+      },
       resolved: { variant: "default", label: t("support.status.resolved") },
       closed: { variant: "secondary", label: t("support.status.closed") },
     };
@@ -94,9 +107,16 @@ export default function Support() {
           <Card className="hover:shadow-lg transition-shadow">
             <CardContent className="pt-6 text-center">
               <Mail className="w-12 h-12 mx-auto text-blue-600 mb-4" />
-              <h3 className="font-semibold text-lg mb-2">{t("support.general.title")}</h3>
-              <p className="text-sm text-muted-foreground mb-3">{t("support.general.desc")}</p>
-              <a href="mailto:support@ifrof.com" className="text-blue-600 hover:underline">
+              <h3 className="font-semibold text-lg mb-2">
+                {t("support.general.title")}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                {t("support.general.desc")}
+              </p>
+              <a
+                href="mailto:support@ifrof.com"
+                className="text-blue-600 hover:underline"
+              >
                 support@ifrof.com
               </a>
             </CardContent>
@@ -105,9 +125,16 @@ export default function Support() {
           <Card className="hover:shadow-lg transition-shadow">
             <CardContent className="pt-6 text-center">
               <MessageSquare className="w-12 h-12 mx-auto text-orange-600 mb-4" />
-              <h3 className="font-semibold text-lg mb-2">{t("support.complaints.title")}</h3>
-              <p className="text-sm text-muted-foreground mb-3">{t("support.complaints.desc")}</p>
-              <a href="mailto:complain@ifrof.com" className="text-orange-600 hover:underline">
+              <h3 className="font-semibold text-lg mb-2">
+                {t("support.complaints.title")}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                {t("support.complaints.desc")}
+              </p>
+              <a
+                href="mailto:complain@ifrof.com"
+                className="text-orange-600 hover:underline"
+              >
                 complain@ifrof.com
               </a>
             </CardContent>
@@ -116,9 +143,16 @@ export default function Support() {
           <Card className="hover:shadow-lg transition-shadow">
             <CardContent className="pt-6 text-center">
               <AlertTriangle className="w-12 h-12 mx-auto text-red-600 mb-4" />
-              <h3 className="font-semibold text-lg mb-2">{t("support.disputes.title")}</h3>
-              <p className="text-sm text-muted-foreground mb-3">{t("support.disputes.desc")}</p>
-              <a href="mailto:dispute@ifrof.com" className="text-red-600 hover:underline">
+              <h3 className="font-semibold text-lg mb-2">
+                {t("support.disputes.title")}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                {t("support.disputes.desc")}
+              </p>
+              <a
+                href="mailto:dispute@ifrof.com"
+                className="text-red-600 hover:underline"
+              >
                 dispute@ifrof.com
               </a>
             </CardContent>
@@ -130,7 +164,9 @@ export default function Support() {
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <CheckCircle2 className="w-6 h-6 text-blue-600" />
-              <p className="text-blue-900 font-medium">{t("support.responseTime")}</p>
+              <p className="text-blue-900 font-medium">
+                {t("support.responseTime")}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -159,14 +195,23 @@ export default function Support() {
                       <label className="block text-sm font-medium mb-2">
                         {t("support.ticketType")}
                       </label>
-                      <Select value={ticketType} onValueChange={(v: any) => setTicketType(v)}>
+                      <Select
+                        value={ticketType}
+                        onValueChange={(v: any) => setTicketType(v)}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="support">{t("support.type.support")}</SelectItem>
-                          <SelectItem value="complaint">{t("support.type.complaint")}</SelectItem>
-                          <SelectItem value="dispute">{t("support.type.dispute")}</SelectItem>
+                          <SelectItem value="support">
+                            {t("support.type.support")}
+                          </SelectItem>
+                          <SelectItem value="complaint">
+                            {t("support.type.complaint")}
+                          </SelectItem>
+                          <SelectItem value="dispute">
+                            {t("support.type.dispute")}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -175,15 +220,26 @@ export default function Support() {
                       <label className="block text-sm font-medium mb-2">
                         {t("support.priority.title")}
                       </label>
-                      <Select value={priority} onValueChange={(v: any) => setPriority(v)}>
+                      <Select
+                        value={priority}
+                        onValueChange={(v: any) => setPriority(v)}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="low">{t("support.priority.low")}</SelectItem>
-                          <SelectItem value="medium">{t("support.priority.medium")}</SelectItem>
-                          <SelectItem value="high">{t("support.priority.high")}</SelectItem>
-                          <SelectItem value="urgent">{t("support.priority.urgent")}</SelectItem>
+                          <SelectItem value="low">
+                            {t("support.priority.low")}
+                          </SelectItem>
+                          <SelectItem value="medium">
+                            {t("support.priority.medium")}
+                          </SelectItem>
+                          <SelectItem value="high">
+                            {t("support.priority.high")}
+                          </SelectItem>
+                          <SelectItem value="urgent">
+                            {t("support.priority.urgent")}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -194,7 +250,7 @@ export default function Support() {
                       </label>
                       <Input
                         value={subject}
-                        onChange={(e) => setSubject(e.target.value)}
+                        onChange={e => setSubject(e.target.value)}
                         placeholder={t("support.subjectPlaceholder")}
                         required
                       />
@@ -206,7 +262,7 @@ export default function Support() {
                       </label>
                       <Textarea
                         value={description}
-                        onChange={(e) => setDescription(e.target.value)}
+                        onChange={e => setDescription(e.target.value)}
                         placeholder={t("support.descriptionPlaceholder")}
                         rows={6}
                         required
@@ -214,7 +270,10 @@ export default function Support() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button type="submit" disabled={createTicketMutation.isPending}>
+                      <Button
+                        type="submit"
+                        disabled={createTicketMutation.isPending}
+                      >
                         {createTicketMutation.isPending && (
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         )}
@@ -278,7 +337,9 @@ export default function Support() {
         ) : (
           <Card>
             <CardContent className="pt-6 text-center">
-              <p className="text-muted-foreground mb-4">{t("support.loginRequired")}</p>
+              <p className="text-muted-foreground mb-4">
+                {t("support.loginRequired")}
+              </p>
               <Link href="/login">
                 <Button>{t("nav.login")}</Button>
               </Link>

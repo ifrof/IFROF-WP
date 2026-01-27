@@ -22,38 +22,50 @@ import { mapsRouter } from "./routers/maps";
 
 export const appRouter = router({
   system: systemRouter,
-  
-  auth: authImprovedRouter,
+
+  auth: authRouter,
 
   // Marketplace features
   factories: factoriesRouter,
   products: productsRouter,
   inquiries: inquiriesRouter,
   messages: messagesRouter,
-  
+
   // Community features
   forum: forumRouter,
   blog: blogRouter,
-  
+
   // AI & Chat features
   chatbot: chatbotRouter,
   aiAgent: aiAgentRouter,
-  
+
   // Payment & Order features
   payments: paymentsRouter,
-  
+
   // Notifications
   notifications: notificationsRouter,
-  
+
   // Shopping features
   cart: cartRouter,
   reviews: reviewsRouter,
-  
+  profiles: profilesRouter,
+  storage: storageRouter,
+
   // Additional features
   services: servicesRouter,
   support: supportRouter,
   dashboard: dashboardRouter,
   maps: mapsRouter,
+  admin: adminRouter,
+  factoryVerification: factoryVerificationRouter,
+  twoFactorAuth: twoFactorAuthRouter,
+  newsletter: newsletterRouter,
+  adminActions: adminActionsRouter,
+
+  // New critical features
+  factoryVerificationAi: factoryVerificationAiRouter,
+  content: contentRouter,
+  adminDashboard: adminDashboardRouter,
 });
 
 export type AppRouter = typeof appRouter;

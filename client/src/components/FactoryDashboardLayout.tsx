@@ -20,10 +20,19 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Package, List, CheckCircle, User, Home } from "lucide-react";
+import {
+  LayoutDashboard,
+  LogOut,
+  PanelLeft,
+  Package,
+  List,
+  CheckCircle,
+  User,
+  Home,
+} from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation, Link } from "wouter";
-import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
+import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const SIDEBAR_WIDTH_KEY = "factory-sidebar-width";
@@ -48,12 +57,12 @@ export default function FactoryDashboardLayout({
   }, [sidebarWidth]);
 
   if (loading) {
-    return <DashboardLayoutSkeleton />
+    return <DashboardLayoutSkeleton />;
   }
 
-  if (!user || user.role !== 'factory') {
+  if (!user || user.role !== "factory") {
     useEffect(() => {
-      if (!loading && (!user || user.role !== 'factory')) {
+      if (!loading && (!user || user.role !== "factory")) {
         setLocation("/login");
       }
     }, [user, loading, setLocation]);
@@ -94,10 +103,26 @@ function FactoryDashboardLayoutContent({
   const { t } = useLanguage();
 
   const menuItems = [
-    { icon: LayoutDashboard, label: t("dashboard.factory.title"), path: "/factory" },
-    { icon: List, label: t("dashboard.factory.listings") || "Listings", path: "/factory/listings" },
-    { icon: Package, label: t("dashboard.factory.orders") || "Orders", path: "/factory/orders" },
-    { icon: CheckCircle, label: t("dashboard.factory.verification") || "Verification", path: "/factory/verification" },
+    {
+      icon: LayoutDashboard,
+      label: t("dashboard.factory.title"),
+      path: "/factory",
+    },
+    {
+      icon: List,
+      label: t("dashboard.factory.listings") || "Listings",
+      path: "/factory/listings",
+    },
+    {
+      icon: Package,
+      label: t("dashboard.factory.orders") || "Orders",
+      path: "/factory/orders",
+    },
+    {
+      icon: CheckCircle,
+      label: t("dashboard.factory.verification") || "Verification",
+      path: "/factory/verification",
+    },
     { icon: User, label: t("profile.title"), path: "/factory/profile" },
     { icon: Home, label: t("nav.home"), path: "/" },
   ];
@@ -131,7 +156,11 @@ function FactoryDashboardLayoutContent({
   return (
     <>
       <div className="relative" ref={sidebarRef}>
-        <Sidebar collapsible="icon" className="border-r shadow-sm" disableTransition={isResizing}>
+        <Sidebar
+          collapsible="icon"
+          className="border-r shadow-sm"
+          disableTransition={isResizing}
+        >
           <SidebarHeader className="h-16 justify-center border-b">
             <div className="flex items-center gap-3 px-2 transition-all w-full">
               <button
@@ -142,7 +171,9 @@ function FactoryDashboardLayoutContent({
               </button>
               {!isCollapsed && (
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-bold tracking-tight truncate text-primary">IFROF Factory</span>
+                  <span className="font-bold tracking-tight truncate text-primary">
+                    IFROF Factory
+                  </span>
                 </div>
               )}
             </div>
@@ -159,7 +190,9 @@ function FactoryDashboardLayoutContent({
                       tooltip={item.label}
                       className={`h-11 transition-all font-medium mb-1 rounded-md ${isActive ? "bg-primary/10 text-primary" : "hover:bg-accent"}`}
                     >
-                      <item.icon className={`h-5 w-5 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                      <item.icon
+                        className={`h-5 w-5 ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                      />
                       <span>{item.label}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -177,19 +210,29 @@ function FactoryDashboardLayoutContent({
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-                    <p className="text-sm font-semibold truncate leading-none">{user?.name || "-"}</p>
-                    <p className="text-xs text-muted-foreground truncate mt-1.5">{user?.email || "-"}</p>
+                    <p className="text-sm font-semibold truncate leading-none">
+                      {user?.name || "-"}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate mt-1.5">
+                      {user?.email || "-"}
+                    </p>
                   </div>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 p-1">
                 <DropdownMenuItem asChild>
-                  <Link href="/factory/profile" className="cursor-pointer flex items-center">
+                  <Link
+                    href="/factory/profile"
+                    className="cursor-pointer flex items-center"
+                  >
                     <User className="mr-2 h-4 w-4" />
                     <span>{t("profile.title")}</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive">
+                <DropdownMenuItem
+                  onClick={logout}
+                  className="cursor-pointer text-destructive"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>{t("nav.logout")}</span>
                 </DropdownMenuItem>
@@ -210,7 +253,9 @@ function FactoryDashboardLayoutContent({
           <div className="flex border-b h-14 items-center justify-between bg-background/95 px-4 backdrop-blur sticky top-0 z-40">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="h-9 w-9 rounded-lg bg-background" />
-              <span className="font-semibold text-foreground">{activeMenuItem?.label ?? "Dashboard"}</span>
+              <span className="font-semibold text-foreground">
+                {activeMenuItem?.label ?? "Dashboard"}
+              </span>
             </div>
           </div>
         )}

@@ -6,16 +6,19 @@ const t = initTRPC.context<TrpcContext>().create();
 /**
  * Strict Role-Based Access Control Middleware
  */
-export const isRole = (roles: ("admin" | "factory" | "buyer")[]) => 
+export const isRole = (roles: ("admin" | "factory" | "buyer")[]) =>
   t.middleware(async ({ ctx, next }) => {
     if (!ctx.user) {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be logged in" });
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You must be logged in",
+      });
     }
 
     if (!roles.includes(ctx.user.role as any)) {
-      throw new TRPCError({ 
-        code: "FORBIDDEN", 
-        message: `Access denied. Required roles: ${roles.join(", ")}` 
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: `Access denied. Required roles: ${roles.join(", ")}`,
       });
     }
 

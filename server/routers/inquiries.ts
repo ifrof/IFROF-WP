@@ -37,7 +37,10 @@ export const inquiriesRouter = router({
     .input(z.object({ buyerId: z.number() }))
     .query(async ({ ctx, input }) => {
       if (ctx.user.id !== input.buyerId && ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Cannot view other buyer's inquiries" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Cannot view other buyer's requests",
+        });
       }
       return db.getInquiriesByBuyer(input.buyerId);
     }),
@@ -60,14 +63,72 @@ export const inquiriesRouter = router({
 
   // Update inquiry status (factory owner or admin)
   updateStatus: protectedProcedure
-    .input(z.object({ id: z.number(), status: z.enum(["pending", "responded", "negotiating", "completed", "cancelled"]) }))
+    .input(
+      z.object({
+        id: z.number(),
+        status: z.enum([
+          "pending",
+          "quoted",
+          "accepted",
+          "paid",
+          "shipped",
+          "cancelled",
+        ]),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "admin" && ctx.user.role !== "factory") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only factory owners can update inquiry status" });
+      const updated = await db.updateImportRequest(input.id, {
+        status: input.status,
+      });
+
+      // Send notification to buyer
+      const request = await db.getImportRequestById(input.id);
+      if (request) {
+        const buyer = await db.getUserById(request.buyerId);
+        if (buyer) {
+          await sendImportRequestUpdateEmail(
+            buyer.email,
+            buyer.fullName || buyer.username,
+            input.id.toString(),
+            input.status,
+            request.productName || "Product"
+          );
+        }
       }
 
-      const result = await db.updateInquiry(input.id, { status: input.status });
-      return result;
+      return updated;
+    }),
+
+  // Submit a quote (factory only)
+  submitQuote: protectedProcedure
+    .input(quoteSchema)
+    .mutation(async ({ ctx, input }) => {
+      const quote = await db.createQuote(input);
+      await db.updateImportRequest(input.requestId, { status: "quoted" });
+
+      // Send notification to buyer
+      const request = await db.getImportRequestById(input.requestId);
+      if (request) {
+        const buyer = await db.getUserById(request.buyerId);
+        if (buyer) {
+          await sendImportRequestUpdateEmail(
+            buyer.email,
+            buyer.fullName || buyer.username,
+            input.requestId.toString(),
+            "quoted",
+            request.productName || "Product"
+          );
+        }
+      }
+
+      return quote;
+    }),
+
+  // Get quotes for a request
+  getQuotes: protectedProcedure
+    .input(z.object({ requestId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      return db.getQuotesByRequest(input.requestId);
     }),
 });
 
@@ -79,7 +140,7 @@ export const messagesRouter = router({
       // In a real app, verify the user is part of this conversation
       const db_instance = await db.getDb();
       if (!db_instance) return [];
-      
+
       return db_instance
         .select()
         .from(messages)
@@ -92,7 +153,10 @@ export const messagesRouter = router({
     .mutation(async ({ ctx, input }) => {
       // Verify user is part of this conversation
       if (ctx.user.id !== input.senderId && ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Cannot send message as another user" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Cannot send message as another user",
+        });
       }
 
       const db_instance = await db.getDb();
@@ -123,21 +187,15 @@ export const messagesRouter = router({
     }),
 
   // Get unread message count for a user
-  getUnreadCount: protectedProcedure
-    .query(async ({ ctx }) => {
-      const db_instance = await db.getDb();
-      if (!db_instance) return 0;
+  getUnreadCount: protectedProcedure.query(async ({ ctx }) => {
+    const db_instance = await db.getDb();
+    if (!db_instance) return 0;
 
-      const unread = await db_instance
-        .select()
-        .from(messages)
-        .where(
-          and(
-            eq(messages.receiverId, ctx.user.id),
-            eq(messages.read, 0)
-          )
-        );
+    const unread = await db_instance
+      .select()
+      .from(messages)
+      .where(and(eq(messages.receiverId, ctx.user.id), eq(messages.read, 0)));
 
-      return unread?.length || 0;
-    }),
+    return unread?.length || 0;
+  }),
 });

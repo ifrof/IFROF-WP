@@ -24,8 +24,8 @@ export interface SupplierAssessment {
   };
   redFlags: string[];
   greenFlags: string[];
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  classification: 'FACTORY' | 'TRADING' | 'MIXED';
+  riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  classification: "FACTORY" | "TRADING" | "MIXED";
   overallScore: number;
   recommendation: string;
 }
@@ -41,7 +41,9 @@ export interface RiskMetrics {
 /**
  * حساب درجة المخاطر الإجمالية
  */
-export function calculateRiskMetrics(assessment: SupplierAssessment): RiskMetrics {
+export function calculateRiskMetrics(
+  assessment: SupplierAssessment
+): RiskMetrics {
   const scores = Object.values(assessment.scores);
   const totalScore = scores.reduce((a, b) => a + b, 0) / scores.length;
 
@@ -86,8 +88,10 @@ function calculateFactoryLikelihood(assessment: SupplierAssessment): number {
     assessment.scores.deliveryReliability,
   ];
 
-  const factoryScore = factoryIndicators.reduce((a, b) => a + b, 0) / factoryIndicators.length;
-  const tradingScore = tradingIndicators.reduce((a, b) => a + b, 0) / tradingIndicators.length;
+  const factoryScore =
+    factoryIndicators.reduce((a, b) => a + b, 0) / factoryIndicators.length;
+  const tradingScore =
+    tradingIndicators.reduce((a, b) => a + b, 0) / tradingIndicators.length;
 
   // إذا كان factoryScore أعلى بكثير = مصنع حقيقي
   const likelihood = (factoryScore / (factoryScore + tradingScore)) * 100;
@@ -98,13 +102,15 @@ function calculateFactoryLikelihood(assessment: SupplierAssessment): number {
 /**
  * تصنيف المورّد (Factory / Trading / Mixed)
  */
-export function classifySupplier(assessment: SupplierAssessment): 'FACTORY' | 'TRADING' | 'MIXED' {
+export function classifySupplier(
+  assessment: SupplierAssessment
+): "FACTORY" | "TRADING" | "MIXED" {
   const metrics = calculateRiskMetrics(assessment);
   const factoryLikelihood = metrics.factoryLikelihood;
 
-  if (factoryLikelihood >= 75) return 'FACTORY';
-  if (factoryLikelihood <= 40) return 'TRADING';
-  return 'MIXED';
+  if (factoryLikelihood >= 75) return "FACTORY";
+  if (factoryLikelihood <= 40) return "TRADING";
+  return "MIXED";
 }
 
 /**
@@ -114,64 +120,69 @@ export function determineRiskLevel(
   riskPercentage: number,
   redFlagsCount: number,
   classification: string
-): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
   // Critical: أكثر من 70% مخاطر أو 5+ علامات تحذير
-  if (riskPercentage > 70 || redFlagsCount >= 5) return 'CRITICAL';
+  if (riskPercentage > 70 || redFlagsCount >= 5) return "CRITICAL";
 
   // High: 50-70% مخاطر أو 3-4 علامات تحذير
-  if (riskPercentage > 50 || redFlagsCount >= 3) return 'HIGH';
+  if (riskPercentage > 50 || redFlagsCount >= 3) return "HIGH";
 
   // Medium: 30-50% مخاطر أو 1-2 علامات تحذير
-  if (riskPercentage > 30 || redFlagsCount >= 1) return 'MEDIUM';
+  if (riskPercentage > 30 || redFlagsCount >= 1) return "MEDIUM";
 
   // Low: أقل من 30% مخاطر
-  return 'LOW';
+  return "LOW";
 }
 
 /**
  * توليد التوصيات بناءً على التقييم
  */
-function generateRecommendations(assessment: SupplierAssessment, totalScore: number): string[] {
+function generateRecommendations(
+  assessment: SupplierAssessment,
+  totalScore: number
+): string[] {
   const recommendations: string[] = [];
 
   // توصيات بناءً على المخاطر
-  if (assessment.riskLevel === 'CRITICAL') {
-    recommendations.push('⛔ لا ننصح بالتعامل مع هذا المورّد - مخاطر عالية جداً');
-    recommendations.push('🔍 يحتاج تحقق إضافي قبل أي تعامل');
+  if (assessment.riskLevel === "CRITICAL") {
+    recommendations.push(
+      "⛔ لا ننصح بالتعامل مع هذا المورّد - مخاطر عالية جداً"
+    );
+    recommendations.push("🔍 يحتاج تحقق إضافي قبل أي تعامل");
   }
 
-  if (assessment.riskLevel === 'HIGH') {
-    recommendations.push('⚠️ احذر - قد يكون وسيط وليس مصنع');
-    recommendations.push('📞 اطلب فيديو حي للمصنع قبل الطلب');
+  if (assessment.riskLevel === "HIGH") {
+    recommendations.push("⚠️ احذر - قد يكون وسيط وليس مصنع");
+    recommendations.push("📞 اطلب فيديو حي للمصنع قبل الطلب");
   }
 
   // توصيات بناءً على التصنيف
-  if (assessment.classification === 'FACTORY') {
-    recommendations.push('✅ يبدو مصنع حقيقي - يمكن التعامل');
-    recommendations.push('💰 يمكن التفاوض على أسعار أفضل');
+  if (assessment.classification === "FACTORY") {
+    recommendations.push("✅ يبدو مصنع حقيقي - يمكن التعامل");
+    recommendations.push("💰 يمكن التفاوض على أسعار أفضل");
   }
 
-  if (assessment.classification === 'TRADING') {
-    recommendations.push('❌ هذا وسيط وليس مصنع - تجنب');
-    recommendations.push('🏭 ابحث عن مصنع مباشر آخر');
+  if (assessment.classification === "TRADING") {
+    recommendations.push("❌ هذا وسيط وليس مصنع - تجنب");
+    recommendations.push("🏭 ابحث عن مصنع مباشر آخر");
   }
 
   // توصيات بناءً على نقاط الضعف
   if (assessment.scores.credentials < 5) {
-    recommendations.push('📋 اطلب شهادات ISO والتراخيص الرسمية');
+    recommendations.push("📋 اطلب شهادات ISO والتراخيص الرسمية");
   }
 
   if (assessment.scores.technicalKnowledge < 5) {
-    recommendations.push('🤔 اطرح أسئلة فنية أكثر للتحقق من الخبرة');
+    recommendations.push("🤔 اطرح أسئلة فنية أكثر للتحقق من الخبرة");
   }
 
   if (assessment.scores.customization < 5) {
-    recommendations.push('🎨 تحقق من قدرتهم على التخصيص');
+    recommendations.push("🎨 تحقق من قدرتهم على التخصيص");
   }
 
   // توصيات بناءً على العلامات الإيجابية
   if (assessment.greenFlags.length >= 5) {
-    recommendations.push('🎯 علامات إيجابية قوية - موثوق');
+    recommendations.push("🎯 علامات إيجابية قوية - موثوق");
   }
 
   return recommendations;
@@ -185,31 +196,31 @@ export function calculateCriterionScore(
   data: Record<string, any>
 ): number {
   switch (criterionName) {
-    case 'legalStructure':
+    case "legalStructure":
       return calculateLegalStructureScore(data);
-    case 'location':
+    case "location":
       return calculateLocationScore(data);
-    case 'workforce':
+    case "workforce":
       return calculateWorkforceScore(data);
-    case 'technicalKnowledge':
+    case "technicalKnowledge":
       return calculateTechnicalKnowledgeScore(data);
-    case 'customization':
+    case "customization":
       return calculateCustomizationScore(data);
-    case 'pricing':
+    case "pricing":
       return calculatePricingScore(data);
-    case 'credentials':
+    case "credentials":
       return calculateCredentialsScore(data);
-    case 'communication':
+    case "communication":
       return calculateCommunicationScore(data);
-    case 'productQuality':
+    case "productQuality":
       return calculateProductQualityScore(data);
-    case 'deliveryReliability':
+    case "deliveryReliability":
       return calculateDeliveryReliabilityScore(data);
-    case 'certifications':
+    case "certifications":
       return calculateCertificationsScore(data);
-    case 'innovation':
+    case "innovation":
       return calculateInnovationScore(data);
-    case 'transparency':
+    case "transparency":
       return calculateTransparencyScore(data);
     default:
       return 0;
@@ -220,7 +231,7 @@ export function calculateCriterionScore(
 function calculateLegalStructureScore(data: Record<string, any>): number {
   let score = 0;
   if (data.hasManufacturingLicense) score += 3;
-  if (data.businessScope === 'manufacturing') score += 3;
+  if (data.businessScope === "manufacturing") score += 3;
   if (data.yearsInBusiness > 5) score += 2;
   if (data.hasRDDepartment) score += 2;
   return Math.min(score, 10);
@@ -287,7 +298,7 @@ function calculateCredentialsScore(data: Record<string, any>): number {
 function calculateCommunicationScore(data: Record<string, any>): number {
   let score = 0;
   if (data.responseTime < 2) score += 3;
-  if (data.communicationLanguage === 'english') score += 2;
+  if (data.communicationLanguage === "english") score += 2;
   if (data.hasMultipleContactChannels) score += 2;
   if (data.professionalCommunication >= 8) score += 2;
   if (data.clarityOfInformation >= 8) score += 1;
@@ -350,7 +361,9 @@ function calculateTransparencyScore(data: Record<string, any>): number {
 /**
  * إنشاء ملخص التقييم
  */
-export function generateAssessmentSummary(assessment: SupplierAssessment): string {
+export function generateAssessmentSummary(
+  assessment: SupplierAssessment
+): string {
   const metrics = calculateRiskMetrics(assessment);
 
   return `
@@ -358,7 +371,7 @@ IFROF Supplier Assessment Report
 ================================
 
 Supplier: ${assessment.supplierName}
-Assessment Date: ${assessment.assessmentDate.toLocaleDateString('ar-SA')}
+Assessment Date: ${assessment.assessmentDate.toLocaleDateString("ar-SA")}
 
 Classification: ${assessment.classification}
 Risk Level: ${assessment.riskLevel}
@@ -370,12 +383,12 @@ Recommendation:
 ${assessment.recommendation}
 
 Green Flags (${assessment.greenFlags.length}):
-${assessment.greenFlags.map((flag) => `✅ ${flag}`).join('\n')}
+${assessment.greenFlags.map(flag => `✅ ${flag}`).join("\n")}
 
 Red Flags (${assessment.redFlags.length}):
-${assessment.redFlags.map((flag) => `❌ ${flag}`).join('\n')}
+${assessment.redFlags.map(flag => `❌ ${flag}`).join("\n")}
 
 Recommendations:
-${metrics.recommendations.map((rec) => `• ${rec}`).join('\n')}
+${metrics.recommendations.map(rec => `• ${rec}`).join("\n")}
   `;
 }

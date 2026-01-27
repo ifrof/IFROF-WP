@@ -40,7 +40,8 @@ export default function Terms() {
 
           <h2>{t("terms.contact")}</h2>
           <p>
-            {t("terms.contactEmail")}: <a href="mailto:legal@ifrof.com">legal@ifrof.com</a>
+            {t("terms.contactEmail")}:{" "}
+            <a href="mailto:legal@ifrof.com">legal@ifrof.com</a>
           </p>
         </div>
       </div>

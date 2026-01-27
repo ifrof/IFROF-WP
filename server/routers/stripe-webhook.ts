@@ -15,7 +15,9 @@ if (!webhookSecret) {
   console.warn("WARNING: STRIPE_WEBHOOK_SECRET is not set");
 }
 
-const stripe = new Stripe(stripeSecretKey || "sk_test_dummy_key_for_initialization");
+const stripe = new Stripe(
+  stripeSecretKey || "sk_test_dummy_key_for_initialization"
+);
 
 export const stripeWebhookRouter = Router();
 
@@ -58,7 +60,9 @@ stripeWebhookRouter.post("/webhook", async (req: Request, res: Response) => {
 
           // Calculate commission (2-3% from factory)
           const commissionRate = 0.025; // 2.5% default
-          const commissionAmount = Math.round(order.totalAmount * commissionRate);
+          const commissionAmount = Math.round(
+            order.totalAmount * commissionRate
+          );
 
           await db
             .update(orders)
@@ -69,9 +73,13 @@ stripeWebhookRouter.post("/webhook", async (req: Request, res: Response) => {
             })
             .where(eq(orders.id, order.id));
 
-          console.log(`[Stripe Webhook] Commission calculated: $${(commissionAmount / 100).toFixed(2)} (${(commissionRate * 100)}%)`);
+          console.log(
+            `[Stripe Webhook] Commission calculated: $${(commissionAmount / 100).toFixed(2)} (${commissionRate * 100}%)`
+          );
 
-          console.log(`[Stripe Webhook] Order ${order.orderNumber} payment confirmed`);
+          console.log(
+            `[Stripe Webhook] Order ${order.orderNumber} payment confirmed`
+          );
 
           await db.insert(notifications).values({
             userId: order.buyerId,
@@ -112,7 +120,12 @@ stripeWebhookRouter.post("/webhook", async (req: Request, res: Response) => {
         const orderRecords = await db
           .select()
           .from(orders)
-          .where(eq(orders.stripePaymentIntentId, charge.payment_intent?.toString() || ""));
+          .where(
+            eq(
+              orders.stripePaymentIntentId,
+              charge.payment_intent?.toString() || ""
+            )
+          );
 
         if (orderRecords.length > 0) {
           const order = orderRecords[0];
@@ -143,13 +156,19 @@ stripeWebhookRouter.post("/webhook", async (req: Request, res: Response) => {
 
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.log("[Stripe Webhook] Payment intent succeeded:", paymentIntent.id);
+        console.log(
+          "[Stripe Webhook] Payment intent succeeded:",
+          paymentIntent.id
+        );
         break;
       }
 
       case "payment_intent.payment_failed": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.log("[Stripe Webhook] Payment intent failed:", paymentIntent.id);
+        console.log(
+          "[Stripe Webhook] Payment intent failed:",
+          paymentIntent.id
+        );
         break;
       }
 

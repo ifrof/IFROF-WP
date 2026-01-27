@@ -8,8 +8,12 @@ export default function FactoryVerification() {
     <FactoryDashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Factory Verification</h1>
-          <p className="text-muted-foreground">Verify your factory to gain trust and access more features.</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Factory Verification
+          </h1>
+          <p className="text-muted-foreground">
+            Verify your factory to gain trust and access more features.
+          </p>
         </div>
         <Card className="border-yellow-200 bg-yellow-50/50">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
@@ -18,9 +22,12 @@ export default function FactoryVerification() {
             </div>
             <CardTitle className="mb-2">Verification Pending</CardTitle>
             <p className="text-muted-foreground max-w-md mx-auto mb-6">
-              Your factory is currently not verified. Verified factories get a "Verified" badge and appear higher in search results.
+              Your factory is currently not verified. Verified factories get a
+              "Verified" badge and appear higher in search results.
             </p>
-            <Button className="bg-yellow-600 hover:bg-yellow-700">Start Verification Process</Button>
+            <Button className="bg-yellow-600 hover:bg-yellow-700">
+              Start Verification Process
+            </Button>
           </CardContent>
         </Card>
       </div>

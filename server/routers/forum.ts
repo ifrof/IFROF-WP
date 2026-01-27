@@ -25,7 +25,9 @@ const voteSchema = z.object({
 export const forumRouter = router({
   // Get all forum posts with pagination
   getPosts: publicProcedure
-    .input(z.object({ limit: z.number().default(20), offset: z.number().default(0) }))
+    .input(
+      z.object({ limit: z.number().default(20), offset: z.number().default(0) })
+    )
     .query(async ({ input }) => {
       return db.getForumPosts(input.limit, input.offset);
     }),
@@ -36,7 +38,10 @@ export const forumRouter = router({
     .query(async ({ input }) => {
       const post = await db.getForumPostById(input.id);
       if (!post) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Forum post not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Forum post not found",
+        });
       }
 
       // Increment view count
@@ -64,7 +69,10 @@ export const forumRouter = router({
     .mutation(async ({ ctx, input }) => {
       const post = await db.getForumPostById(input.postId);
       if (!post) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Forum post not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Forum post not found",
+        });
       }
 
       const result = await db.createForumAnswer({
@@ -96,7 +104,10 @@ export const forumRouter = router({
         .limit(1);
 
       if (existingVote && existingVote.length > 0) {
-        throw new TRPCError({ code: "CONFLICT", message: "You have already voted on this answer" });
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "You have already voted on this answer",
+        });
       }
 
       // Add vote
@@ -130,19 +141,29 @@ export const forumRouter = router({
     .mutation(async ({ ctx, input }) => {
       const post = await db.getForumPostById(input.postId);
       if (!post) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Forum post not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Forum post not found",
+        });
       }
 
       // Only post author or admin can mark best answer
-      if (ctx.user.id !== post.authorId && ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only post author can mark best answer" });
+      const postData = post as any;
+      if (ctx.user.id !== postData.authorId && ctx.user.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only post author can mark best answer",
+        });
       }
 
       // Update answer as best
       await db.updateForumAnswer(input.answerId, { isBestAnswer: 1 });
 
       // Update post status
-      await db.updateForumPost(input.postId, { status: "answered", bestAnswerId: input.answerId });
+      await db.updateForumPost(input.postId, {
+        status: "answered",
+        bestAnswerId: input.answerId,
+      });
 
       return { success: true };
     }),

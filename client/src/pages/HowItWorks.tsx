@@ -1,7 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Search, MessageSquare, CreditCard, Truck, CheckCircle } from "lucide-react";
+import {
+  Search,
+  MessageSquare,
+  CreditCard,
+  Truck,
+  CheckCircle,
+} from "lucide-react";
 import { Link } from "wouter";
 
 export default function HowItWorks() {
@@ -57,8 +63,12 @@ export default function HowItWorks() {
                     <div className="absolute -top-4 left-4 bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
                       {index + 1}
                     </div>
-                    <h3 className="font-semibold text-lg mb-2">{t(step.titleKey)}</h3>
-                    <p className="text-sm text-muted-foreground">{t(step.descKey)}</p>
+                    <h3 className="font-semibold text-lg mb-2">
+                      {t(step.titleKey)}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {t(step.descKey)}
+                    </p>
                   </CardContent>
                 </Card>
                 {index < steps.length - 1 && (
@@ -71,27 +81,41 @@ export default function HowItWorks() {
 
         {/* Benefits */}
         <div className="bg-blue-50 rounded-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold mb-8 text-center">{t("howItWorks.benefits")}</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center">
+            {t("howItWorks.benefits")}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex gap-4">
               <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-semibold mb-2">{t("howItWorks.benefit1.title")}</h3>
-                <p className="text-sm text-muted-foreground">{t("howItWorks.benefit1.desc")}</p>
+                <h3 className="font-semibold mb-2">
+                  {t("howItWorks.benefit1.title")}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t("howItWorks.benefit1.desc")}
+                </p>
               </div>
             </div>
             <div className="flex gap-4">
               <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-semibold mb-2">{t("howItWorks.benefit2.title")}</h3>
-                <p className="text-sm text-muted-foreground">{t("howItWorks.benefit2.desc")}</p>
+                <h3 className="font-semibold mb-2">
+                  {t("howItWorks.benefit2.title")}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t("howItWorks.benefit2.desc")}
+                </p>
               </div>
             </div>
             <div className="flex gap-4">
               <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-semibold mb-2">{t("howItWorks.benefit3.title")}</h3>
-                <p className="text-sm text-muted-foreground">{t("howItWorks.benefit3.desc")}</p>
+                <h3 className="font-semibold mb-2">
+                  {t("howItWorks.benefit3.title")}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t("howItWorks.benefit3.desc")}
+                </p>
               </div>
             </div>
           </div>
@@ -100,7 +124,9 @@ export default function HowItWorks() {
         {/* CTA */}
         <div className="text-center">
           <h2 className="text-3xl font-bold mb-4">{t("howItWorks.cta")}</h2>
-          <p className="text-lg text-muted-foreground mb-8">{t("howItWorks.ctaDesc")}</p>
+          <p className="text-lg text-muted-foreground mb-8">
+            {t("howItWorks.ctaDesc")}
+          </p>
           <div className="flex gap-4 justify-center">
             <Link href="/marketplace">
               <Button size="lg">{t("howItWorks.startBrowsing")}</Button>

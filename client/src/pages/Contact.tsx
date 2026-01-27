@@ -23,7 +23,9 @@ export default function Contact() {
               <Mail className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-bold">{language === "ar" ? "البريد الإلكتروني" : "Email"}</h3>
+              <h3 className="font-bold">
+                {language === "ar" ? "البريد الإلكتروني" : "Email"}
+              </h3>
               <p className="text-muted-foreground">support@ifrof.com</p>
             </div>
           </div>
@@ -33,8 +35,14 @@ export default function Contact() {
               <Phone className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-bold">{language === "ar" ? "الهاتف" : "Phone"}</h3>
-              <p className="text-muted-foreground">{language === "ar" ? "متاح عبر البريد الإلكتروني" : "Available via email"}</p>
+              <h3 className="font-bold">
+                {language === "ar" ? "الهاتف" : "Phone"}
+              </h3>
+              <p className="text-muted-foreground">
+                {language === "ar"
+                  ? "متاح عبر البريد الإلكتروني"
+                  : "Available via email"}
+              </p>
             </div>
           </div>
 
@@ -43,11 +51,11 @@ export default function Contact() {
               <MapPin className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-bold">{language === "ar" ? "العنوان" : "Address"}</h3>
+              <h3 className="font-bold">
+                {language === "ar" ? "العنوان" : "Address"}
+              </h3>
               <p className="text-muted-foreground">
-                {language === "ar" 
-                  ? "قوانغتشو، الصين" 
-                  : "Guangzhou, China"}
+                {language === "ar" ? "قوانغتشو، الصين" : "Guangzhou, China"}
               </p>
             </div>
           </div>
@@ -57,22 +65,42 @@ export default function Contact() {
         <form className="space-y-4 bg-card p-6 rounded-xl border shadow-sm">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">{language === "ar" ? "الاسم" : "Name"}</label>
-              <Input placeholder={language === "ar" ? "اسمك الكامل" : "Your full name"} />
+              <label className="text-sm font-medium">
+                {language === "ar" ? "الاسم" : "Name"}
+              </label>
+              <Input
+                placeholder={
+                  language === "ar" ? "اسمك الكامل" : "Your full name"
+                }
+              />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">{language === "ar" ? "البريد الإلكتروني" : "Email"}</label>
+              <label className="text-sm font-medium">
+                {language === "ar" ? "البريد الإلكتروني" : "Email"}
+              </label>
               <Input type="email" placeholder="name@example.com" />
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">{language === "ar" ? "الموضوع" : "Subject"}</label>
-            <Input placeholder={language === "ar" ? "كيف يمكننا مساعدتك؟" : "How can we help?"} />
+            <label className="text-sm font-medium">
+              {language === "ar" ? "الموضوع" : "Subject"}
+            </label>
+            <Input
+              placeholder={
+                language === "ar" ? "كيف يمكننا مساعدتك؟" : "How can we help?"
+              }
+            />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">{language === "ar" ? "الرسالة" : "Message"}</label>
-            <Textarea 
-              placeholder={language === "ar" ? "اكتب رسالتك هنا..." : "Write your message here..."} 
+            <label className="text-sm font-medium">
+              {language === "ar" ? "الرسالة" : "Message"}
+            </label>
+            <Textarea
+              placeholder={
+                language === "ar"
+                  ? "اكتب رسالتك هنا..."
+                  : "Write your message here..."
+              }
               rows={5}
             />
           </div>

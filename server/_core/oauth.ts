@@ -28,7 +28,22 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      await db.upsertUser({
+      // Filter for Google only
+      const loginMethod = userInfo.loginMethod ?? userInfo.platform;
+      if (loginMethod !== "google") {
+        console.warn(
+          `[OAuth] Rejected login attempt from platform: ${loginMethod}`
+        );
+        res
+          .status(403)
+          .json({
+            error:
+              "Only Google authentication is allowed / يسمح فقط بتسجيل الدخول عبر جوجل",
+          });
+        return;
+      }
+
+      const user = await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
         email: userInfo.email ?? null,

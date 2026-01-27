@@ -6,7 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ShoppingCart, MapPin, Star, Package, Truck, Shield, ArrowLeft } from "lucide-react";
+import {
+  Loader2,
+  ShoppingCart,
+  MapPin,
+  Star,
+  Package,
+  Truck,
+  Shield,
+  ArrowLeft,
+} from "lucide-react";
+import MetaTags from "../components/SEO/MetaTags";
+import ProductSchema from "../components/SEO/ProductSchema";
+import BreadcrumbSchema from "../components/SEO/BreadcrumbSchema";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -17,8 +29,10 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const { t } = useLanguage();
 
-  const { data: product, isLoading } = trpc.products.getById.useQuery({ id: productId });
-  
+  const { data: product, isLoading } = trpc.products.getById.useQuery({
+    id: productId,
+  });
+
   // We need to fetch factory separately if it's not included in product
   const { data: factory } = trpc.factories.getById.useQuery(
     { id: product?.factoryId || 0 },
@@ -34,6 +48,15 @@ export default function ProductDetail() {
     { enabled: !!product?.id }
   );
 
+  const { data: relatedProducts = [] } = trpc.products.getRelated.useQuery(
+    {
+      factoryId: product?.factoryId || 0,
+      excludeProductId: product?.id || 0,
+      limit: 4,
+    },
+    { enabled: !!product?.factoryId && !!product?.id }
+  );
+
   const addToCartMutation = trpc.cart.addItem.useMutation({
     onSuccess: () => {
       toast.success(t("cart.added"));
@@ -45,7 +68,7 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!product) return;
-    
+
     addToCartMutation.mutate({
       productId: product.id,
       quantity,
@@ -65,7 +88,9 @@ export default function ProductDetail() {
       <div className="min-h-screen flex items-center justify-center">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">{t("product.notFound")}</p>
+            <p className="text-center text-muted-foreground">
+              {t("product.notFound")}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -73,20 +98,65 @@ export default function ProductDetail() {
   }
 
   const images = product.imageUrls ? JSON.parse(product.imageUrls) : [];
-  const specifications = product.specifications ? JSON.parse(product.specifications) : {};
-  const pricingTiers = product.pricingTiers ? JSON.parse(product.pricingTiers) : [];
+  const specifications = product.specifications
+    ? JSON.parse(product.specifications)
+    : {};
+  const pricingTiers = product.pricingTiers
+    ? JSON.parse(product.pricingTiers)
+    : [];
+
+  const seo = {
+    title: `${product.name} - Direct Import from China | IFROF`,
+    description: product.description.substring(0, 160),
+    keywords: [product.category || "", "import from china", "wholesale"],
+    ogImage: images[0] || "https://ifrof.com/images/og-default.jpg",
+    canonical: `https://ifrof.com/products/${product.id}`,
+  };
 
   return (
     <div className="min-h-screen bg-background">
+      <MetaTags seo={seo} type="product" />
+      <ProductSchema
+        product={{
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          images: images,
+          price: product.basePrice / 100,
+          brand: factory?.name,
+          rating: factoryStats
+            ? {
+                value: (factoryStats as any).rating,
+                count: (factoryStats as any).count,
+              }
+            : undefined,
+        }}
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", url: "https://ifrof.com" },
+          { name: "Marketplace", url: "https://ifrof.com/marketplace" },
+          {
+            name: product.name,
+            url: `https://ifrof.com/products/${product.id}`,
+          },
+        ]}
+      />
       {/* Breadcrumb */}
       <div className="bg-muted py-4">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center gap-2 text-sm">
-            <Link href="/" className="text-muted-foreground hover:text-foreground">
+            <Link
+              href="/"
+              className="text-muted-foreground hover:text-foreground"
+            >
               {t("nav.home")}
             </Link>
             <span className="text-muted-foreground">/</span>
-            <Link href="/marketplace" className="text-muted-foreground hover:text-foreground">
+            <Link
+              href="/factory"
+              className="text-muted-foreground hover:text-foreground"
+            >
               {t("nav.manufacturers")}
             </Link>
             <span className="text-muted-foreground">/</span>
@@ -125,11 +195,17 @@ export default function ProductDetail() {
                   <div
                     key={idx}
                     className={`cursor-pointer border-2 rounded overflow-hidden ${
-                      selectedImage === idx ? "border-blue-500" : "border-gray-200"
+                      selectedImage === idx
+                        ? "border-blue-500"
+                        : "border-gray-200"
                     }`}
                     onClick={() => setSelectedImage(idx)}
                   >
-                    <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-20 object-cover" />
+                    <img
+                      src={img}
+                      alt={`${product.name} ${idx + 1}`}
+                      className="w-full h-20 object-cover"
+                    />
                   </div>
                 ))}
               </div>
@@ -153,7 +229,10 @@ export default function ProductDetail() {
               <Card className="mb-4">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center justify-between">
-                    <Link href={`/factories/${factory.id}`} className="hover:underline">
+                    <Link
+                      href={`/factories/${factory.id}`}
+                      className="hover:underline"
+                    >
                       {factory.name}
                     </Link>
                     {factory.verificationStatus === "verified" && (
@@ -174,7 +253,8 @@ export default function ProductDetail() {
                     <div className="flex items-center gap-2">
                       <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                       <span>
-                        {(factoryStats as any).rating.toFixed(1)} ({(factoryStats as any).count} {t("reviews.title")})
+                        {(factoryStats as any).rating.toFixed(1)} (
+                        {(factoryStats as any).count} {t("reviews.title")})
                       </span>
                     </div>
                   )}
@@ -189,19 +269,25 @@ export default function ProductDetail() {
                   <span className="text-3xl font-bold text-blue-600">
                     ${(product.basePrice / 100).toFixed(2)}
                   </span>
-                  <span className="text-muted-foreground">{t("product.perUnit")}</span>
+                  <span className="text-muted-foreground">
+                    {t("product.perUnit")}
+                  </span>
                 </div>
 
                 {pricingTiers.length > 0 && (
                   <div className="mb-4">
-                    <p className="text-sm font-medium mb-2">{t("product.bulkPricing")}:</p>
+                    <p className="text-sm font-medium mb-2">
+                      {t("product.bulkPricing")}:
+                    </p>
                     <div className="space-y-1">
                       {pricingTiers.map((tier: any, idx: number) => (
                         <div key={idx} className="text-sm flex justify-between">
                           <span>
                             {tier.minQty}+ {t("product.units")}
                           </span>
-                          <span className="font-medium">${(tier.price / 100).toFixed(2)}</span>
+                          <span className="font-medium">
+                            ${(tier.price / 100).toFixed(2)}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -210,18 +296,21 @@ export default function ProductDetail() {
 
                 <div className="mb-4">
                   <p className="text-sm text-muted-foreground mb-2">
-                    {t("product.moq")}: {product.minimumOrderQuantity} {t("product.units")}
+                    {t("product.moq")}: {product.minimumOrderQuantity}{" "}
+                    {t("product.units")}
                   </p>
                 </div>
 
                 {/* Quantity Selector */}
                 <div className="flex items-center gap-4 mb-4">
-                  <label className="text-sm font-medium">{t("product.quantity")}:</label>
+                  <label className="text-sm font-medium">
+                    {t("product.quantity")}:
+                  </label>
                   <Input
                     type="number"
                     min={product.minimumOrderQuantity || 1}
                     value={quantity}
-                    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                    onChange={e => setQuantity(parseInt(e.target.value) || 1)}
                     className="w-24"
                   />
                 </div>
@@ -241,7 +330,9 @@ export default function ProductDetail() {
                     )}
                     {t("product.addToCart")}
                   </Button>
-                  <Link href={`/inquiries/create?factoryId=${factory?.id || 0}&productId=${product.id}`}>
+                  <Link
+                    href={`/inquiries/create?factoryId=${factory?.id || 0}&productId=${product.id}`}
+                  >
                     <Button variant="outline" className="w-full" size="lg">
                       {t("product.sendInquiry")}
                     </Button>
@@ -268,11 +359,46 @@ export default function ProductDetail() {
           </div>
         </div>
 
+        {/* Related Products */}
+        {relatedProducts && relatedProducts.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {relatedProducts.map((rel: any) => {
+                const imgs = rel.imageUrls ? JSON.parse(rel.imageUrls) : [];
+                return (
+                  <Link key={rel.id} href={`/products/${rel.id}`}>
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+                      <div className="aspect-square bg-gray-100">
+                        <img
+                          src={imgs[0] || "https://via.placeholder.com/200"}
+                          alt={rel.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold line-clamp-2 mb-2">
+                          {rel.name}
+                        </h3>
+                        <span className="text-lg font-bold text-blue-600">
+                          ¥{rel.basePrice}
+                        </span>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Tabs Section */}
         <div className="mt-8">
           <Tabs defaultValue="specifications">
             <TabsList>
-              <TabsTrigger value="specifications">{t("product.specifications")}</TabsTrigger>
+              <TabsTrigger value="specifications">
+                {t("product.specifications")}
+              </TabsTrigger>
               <TabsTrigger value="reviews">{t("reviews.title")}</TabsTrigger>
             </TabsList>
 
@@ -282,9 +408,14 @@ export default function ProductDetail() {
                   {Object.keys(specifications).length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {Object.entries(specifications).map(([key, value]) => (
-                        <div key={key} className="flex justify-between border-b pb-2">
+                        <div
+                          key={key}
+                          className="flex justify-between border-b pb-2"
+                        >
                           <span className="font-medium">{key}:</span>
-                          <span className="text-muted-foreground">{String(value)}</span>
+                          <span className="text-muted-foreground">
+                            {String(value)}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -301,11 +432,16 @@ export default function ProductDetail() {
               <Card>
                 <CardContent className="pt-6">
                   {!reviews || (reviews as any[]).length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">{t("reviews.noReviews")}</p>
+                    <p className="text-center text-muted-foreground py-8">
+                      {t("reviews.noReviews")}
+                    </p>
                   ) : (
                     <div className="space-y-6">
                       {(reviews as any[]).map((review: any) => (
-                        <div key={review.id} className="border-b pb-4 last:border-0">
+                        <div
+                          key={review.id}
+                          className="border-b pb-4 last:border-0"
+                        >
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                               <div className="flex">
@@ -320,7 +456,9 @@ export default function ProductDetail() {
                                   />
                                 ))}
                               </div>
-                              <span className="font-medium">{review.user?.name || t("common.anonymous")}</span>
+                              <span className="font-medium">
+                                {review.user?.name || t("common.anonymous")}
+                              </span>
                             </div>
                             <span className="text-sm text-muted-foreground">
                               {new Date(review.createdAt).toLocaleDateString()}

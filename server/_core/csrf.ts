@@ -48,7 +48,11 @@ function verifyCsrfToken(req: Request): boolean {
 }
 
 // CSRF protection middleware for state-changing operations
-export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
+export const csrfProtection = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   // Skip CSRF check for safe methods
   if (["GET", "HEAD", "OPTIONS"].includes(req.method)) {
     return next();
@@ -72,7 +76,11 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
 };
 
 // Middleware to ensure CSRF token exists
-export const ensureCsrfToken = (req: Request, res: Response, next: NextFunction) => {
+export const ensureCsrfToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if (!req.cookies?.[CSRF_COOKIE_NAME]) {
     setCsrfToken(res);
   }

@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
@@ -26,11 +32,15 @@ export default function Services() {
     },
   });
 
-  const filteredServices = services?.filter((item: any) =>
-    item.service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.service.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.factory?.name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredServices =
+    services?.filter(
+      (item: any) =>
+        item.service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.service.category
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        item.factory?.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
   const handleAddToCart = (serviceId: number) => {
     addToCartMutation.mutate({
@@ -45,13 +55,15 @@ export default function Services() {
       <section className="bg-gradient-to-r from-purple-600 to-purple-800 text-white py-12 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl font-bold mb-4">{t("services.title")}</h1>
-          <p className="text-xl text-purple-100 mb-8">{t("services.subtitle")}</p>
-          
+          <p className="text-xl text-purple-100 mb-8">
+            {t("services.subtitle")}
+          </p>
+
           <div className="flex gap-2 max-w-2xl mx-auto">
             <Input
               placeholder={t("services.searchPlaceholder")}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="bg-white text-black"
             />
             <Button className="bg-orange-500 hover:bg-orange-600">
@@ -71,10 +83,15 @@ export default function Services() {
             {filteredServices.map((item: any) => {
               const service = item.service;
               const factory = item.factory;
-              const images = service.imageUrls ? JSON.parse(service.imageUrls) : [];
+              const images = service.imageUrls
+                ? JSON.parse(service.imageUrls)
+                : [];
 
               return (
-                <Card key={service.id} className="hover:shadow-lg transition-shadow">
+                <Card
+                  key={service.id}
+                  className="hover:shadow-lg transition-shadow"
+                >
                   {/* Service Image */}
                   <div className="w-full h-48 bg-gray-200 rounded-t-lg overflow-hidden">
                     {images.length > 0 ? (
@@ -93,7 +110,9 @@ export default function Services() {
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-lg line-clamp-2">{service.name}</CardTitle>
+                        <CardTitle className="text-lg line-clamp-2">
+                          {service.name}
+                        </CardTitle>
                         {service.category && (
                           <Badge variant="secondary" className="mt-2">
                             {service.category}
@@ -112,7 +131,10 @@ export default function Services() {
                     {/* Factory Info */}
                     {factory && (
                       <div className="text-sm">
-                        <Link href={`/factories/${factory.id}`} className="text-blue-600 hover:underline">
+                        <Link
+                          href={`/factories/${factory.id}`}
+                          className="text-blue-600 hover:underline"
+                        >
                           {factory.name}
                         </Link>
                         {factory.location && (
@@ -127,7 +149,9 @@ export default function Services() {
                     {/* Pricing */}
                     <div className="flex justify-between items-center pt-2 border-t">
                       <div>
-                        <p className="text-sm text-muted-foreground">{t("services.startingAt")}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {t("services.startingAt")}
+                        </p>
                         <p className="text-2xl font-bold text-purple-600">
                           ${(service.basePrice / 100).toFixed(2)}
                         </p>

@@ -44,9 +44,11 @@ The system uses the following database tables:
 ## Frontend Components
 
 ### 1. Cart Page (`/cart`)
+
 **File**: `client/src/pages/Cart.tsx`
 
 Features:
+
 - Display all cart items with product images, names, prices
 - Quantity adjustment with +/- buttons
 - Remove item functionality
@@ -56,28 +58,33 @@ Features:
 - Real-time cart persistence
 
 ### 2. Checkout Page (`/checkout`)
+
 **File**: `client/src/pages/CheckoutImproved.tsx`
 
 Multi-step checkout flow:
 
 **Step 1: Shipping Address**
+
 - Full name, address, city, state, ZIP, country, phone
 - Client-side validation with error messages
 - Required field indicators
 
 **Step 2: Shipping Method**
+
 - Standard Shipping (5-7 business days)
 - Express Shipping (2-3 business days)
 - Optional order notes
 - Dynamic pricing based on method
 
 **Step 3: Payment**
+
 - Stripe payment information
 - Secure payment badge
 - Accepted payment methods display
 - Order summary sidebar
 
 Features:
+
 - Step indicator with progress
 - Back/Next navigation
 - Real-time order summary
@@ -85,9 +92,11 @@ Features:
 - Error handling
 
 ### 3. Orders Page (`/orders`)
+
 **File**: `client/src/pages/Orders.tsx`
 
 Features:
+
 - List all user orders
 - Order status badges
 - Order details (date, amount, status)
@@ -97,9 +106,11 @@ Features:
 - Success message for recent payments
 
 ### 4. Order Detail Page (`/orders/:orderId`)
+
 **File**: `client/src/pages/OrderDetail.tsx`
 
 Features:
+
 - Complete order information
 - Order items with quantities and prices
 - Shipping address display
@@ -114,6 +125,7 @@ Features:
 ### 1. Cart Router (`server/routers/cart.ts`)
 
 **Endpoints:**
+
 - `cart.getItems` - Get user's cart items with product details
 - `cart.addItem` - Add product to cart (with MOQ validation)
 - `cart.removeItem` - Remove item from cart
@@ -122,6 +134,7 @@ Features:
 - `cart.getSummary` - Get cart summary (totals, counts)
 
 **Features:**
+
 - Database-backed persistence
 - Minimum order quantity validation
 - Product availability checking
@@ -129,6 +142,7 @@ Features:
 ### 2. Improved Checkout Router (`server/routers/checkout-improved.ts`)
 
 **Endpoints:**
+
 - `checkout.getSummary` - Get checkout summary with cart items
 - `checkout.validateShippingAddress` - Validate address format
 - `checkout.createCheckoutSession` - Create Stripe session and order
@@ -136,6 +150,7 @@ Features:
 - `checkout.clearCartAfterCheckout` - Clear cart after successful order
 
 **Features:**
+
 - Comprehensive order validation
 - Stripe checkout session creation
 - Order persistence to database
@@ -144,6 +159,7 @@ Features:
 ### 3. Payments Router (`server/routers/payments.ts`)
 
 **Endpoints:**
+
 - `payments.createCheckout` - Create checkout session (legacy)
 - `payments.getOrderBySession` - Get order by session ID
 - `payments.getOrders` - Get user's orders
@@ -177,6 +193,7 @@ Features:
    - Creates notification for buyer
 
 **Features:**
+
 - Signature verification using webhook secret
 - Error handling and logging
 - Database transaction updates
@@ -185,6 +202,7 @@ Features:
 ### Stripe Configuration
 
 **Environment Variables:**
+
 ```
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
@@ -210,6 +228,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 ### Email Configuration
 
 **Environment Variables:**
+
 ```
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASSWORD=your-app-password
@@ -217,6 +236,7 @@ EMAIL_FROM=noreply@ifrof.com
 ```
 
 **SMTP Settings:**
+
 - Service: Gmail
 - Port: 587 (TLS)
 - Authentication: OAuth2 or App Password
@@ -224,11 +244,13 @@ EMAIL_FROM=noreply@ifrof.com
 ## Order Flow
 
 ### 1. Add to Cart
+
 ```
 User adds product → Cart router validates MOQ → Item stored in database
 ```
 
 ### 2. Checkout
+
 ```
 User navigates to /checkout
 → Checkout page loads cart items
@@ -241,6 +263,7 @@ User navigates to /checkout
 ```
 
 ### 3. Payment
+
 ```
 User completes Stripe payment
 → Stripe processes payment
@@ -252,6 +275,7 @@ User completes Stripe payment
 ```
 
 ### 4. Order Management
+
 ```
 User views /orders
 → Displays all user orders
@@ -262,6 +286,7 @@ User views /orders
 ## Data Flow Diagrams
 
 ### Cart Persistence
+
 ```
 Frontend (Cart.tsx)
     ↓
@@ -275,6 +300,7 @@ Response with product details
 ```
 
 ### Checkout & Payment
+
 ```
 Frontend (CheckoutImproved.tsx)
     ↓
@@ -302,18 +328,21 @@ Create Notification
 ## Error Handling
 
 ### Frontend
+
 - Form validation with error messages
 - Toast notifications for errors
 - Graceful fallbacks for missing data
 - Loading states during async operations
 
 ### Backend
+
 - Input validation with Zod schemas
 - TRPC error codes (UNAUTHORIZED, NOT_FOUND, BAD_REQUEST, etc.)
 - Database transaction rollback on failure
 - Comprehensive logging
 
 ### Stripe
+
 - Signature verification
 - Retry logic for failed webhooks
 - Error logging and monitoring
@@ -342,6 +371,7 @@ Create Notification
 ## Testing Checklist
 
 ### Cart Operations
+
 - [ ] Add item to cart
 - [ ] Update item quantity
 - [ ] Remove item from cart
@@ -350,6 +380,7 @@ Create Notification
 - [ ] Minimum order quantity validation
 
 ### Checkout Flow
+
 - [ ] Navigate through all checkout steps
 - [ ] Validate shipping address errors
 - [ ] Select different shipping methods
@@ -357,6 +388,7 @@ Create Notification
 - [ ] View order summary
 
 ### Payment Processing
+
 - [ ] Complete Stripe payment
 - [ ] Verify order created in database
 - [ ] Confirm order status updated
@@ -365,6 +397,7 @@ Create Notification
 - [ ] View order details in /orders/:id
 
 ### Webhook Handling
+
 - [ ] Webhook signature verification
 - [ ] Order status updates correctly
 - [ ] Payment status updates correctly
@@ -372,6 +405,7 @@ Create Notification
 - [ ] Notifications created in database
 
 ### Error Scenarios
+
 - [ ] Empty cart checkout
 - [ ] Invalid shipping address
 - [ ] Payment declined
@@ -381,6 +415,7 @@ Create Notification
 ## Deployment Checklist
 
 ### Environment Variables
+
 - [ ] `STRIPE_SECRET_KEY` configured
 - [ ] `STRIPE_WEBHOOK_SECRET` configured
 - [ ] `EMAIL_USER` configured
@@ -389,17 +424,20 @@ Create Notification
 - [ ] `DATABASE_URL` configured
 
 ### Stripe Configuration
+
 - [ ] Webhook endpoint registered
 - [ ] Webhook secret saved
 - [ ] Test mode keys configured
 - [ ] Live mode keys ready for production
 
 ### Email Configuration
+
 - [ ] Gmail app password generated
 - [ ] Email templates tested
 - [ ] Reply-to address configured
 
 ### Database
+
 - [ ] Migration scripts run
 - [ ] Tables created
 - [ ] Indexes created

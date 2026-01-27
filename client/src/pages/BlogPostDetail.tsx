@@ -2,7 +2,14 @@ import { useParams } from "wouter";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Share2, Bookmark, MessageCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Share2,
+  Bookmark,
+  Calendar,
+  Clock,
+  Tag,
+} from "lucide-react";
 import { useLocation } from "wouter";
 import { Streamdown } from "streamdown";
 
@@ -27,18 +34,13 @@ export default function BlogPostDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        setLoading(true);
-        // في بيئة الإنتاج، ستحصل على البيانات من API
-        // للآن، نستخدم بيانات وهمية
-        const mockPost: BlogPost = {
-          id: 1,
-          title: "How to Identify Real Factories vs Trading Companies in China",
-          slug: slug || "how-to-identify-real-factories",
-          content: `
-# How to Identify Real Factories vs Trading Companies in China
+  const {
+    data: post,
+    isLoading,
+    error,
+  } = trpc.blog.getBySlug.useQuery({
+    slug: slug || "",
+  });
 
 ## Introduction
 When sourcing from China, one of the most critical decisions is determining whether you're dealing with a real factory or a trading company. This distinction can significantly impact your business operations, costs, and quality control.
@@ -162,8 +164,10 @@ Taking time to properly verify whether you're dealing with a real factory or tra
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading article...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">
+            {language === "ar" ? "جاري تحميل المقال..." : "Loading article..."}
+          </p>
         </div>
       </div>
     );
@@ -173,8 +177,15 @@ Taking time to properly verify whether you're dealing with a real factory or tra
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Article Not Found</h1>
-          <Button onClick={() => setLocation("/blog")}>Back to Blog</Button>
+          <h1 className="text-2xl font-bold text-blue-900 mb-4">
+            {language === "ar" ? "المقال غير موجود" : "Article Not Found"}
+          </h1>
+          <Button
+            onClick={() => setLocation("/blog")}
+            className="bg-blue-900 text-white"
+          >
+            {language === "ar" ? "العودة للمدونة" : "Back to Blog"}
+          </Button>
         </div>
       </div>
     );
@@ -192,114 +203,85 @@ Taking time to properly verify whether you're dealing with a real factory or tra
             onClick={() => setLocation("/blog")}
             className="mb-4 gap-2"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Blog
+            <ArrowLeft
+              className={`w-4 h-4 ${language === "ar" ? "rotate-180" : ""}`}
+            />
+            {language === "ar" ? "العودة للمدونة" : "Back to Blog"}
           </Button>
 
-          <h1 className="text-4xl font-bold text-foreground mb-4">{post.title}</h1>
-
-          <div className="flex flex-wrap gap-4 items-center text-sm text-muted-foreground">
-            <span className="bg-secondary px-3 py-1 rounded-full">{post.category}</span>
-            <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-            <span>5 min read</span>
+      {/* Hero Header */}
+      <header className="bg-white border-b border-gray-200 py-12 md:py-20">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-semibold">
+              {post.category}
+            </span>
+          </div>
+          <h1 className="text-3xl md:text-5xl font-bold text-blue-900 mb-8 leading-tight">
+            {post.title}
+          </h1>
+          <div className="flex flex-wrap gap-6 items-center text-gray-500 text-sm">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              {new Date(post.createdAt).toLocaleDateString(
+                language === "ar" ? "ar-SA" : "en-US"
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              {language === "ar" ? "قراءة 5 دقائق" : "5 min read"}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            <Card className="p-8 mb-8">
-              <Streamdown>{post.content}</Streamdown>
-            </Card>
+      {/* Content Section */}
+      <main className="container mx-auto px-4 py-12 max-w-4xl">
+        <Card className="p-6 md:p-12 shadow-sm border-gray-200 bg-white overflow-hidden">
+          <article className="prose prose-blue max-w-none">
+            <Streamdown>{post.content}</Streamdown>
+          </article>
 
-            {/* Tags */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Tags</h3>
+          {/* Tags */}
+          {tags.length > 0 && (
+            <div className="mt-12 pt-8 border-t border-gray-100">
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag: string) => (
-                  <Button
+                  <span
                     key={tag}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setLocation(`/blog?tag=${tag}`)}
+                    className="flex items-center gap-1 text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-md"
                   >
-                    #{tag}
-                  </Button>
+                    <Tag className="w-3 h-3" />
+                    {tag}
+                  </span>
                 ))}
               </div>
             </div>
 
-            {/* Share */}
-            <div className="flex gap-4 py-8 border-t border-border">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Share2 className="w-4 h-4" />
-                Share
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Bookmark className="w-4 h-4" />
-                Save
-              </Button>
-            </div>
-
-            {/* Comments Section */}
-            <div className="mt-12 pt-8 border-t border-border">
-              <h3 className="text-2xl font-bold text-foreground mb-6">Comments</h3>
-              <Card className="p-6 bg-secondary/50">
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/20"></div>
-                  <div className="flex-1">
-                    <textarea
-                      placeholder="Share your thoughts..."
-                      className="w-full p-3 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      rows={4}
-                    />
-                    <Button className="mt-4">Post Comment</Button>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            {/* Related Articles */}
-            <Card className="p-6 mb-6">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Related Articles</h3>
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="p-4 rounded-lg bg-secondary/50 hover:bg-secondary cursor-pointer transition"
-                    onClick={() => setLocation("/blog")}
-                  >
-                    <h4 className="font-medium text-foreground text-sm mb-2">
-                      Top 10 Supplier Verification Tips
-                    </h4>
-                    <p className="text-xs text-muted-foreground">6 min read</p>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* Newsletter */}
-            <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5">
-              <h3 className="text-lg font-semibold text-foreground mb-2">Subscribe to Updates</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Get the latest sourcing tips delivered to your inbox
-              </p>
-              <input
-                type="email"
-                placeholder="your@email.com"
-                className="w-full px-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary mb-3"
-              />
-              <Button className="w-full">Subscribe</Button>
-            </Card>
+        {/* Share & Actions */}
+        <div className="mt-8 flex justify-between items-center">
+          <div className="flex gap-4">
+            <Button variant="outline" size="sm" className="gap-2">
+              <Share2 className="w-4 h-4" />
+              {language === "ar" ? "مشاركة" : "Share"}
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Bookmark className="w-4 h-4" />
+              {language === "ar" ? "حفظ" : "Save"}
+            </Button>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-300 py-12 mt-20">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-sm">
+            © 2026 IFROF.{" "}
+            {language === "ar" ? "جميع الحقوق محفوظة." : "All rights reserved."}
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

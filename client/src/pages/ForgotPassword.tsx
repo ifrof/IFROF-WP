@@ -7,12 +7,21 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Loader2, Mail, ArrowLeft, CheckCircle2, Home } from "lucide-react";
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email("Invalid email format / تنسيق البريد الإلكتروني غير صحيح"),
+  email: z
+    .string()
+    .email("Invalid email format / تنسيق البريد الإلكتروني غير صحيح"),
 });
 
 type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
@@ -20,11 +29,18 @@ type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
 export default function ForgotPassword() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Simple language detection
-  const language = typeof window !== "undefined" && window.location.pathname.startsWith("/ar") ? "ar" : "en";
 
-  const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordForm>({
+  // Simple language detection
+  const language =
+    typeof window !== "undefined" && window.location.pathname.startsWith("/ar")
+      ? "ar"
+      : "en";
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ForgotPasswordForm>({
     resolver: zodResolver(forgotPasswordSchema),
   });
 
@@ -34,7 +50,7 @@ export default function ForgotPassword() {
     },
     onError: (err: any) => {
       setError(err.message);
-    }
+    },
   });
 
   const onSubmit = (data: ForgotPasswordForm) => {
@@ -44,10 +60,17 @@ export default function ForgotPassword() {
 
   if (isSubmitted) {
     return (
-      <div className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}>
+      <div
+        className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}
+      >
         <div className="mb-8">
-          <Link to="/" className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium">
-            <Home className={`h-5 w-5 ${language === "ar" ? "ml-2" : "mr-2"}`} />
+          <Link
+            to="/"
+            className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium"
+          >
+            <Home
+              className={`h-5 w-5 ${language === "ar" ? "ml-2" : "mr-2"}`}
+            />
             {language === "ar" ? "العودة للرئيسية" : "Back to Home"}
           </Link>
         </div>
@@ -64,7 +87,8 @@ export default function ForgotPassword() {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              If an account exists for that email, you will receive a link to reset your password shortly.
+              If an account exists for that email, you will receive a link to
+              reset your password shortly.
             </p>
           </CardContent>
           <CardFooter>
@@ -81,9 +105,14 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}>
+    <div
+      className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}
+    >
       <div className="mb-8">
-        <Link to="/" className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium">
+        <Link
+          to="/"
+          className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium"
+        >
           <Home className={`h-5 w-5 ${language === "ar" ? "ml-2" : "mr-2"}`} />
           {language === "ar" ? "العودة للرئيسية" : "Back to Home"}
         </Link>
@@ -91,7 +120,9 @@ export default function ForgotPassword() {
 
       <Card className="w-full max-w-md shadow-xl border-gray-200">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Forgot Password?</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Forgot Password?
+          </CardTitle>
           <CardDescription className="text-center">
             Enter your email and we'll send you a link to reset your password
           </CardDescription>
@@ -103,17 +134,29 @@ export default function ForgotPassword() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
+
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input id="email" type="email" placeholder="name@example.com" className="pl-10" {...register("email")} />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  className="pl-10"
+                  {...register("email")}
+                />
               </div>
-              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={forgotPasswordMutation.isPending}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={forgotPasswordMutation.isPending}
+            >
               {forgotPasswordMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -126,7 +169,10 @@ export default function ForgotPassword() {
           </form>
         </CardContent>
         <CardFooter>
-          <Link to="/login" className="text-sm text-blue-600 hover:underline flex items-center mx-auto">
+          <Link
+            to="/login"
+            className="text-sm text-blue-600 hover:underline flex items-center mx-auto"
+          >
             <ArrowLeft className="mr-1 h-3 w-3" />
             Back to Login
           </Link>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,15 +28,18 @@ export function ChatSkeleton({ recipientName }: { recipientName: string }) {
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
-    
+
     const msg: Message = {
       id: messages.length + 1,
       sender: "Me",
       content: newMessage,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
       isMe: true,
     };
-    
+
     setMessages([...messages, msg]);
     setNewMessage("");
   };
@@ -55,16 +57,14 @@ export function ChatSkeleton({ recipientName }: { recipientName: string }) {
       <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
-            {messages.map((msg) => (
+            {messages.map(msg => (
               <div
                 key={msg.id}
                 className={`flex ${msg.isMe ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-[80%] rounded-lg p-3 ${
-                    msg.isMe
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
+                    msg.isMe ? "bg-primary text-primary-foreground" : "bg-muted"
                   }`}
                 >
                   <p className="text-sm">{msg.content}</p>
@@ -80,8 +80,8 @@ export function ChatSkeleton({ recipientName }: { recipientName: string }) {
           <Input
             placeholder="Type your message..."
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+            onChange={e => setNewMessage(e.target.value)}
+            onKeyPress={e => e.key === "Enter" && handleSendMessage()}
           />
           <Button size="icon" onClick={handleSendMessage}>
             <Send className="h-4 w-4" />

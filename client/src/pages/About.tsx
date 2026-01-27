@@ -10,23 +10,35 @@ export default function About() {
   const values = [
     {
       icon: Globe,
-      titleKey: "about.value1.title",
-      descKey: "about.value1.desc",
+      title: language === "ar" ? "النزاهة" : "Integrity",
+      desc:
+        language === "ar"
+          ? "نحن نؤمن بالشفافية والصدق في جميع تعاملاتنا."
+          : "We believe in transparency and honesty in all our dealings.",
+    },
+    {
+      icon: Target,
+      title: language === "ar" ? "الدقة" : "Precision",
+      desc:
+        language === "ar"
+          ? "نحرص على تقديم معلومات دقيقة وموثوقة عن المصانع."
+          : "We ensure providing accurate and reliable information about factories.",
     },
     {
       icon: Users,
-      titleKey: "about.value2.title",
-      descKey: "about.value2.desc",
-    },
-    {
-      icon: Zap,
-      titleKey: "about.value3.title",
-      descKey: "about.value3.desc",
+      title: language === "ar" ? "التعاون" : "Collaboration",
+      desc:
+        language === "ar"
+          ? "نبني جسور التواصل بين الشرق والغرب."
+          : "We build bridges of communication between East and West.",
     },
     {
       icon: Shield,
-      titleKey: "about.value4.title",
-      descKey: "about.value4.desc",
+      title: language === "ar" ? "العالمية" : "Global Reach",
+      desc:
+        language === "ar"
+          ? "نخدم العملاء في جميع أنحاء العالم للوصول للصين."
+          : "We serve clients worldwide to reach China.",
     },
   ];
 
@@ -35,22 +47,47 @@ export default function About() {
       {/* Hero */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl font-bold mb-4">{t("about.title")}</h1>
-          <p className="text-xl text-blue-100">{t("about.subtitle")}</p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            {language === "ar" ? "عن IFROF" : "About IFROF"}
+          </h1>
+          <p className="text-xl text-blue-100 leading-relaxed">
+            {language === "ar"
+              ? "IFROF هي منصة رائدة تهدف إلى تبسيط عملية الاستيراد من الصين من خلال ربط المشترين العالميين بمصانع موثوقة ومتحقق منها."
+              : "IFROF is a leading platform aimed at simplifying the import process from China by connecting global buyers with reliable and verified factories."}
+          </p>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-16">
-        {/* Mission */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-6">{t("about.mission.title")}</h2>
-          <p className="text-lg text-muted-foreground mb-4">{t("about.mission.desc1")}</p>
-          <p className="text-lg text-muted-foreground">{t("about.mission.desc2")}</p>
+        {/* Mission & Vision */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold">
+              {language === "ar" ? "مهمتنا" : "Our Mission"}
+            </h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              {language === "ar"
+                ? "مهمتنا هي تمكين الشركات الصغيرة والمتوسطة من الوصول إلى قدرات التصنيع الصينية بكل سهولة وأمان، مع ضمان أعلى معايير الجودة والشفافية."
+                : "Our mission is to empower small and medium enterprises to access Chinese manufacturing capabilities with ease and security, ensuring the highest standards of quality and transparency."}
+            </p>
+          </div>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold">
+              {language === "ar" ? "رؤيتنا" : "Our Vision"}
+            </h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              {language === "ar"
+                ? "أن نكون المنصة الأولى عالمياً في تسهيل التجارة الدولية المباشرة مع المصانع، وإزالة كافة العوائق الجغرافية واللغوية."
+                : "To be the world's leading platform in facilitating direct international trade with factories, removing all geographical and linguistic barriers."}
+            </p>
+          </div>
         </div>
 
         {/* Values */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-8 text-center">{t("about.values")}</h2>
+        <div className="mb-20">
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            {language === "ar" ? "قيمنا" : "Our Values"}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => {
               const Icon = value.icon;
@@ -60,8 +97,10 @@ export default function About() {
                     <div className="flex justify-center mb-4">
                       <Icon className="w-10 h-10 text-blue-600" />
                     </div>
-                    <h3 className="font-semibold text-lg mb-2">{t(value.titleKey)}</h3>
-                    <p className="text-sm text-muted-foreground">{t(value.descKey)}</p>
+                    <h3 className="font-bold text-lg mb-2">{value.title}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {value.desc}
+                    </p>
                   </CardContent>
                 </Card>
               );
@@ -70,39 +109,66 @@ export default function About() {
         </div>
 
         {/* Stats */}
-        <div className="bg-blue-50 rounded-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold mb-8 text-center">{t("about.stats")}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="bg-muted/30 rounded-2xl p-12 mb-20">
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            {language === "ar" ? "أرقامنا" : "Our Stats"}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">500+</div>
-              <p className="text-muted-foreground">{t("about.stat1")}</p>
+              <div className="text-4xl font-bold text-primary mb-2">500+</div>
+              <p className="text-muted-foreground">
+                {language === "ar" ? "مصنع موثوق" : "Verified Factories"}
+              </p>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">5000+</div>
-              <p className="text-muted-foreground">{t("about.stat2")}</p>
+              <div className="text-4xl font-bold text-primary mb-2">5000+</div>
+              <p className="text-muted-foreground">
+                {language === "ar" ? "طلب ناجح" : "Successful Orders"}
+              </p>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">50+</div>
-              <p className="text-muted-foreground">{t("about.stat3")}</p>
+              <div className="text-4xl font-bold text-primary mb-2">50+</div>
+              <p className="text-muted-foreground">
+                {language === "ar" ? "دولة مخدومة" : "Countries Served"}
+              </p>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">24/7</div>
-              <p className="text-muted-foreground">{t("about.stat4")}</p>
+              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
+              <p className="text-muted-foreground">
+                {language === "ar" ? "دعم فني" : "Support"}
+              </p>
             </div>
           </div>
         </div>
 
         {/* CTA */}
-        <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">{t("about.cta")}</h2>
-          <p className="text-lg text-muted-foreground mb-8">{t("about.ctaDesc")}</p>
-          <div className="flex gap-4 justify-center">
-            <Link href="/marketplace">
-              <Button size="lg">{t("about.explorePlatform")}</Button>
+        <div className="text-center bg-primary text-white rounded-2xl p-12">
+          <h2 className="text-3xl font-bold mb-4">
+            {language === "ar"
+              ? "ابدأ رحلتك معنا اليوم"
+              : "Start Your Journey Today"}
+          </h2>
+          <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
+            {language === "ar"
+              ? "انضم إلى آلاف المستوردين الذين يثقون في IFROF للوصول إلى أفضل المصانع الصينية."
+              : "Join thousands of importers who trust IFROF to reach the best Chinese factories."}
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link href="/factory">
+              <Button
+                size="lg"
+                className="bg-white text-primary hover:bg-blue-50"
+              >
+                {language === "ar" ? "تصفح السوق" : "Explore Marketplace"}
+              </Button>
             </Link>
             <Link href="/contact">
-              <Button variant="outline" size="lg">
-                {t("common.contactUs")}
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white text-white hover:bg-white/10"
+              >
+                {language === "ar" ? "اتصل بنا" : "Contact Us"}
               </Button>
             </Link>
           </div>

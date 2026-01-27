@@ -83,7 +83,7 @@ export default function Pricing() {
       <div className="max-w-6xl mx-auto px-4 py-16">
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          {plans.map((plan) => (
+          {plans.map(plan => (
             <Card
               key={plan.name}
               className={`relative ${plan.highlighted ? "ring-2 ring-blue-600 md:scale-105" : ""}`}
@@ -94,8 +94,12 @@ export default function Pricing() {
                 </Badge>
               )}
               <CardHeader>
-                <CardTitle className="text-2xl">{t(`pricing.${plan.name}`)}</CardTitle>
-                <p className="text-sm text-muted-foreground">{plan.description}</p>
+                <CardTitle className="text-2xl">
+                  {t(`pricing.${plan.name}`)}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {plan.description}
+                </p>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
@@ -116,7 +120,11 @@ export default function Pricing() {
                         }`}
                       />
                       <span
-                        className={feature.included ? "" : "text-muted-foreground line-through"}
+                        className={
+                          feature.included
+                            ? ""
+                            : "text-muted-foreground line-through"
+                        }
                       >
                         {featureLabels[feature.key] || feature.key}
                       </span>
@@ -124,7 +132,10 @@ export default function Pricing() {
                   ))}
                 </ul>
 
-                <Button className="w-full" variant={plan.highlighted ? "default" : "outline"}>
+                <Button
+                  className="w-full"
+                  variant={plan.highlighted ? "default" : "outline"}
+                >
                   {t(`pricing.${plan.cta}`) || plan.cta}
                 </Button>
               </CardContent>
@@ -134,23 +145,33 @@ export default function Pricing() {
 
         {/* FAQ */}
         <div className="bg-gray-50 rounded-lg p-8">
-          <h2 className="text-3xl font-bold mb-8 text-center">{t("pricing.faq")}</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center">
+            {t("pricing.faq")}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <h3 className="font-semibold mb-2">{t("pricing.faq1.q")}</h3>
-              <p className="text-sm text-muted-foreground">{t("pricing.faq1.a")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("pricing.faq1.a")}
+              </p>
             </div>
             <div>
               <h3 className="font-semibold mb-2">{t("pricing.faq2.q")}</h3>
-              <p className="text-sm text-muted-foreground">{t("pricing.faq2.a")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("pricing.faq2.a")}
+              </p>
             </div>
             <div>
               <h3 className="font-semibold mb-2">{t("pricing.faq3.q")}</h3>
-              <p className="text-sm text-muted-foreground">{t("pricing.faq3.a")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("pricing.faq3.a")}
+              </p>
             </div>
             <div>
               <h3 className="font-semibold mb-2">{t("pricing.faq4.q")}</h3>
-              <p className="text-sm text-muted-foreground">{t("pricing.faq4.a")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("pricing.faq4.a")}
+              </p>
             </div>
           </div>
         </div>

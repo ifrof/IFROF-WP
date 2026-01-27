@@ -54,7 +54,7 @@ const emailTemplates = {
             ${results
               .slice(0, 5)
               .map(
-                (r) => `
+                r => `
               <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
                 <h3>${r.companyName}</h3>
                 <p><strong>Verification Score:</strong> ${r.verification.overallScore}%</p>
@@ -116,7 +116,7 @@ const emailTemplates = {
             ${results
               .slice(0, 5)
               .map(
-                (r) => `
+                r => `
               <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
                 <h3>${r.companyName}</h3>
                 <p><strong>درجة التحقق:</strong> ${r.verification.overallScore}%</p>
@@ -141,7 +141,9 @@ export async function sendVerificationEmail(
   token: string,
   language: "en" | "ar" | "zh" = "en"
 ) {
-  const template = emailTemplates[language]?.verification(token) || emailTemplates.en.verification(token);
+  const template =
+    emailTemplates[language]?.verification(token) ||
+    emailTemplates.en.verification(token);
 
   return resend.emails.send({
     from: secrets.EMAIL_FROM,

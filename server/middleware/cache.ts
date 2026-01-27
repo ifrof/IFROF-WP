@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-const cache = new Map<string, { data: any, expiry: number }>();
+const cache = new Map<string, { data: any; expiry: number }>();
 
 /**
  * Simple In-Memory Cache Middleware for Public Pages
@@ -20,7 +20,7 @@ export const cacheMiddleware = (durationSeconds: number) => {
     res.send = function (body) {
       cache.set(key, {
         data: body,
-        expiry: Date.now() + (durationSeconds * 1000)
+        expiry: Date.now() + durationSeconds * 1000,
       });
       return originalSend.apply(res, [body]);
     };

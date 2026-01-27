@@ -8,107 +8,45 @@ import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Plus, Edit2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-
-interface FactoryFormData {
-  name: string;
-  description: string;
-  location: string;
-  latitude: string;
-  longitude: string;
-  contactEmail: string;
-  contactPhone: string;
-  certifications: string;
-  productCategories: string;
-  productionCapacity: string;
-  minimumOrderQuantity: string;
-  logoUrl: string;
-  bannerUrl: string;
-}
+import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import AdminDashboardLayout from "@/components/AdminDashboardLayout";
 
 export default function AdminFactories() {
-  const { user, loading: authLoading } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [formData, setFormData] = useState<FactoryFormData>({
-    name: "",
-    description: "",
-    location: "",
-    latitude: "",
-    longitude: "",
-    contactEmail: "",
-    contactPhone: "",
-    certifications: "",
-    productCategories: "",
-    productionCapacity: "",
-    minimumOrderQuantity: "",
-    logoUrl: "",
-    bannerUrl: "",
+  const { language } = useLanguage();
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const {
+    data: factories,
+    isLoading: factoriesLoading,
+    refetch,
+  } = trpc.admin.getFactories.useQuery({
+    status: statusFilter === "all" ? undefined : statusFilter,
   });
 
-  const { data: factories, isLoading: factoriesLoading, refetch } = trpc.factories.list.useQuery();
-  const createMutation = trpc.factories.create.useMutation();
-  const updateMutation = trpc.factories.update.useMutation();
-
-  if (authLoading) {
-    return <div className="flex items-center justify-center min-h-screen"><Loader2 className="animate-spin" /></div>;
-  }
-
-  if (!user || user.role !== "admin") {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Access Denied</CardTitle>
-            <CardDescription>You must be an admin to access this page.</CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    );
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      if (editingId) {
-        await updateMutation.mutateAsync({
-          id: editingId,
-          ...formData,
-          minimumOrderQuantity: formData.minimumOrderQuantity ? parseInt(formData.minimumOrderQuantity) : undefined,
-        });
-        toast.success("Factory updated successfully");
-      } else {
-        await createMutation.mutateAsync({
-          ...formData,
-          minimumOrderQuantity: formData.minimumOrderQuantity ? parseInt(formData.minimumOrderQuantity) : undefined,
-        });
-        toast.success("Factory created successfully");
-      }
-
-      setFormData({
-        name: "",
-        description: "",
-        location: "",
-        latitude: "",
-        longitude: "",
-        contactEmail: "",
-        contactPhone: "",
-        certifications: "",
-        productCategories: "",
-        productionCapacity: "",
-        minimumOrderQuantity: "",
-        logoUrl: "",
-        bannerUrl: "",
-      });
-      setEditingId(null);
-      setIsOpen(false);
+  const updateStatusMutation = trpc.admin.updateFactoryStatus.useMutation({
+    onSuccess: () => {
+      toast.success(
+        language === "ar" ? "تم تحديث حالة المصنع" : "Factory status updated"
+      );
       refetch();
-    } catch (error) {
-      toast.error("Failed to save factory");
-      console.error(error);
-    }
-  };
+    },
+  });
 
   const handleEdit = (factory: any) => {
     setFormData({
@@ -157,230 +95,128 @@ export default function AdminFactories() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Factory Management</h1>
-            <p className="text-muted-foreground mt-2">Register and manage factories in the marketplace</p>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {language === "ar" ? "إدارة المصانع" : "Factory Management"}
+            </h1>
+            <p className="text-muted-foreground">
+              {language === "ar"
+                ? "مراجعة واعتماد طلبات انضمام المصانع"
+                : "Review and approve factory applications"}
+            </p>
           </div>
 
-          <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="w-4 h-4" />
-                Add Factory
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingId ? "Edit Factory" : "Add New Factory"}</DialogTitle>
-                <DialogDescription>
-                  {editingId ? "Update factory information" : "Register a new factory in the marketplace"}
-                </DialogDescription>
-              </DialogHeader>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="name">Factory Name *</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="contactEmail">Contact Email</Label>
-                    <Input
-                      id="contactEmail"
-                      type="email"
-                      value={formData.contactEmail}
-                      onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="contactPhone">Contact Phone</Label>
-                    <Input
-                      id="contactPhone"
-                      value={formData.contactPhone}
-                      onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={3}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="latitude">Latitude</Label>
-                    <Input
-                      id="latitude"
-                      value={formData.latitude}
-                      onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="longitude">Longitude</Label>
-                    <Input
-                      id="longitude"
-                      value={formData.longitude}
-                      onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="productCategories">Product Categories (comma-separated)</Label>
-                    <Input
-                      id="productCategories"
-                      value={formData.productCategories}
-                      onChange={(e) => setFormData({ ...formData, productCategories: e.target.value })}
-                      placeholder="Electronics, Textiles, etc."
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="certifications">Certifications (comma-separated)</Label>
-                    <Input
-                      id="certifications"
-                      value={formData.certifications}
-                      onChange={(e) => setFormData({ ...formData, certifications: e.target.value })}
-                      placeholder="ISO 9001, CE, etc."
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="productionCapacity">Production Capacity</Label>
-                    <Input
-                      id="productionCapacity"
-                      value={formData.productionCapacity}
-                      onChange={(e) => setFormData({ ...formData, productionCapacity: e.target.value })}
-                      placeholder="e.g., 10000 units/month"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="minimumOrderQuantity">Minimum Order Quantity</Label>
-                    <Input
-                      id="minimumOrderQuantity"
-                      type="number"
-                      value={formData.minimumOrderQuantity}
-                      onChange={(e) => setFormData({ ...formData, minimumOrderQuantity: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="logoUrl">Logo URL</Label>
-                    <Input
-                      id="logoUrl"
-                      value={formData.logoUrl}
-                      onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="bannerUrl">Banner URL</Label>
-                    <Input
-                      id="bannerUrl"
-                      value={formData.bannerUrl}
-                      onChange={(e) => setFormData({ ...formData, bannerUrl: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                    {createMutation.isPending || updateMutation.isPending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      "Save Factory"
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                {language === "ar" ? "الكل" : "All Status"}
+              </SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="verified">Verified</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="grid gap-4">
-          {factoriesLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : factories && factories.length > 0 ? (
-            factories.map((factory: any) => (
-              <Card key={factory.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle>{factory.name}</CardTitle>
-                      <CardDescription>{factory.location}</CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(factory)}
+        <Card>
+          <CardContent className="p-0">
+            {factoriesLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-[#1e3a5f]" />
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>
+                      {language === "ar" ? "المصنع" : "Factory"}
+                    </TableHead>
+                    <TableHead>
+                      {language === "ar" ? "الموقع" : "Location"}
+                    </TableHead>
+                    <TableHead>
+                      {language === "ar" ? "الحالة" : "Status"}
+                    </TableHead>
+                    <TableHead className="text-right">
+                      {language === "ar" ? "إجراءات" : "Actions"}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {factories?.map((factory: any) => (
+                    <TableRow key={factory.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center">
+                            <Building2 className="w-5 h-5 text-gray-400" />
+                          </div>
+                          <div>
+                            <div className="font-medium">{factory.name}</div>
+                            <div className="text-xs text-gray-500">
+                              {factory.contactEmail}
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{factory.location}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            factory.verificationStatus === "verified"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {factory.verificationStatus}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        {factory.verificationStatus !== "verified" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-green-600 border-green-200 hover:bg-green-50"
+                            onClick={() =>
+                              handleStatusChange(factory.id, "verified")
+                            }
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            {language === "ar" ? "اعتماد" : "Approve"}
+                          </Button>
+                        )}
+                        {factory.verificationStatus !== "rejected" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={() =>
+                              handleStatusChange(factory.id, "rejected")
+                            }
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            {language === "ar" ? "رفض" : "Reject"}
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {factories?.length === 0 && (
+                    <TableRow>
+                      <TableCell
+                        colSpan={4}
+                        className="text-center py-12 text-muted-foreground"
                       >
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" className="text-destructive">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-semibold">Email:</span> {factory.contactEmail}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Phone:</span> {factory.contactPhone}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Status:</span> {factory.verificationStatus}
-                    </div>
-                    <div>
-                      <span className="font-semibold">MOQ:</span> {factory.minimumOrderQuantity}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-center text-muted-foreground">No factories registered yet. Create one to get started.</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+                        No factories found matching the filter.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

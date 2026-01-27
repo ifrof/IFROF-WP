@@ -1,14 +1,14 @@
-import { z } from 'zod';
-import { publicProcedure, router } from '../_core/trpc';
-import { invokeLLM } from '../_core/llm';
-import { TRPCError } from '@trpc/server';
-import { searchDuckDuckGo } from '../utils/search';
+import { z } from "zod";
+import { publicProcedure, router } from "../_core/trpc";
+import { invokeLLM } from "../_core/llm";
+import { TRPCError } from "@trpc/server";
+import { searchDuckDuckGo } from "../utils/search";
 
 const verificationInputSchema = z.object({
   factory_name: z.string().min(2),
   location: z.string().optional(),
   website: z.string().optional(),
-  language: z.enum(['ar', 'en', 'zh']).default('en'),
+  language: z.enum(["ar", "en", "zh"]).default("en"),
 });
 
 export const factoryVerificationRouter = router({
@@ -16,13 +16,13 @@ export const factoryVerificationRouter = router({
     .input(verificationInputSchema)
     .mutation(async ({ input }) => {
       const { factory_name, location, website, language } = input;
-      
+
       try {
         // 1. Perform multiple searches
         const searchQueries = [
-          `${factory_name} ${location || ''} official website business license`,
-          `${factory_name} ${location || ''} site:alibaba.com OR site:1688.com supplier profile`,
-          `${factory_name} ${location || ''} factory tour video reviews trading company`,
+          `${factory_name} ${location || ""} official website business license`,
+          `${factory_name} ${location || ""} site:alibaba.com OR site:1688.com supplier profile`,
+          `${factory_name} ${location || ""} factory tour video reviews trading company`,
         ];
 
         const searchPromises = searchQueries.map(q => searchDuckDuckGo(q));
@@ -30,19 +30,22 @@ export const factoryVerificationRouter = router({
         const allSearchResults = searchResultsArray.flat();
 
         // 2. Prepare context for LLM
-        const searchContext = allSearchResults.map((r, i) => 
-          `Result ${i+1}:
+        const searchContext = allSearchResults
+          .map(
+            (r, i) =>
+              `Result ${i + 1}:
 Title: ${r.title}
 Link: ${r.link}
 Snippet: ${r.snippet}`
-        ).join('\n\n');
+          )
+          .join("\n\n");
 
         // 3. Invoke LLM for analysis
         const systemPrompt = `You are an expert industrial auditor specializing in verifying Chinese manufacturers. 
 Your goal is to distinguish between real direct factories and trading companies/intermediaries.
 
-Analyze the provided search results for "${factory_name}" ${location ? `located in ${location}` : ''}.
-${website ? `Official website: ${website}` : ''}
+Analyze the provided search results for "${factory_name}" ${location ? `located in ${location}` : ""}.
+${website ? `Official website: ${website}` : ""}
 
 Criteria for a Real Factory:
 - Specific manufacturing equipment mentioned.
@@ -58,7 +61,7 @@ Red Flags for Trading Companies:
 - Small office address instead of an industrial zone.
 - No mention of production lines or machinery.
 
-Provide your report in ${language === 'ar' ? 'Arabic' : language === 'zh' ? 'Chinese' : 'English'}.`;
+Provide your report in ${language === "ar" ? "Arabic" : language === "zh" ? "Chinese" : "English"}.`;
 
         const userPrompt = `Based on these search results, provide a verification report for "${factory_name}":
 
@@ -76,34 +79,39 @@ Output the result in the following JSON format:
 
         const response = await invokeLLM({
           messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
           ],
           response_format: {
-            type: 'json_schema',
+            type: "json_schema",
             json_schema: {
-              name: 'verification_report',
+              name: "verification_report",
               strict: true,
               schema: {
-                type: 'object',
+                type: "object",
                 properties: {
-                  score: { type: 'number', minimum: 1, maximum: 10 },
-                  is_verified: { type: 'boolean' },
+                  score: { type: "number", minimum: 1, maximum: 10 },
+                  is_verified: { type: "boolean" },
                   evidence: {
-                    type: 'array',
+                    type: "array",
                     items: {
-                      type: 'object',
+                      type: "object",
                       properties: {
-                        finding: { type: 'string' },
-                        source: { type: 'string' },
+                        finding: { type: "string" },
+                        source: { type: "string" },
                       },
-                      required: ['finding', 'source'],
+                      required: ["finding", "source"],
                       additionalProperties: false,
                     },
                   },
-                  recommendation: { type: 'string' },
+                  recommendation: { type: "string" },
                 },
-                required: ['score', 'is_verified', 'evidence', 'recommendation'],
+                required: [
+                  "score",
+                  "is_verified",
+                  "evidence",
+                  "recommendation",
+                ],
                 additionalProperties: false,
               },
             },
@@ -111,16 +119,16 @@ Output the result in the following JSON format:
         });
 
         const content = response.choices[0]?.message.content;
-        if (!content || typeof content !== 'string') {
-          throw new Error('No response from AI');
+        if (!content || typeof content !== "string") {
+          throw new Error("No response from AI");
         }
 
         return JSON.parse(content);
       } catch (error) {
-        console.error('Factory verification error:', error);
+        console.error("Factory verification error:", error);
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to verify factory. Please try again later.',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to verify factory. Please try again later.",
         });
       }
     }),

@@ -13,7 +13,9 @@ export default function BuyerOrders() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.buyer.orders")}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {t("dashboard.buyer.orders")}
+            </h1>
             <p className="text-muted-foreground">
               Track and manage your orders from Chinese manufacturers.
             </p>
@@ -33,10 +35,13 @@ export default function BuyerOrders() {
             </div>
             <CardTitle className="mb-2">No orders yet</CardTitle>
             <p className="text-muted-foreground max-w-xs mx-auto mb-6">
-              Your order history is empty. Browse the marketplace to find products and start your first order.
+              Your order history is empty. Browse the marketplace to find
+              products and start your first order.
             </p>
             <Link href="/factory">
-              <Button variant="outline">{t("dashboard.buyer.startShopping")}</Button>
+              <Button variant="outline">
+                {t("dashboard.buyer.startShopping")}
+              </Button>
             </Link>
           </CardContent>
         </Card>

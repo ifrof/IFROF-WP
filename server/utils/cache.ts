@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import Redis from "ioredis";
 
 let redis: Redis | null = null;
 
@@ -7,7 +7,7 @@ export function getRedisClient(): Redis | null {
     try {
       redis = new Redis(process.env.REDIS_URL, {
         maxRetriesPerRequest: 3,
-        retryStrategy: (times) => {
+        retryStrategy: times => {
           const delay = Math.min(times * 50, 2000);
           return delay;
         },
@@ -15,21 +15,21 @@ export function getRedisClient(): Redis | null {
         lazyConnect: true,
       });
 
-      redis.on('error', (err) => {
-        console.error('Redis connection error:', err);
+      redis.on("error", err => {
+        console.error("Redis connection error:", err);
       });
 
-      redis.on('connect', () => {
-        console.log('Redis connected successfully');
+      redis.on("connect", () => {
+        console.log("Redis connected successfully");
       });
 
       // Connect asynchronously
-      redis.connect().catch((err) => {
-        console.error('Failed to connect to Redis:', err);
+      redis.connect().catch(err => {
+        console.error("Failed to connect to Redis:", err);
         redis = null;
       });
     } catch (error) {
-      console.error('Failed to initialize Redis:', error);
+      console.error("Failed to initialize Redis:", error);
       redis = null;
     }
   }
@@ -42,7 +42,7 @@ export async function getCached<T>(
   ttl: number = 300 // 5 minutes default
 ): Promise<T> {
   const client = getRedisClient();
-  
+
   if (!client) {
     return fallback();
   }
@@ -69,7 +69,7 @@ export async function getCached<T>(
 
 export async function invalidateCache(pattern: string): Promise<void> {
   const client = getRedisClient();
-  
+
   if (!client) {
     return;
   }
@@ -90,7 +90,7 @@ export async function setCached(
   ttl: number = 300
 ): Promise<void> {
   const client = getRedisClient();
-  
+
   if (!client) {
     return;
   }

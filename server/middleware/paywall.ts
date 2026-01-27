@@ -50,7 +50,10 @@ export async function requireSubscription(
     }
 
     // Check if subscription has expired
-    if (userData.subscriptionEndsAt && userData.subscriptionEndsAt < new Date()) {
+    if (
+      userData.subscriptionEndsAt &&
+      userData.subscriptionEndsAt < new Date()
+    ) {
       return res.status(403).json({
         error: "Subscription expired",
         message: "Your subscription has expired. Please renew to continue.",
@@ -66,7 +69,11 @@ export async function requireSubscription(
   }
 }
 
-export async function requireAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export async function requireAdmin(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
   if (!req.user) {
     return res.status(401).json({
       error: "Not authenticated",
@@ -83,7 +90,10 @@ export async function requireAdmin(req: AuthenticatedRequest, res: Response, nex
   next();
 }
 
-export async function checkSubscriptionStatus(req: AuthenticatedRequest, res: Response) {
+export async function checkSubscriptionStatus(
+  req: AuthenticatedRequest,
+  res: Response
+) {
   if (!req.user) {
     return res.status(401).json({ authenticated: false });
   }
@@ -111,7 +121,10 @@ export async function checkSubscriptionStatus(req: AuthenticatedRequest, res: Re
       subscriptionActive: userData.subscriptionActive,
       subscriptionEndsAt: userData.subscriptionEndsAt,
       daysRemaining: userData.subscriptionEndsAt
-        ? Math.ceil((userData.subscriptionEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+        ? Math.ceil(
+            (userData.subscriptionEndsAt.getTime() - Date.now()) /
+              (1000 * 60 * 60 * 24)
+          )
         : null,
     });
   } catch (error) {

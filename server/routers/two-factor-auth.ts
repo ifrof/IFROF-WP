@@ -17,7 +17,7 @@ export const twoFactorAuthRouter = router({
   getStatus: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
     const usersTable = getUsersTable() as any;
-    
+
     const [user] = await db
       .select({
         twoFactorEnabled: usersTable.twoFactorEnabled,
@@ -25,7 +25,7 @@ export const twoFactorAuthRouter = router({
       .from(usersTable)
       .where(eq(usersTable.id, ctx.user.id))
       .limit(1);
-    
+
     return {
       enabled: user?.twoFactorEnabled === 1,
     };
@@ -34,8 +34,8 @@ export const twoFactorAuthRouter = router({
   // Generate 2FA secret (skeleton)
   generateSecret: protectedProcedure.mutation(async ({ ctx }) => {
     // Generate a random secret for 2FA
-    const secret = crypto.randomBytes(20).toString('hex');
-    
+    const secret = crypto.randomBytes(20).toString("hex");
+
     return {
       secret,
       qrCode: `otpauth://totp/IFROF:${ctx.user.email}?secret=${secret}&issuer=IFROF`,
@@ -48,14 +48,14 @@ export const twoFactorAuthRouter = router({
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       const usersTable = getUsersTable() as any;
-      
+
       await db
         .update(usersTable)
         .set({
           twoFactorEnabled: input.enabled ? 1 : 0,
         })
         .where(eq(usersTable.id, ctx.user.id));
-      
+
       return {
         success: true,
         enabled: input.enabled,
@@ -69,7 +69,7 @@ export const twoFactorAuthRouter = router({
       // TODO: Implement actual TOTP verification
       // For now, accept any 6-digit code as valid
       const isValid = /^\d{6}$/.test(input.code);
-      
+
       return {
         success: isValid,
       };

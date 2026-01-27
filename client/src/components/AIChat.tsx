@@ -1,38 +1,39 @@
-import { useState, useRef, useEffect } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Send, MessageCircle, Loader2, X, Minimize2, Maximize2 } from 'lucide-react';
-import { toast } from 'sonner';
-
-interface Message {
-  id: string;
-  type: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Send,
+  MessageCircle,
+  Loader2,
+  X,
+  Minimize2,
+  Maximize2,
+} from "lucide-react";
+import { useAiChat } from "@/hooks/useAiChat";
 
 export default function AIChat() {
   const { language, dir } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      type: 'assistant',
-      content: language === 'ar' 
-        ? 'مرحباً! أنا مساعد IFROF الذكي. كيف يمكنني مساعدتك في البحث عن المصانع الصينية الموثقة؟'
-        : 'Hello! I\'m IFROF Smart Assistant. How can I help you find verified Chinese manufacturers?',
-      timestamp: new Date(),
-    }
-  ]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const initialMessage = useMemo(
+    () => [
+      {
+        role: "assistant" as const,
+        content:
+          language === "ar"
+            ? "مرحباً! أنا مساعد IFROF الذكي. كيف يمكنني مساعدتك في البحث عن المصانع الصينية الموثقة؟"
+            : "Hello! I'm IFROF Smart Assistant. How can I help you find verified Chinese manufacturers?",
+      },
+    ],
+    [language]
+  );
+  const { messages, input, isLoading, setInput, sendMessage } =
+    useAiChat(initialMessage);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -116,29 +117,30 @@ export default function AIChat() {
 
   return (
     <div
-      className="fixed bottom-6 right-6 z-40 w-96 bg-white rounded-lg shadow-2xl overflow-hidden"
+      className="fixed bottom-6 right-6 z-40 w-96 bg-white rounded-lg shadow-2xl overflow-hidden border border-gray-200"
       dir={dir}
     >
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#1e3a5f] to-[#2a4a6f] text-white p-4 flex justify-between items-center">
-        <div>
-          <h3 className="font-bold text-lg">
-            {language === 'ar' ? 'مساعد IFROF الذكي' : 'IFROF Smart Assistant'}
+      <div className="bg-[#1e3a5f] text-white p-4 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <h3 className="font-bold">
+            {language === "ar" ? "مساعد IFROF الذكي" : "IFROF AI Assistant"}
           </h3>
-          <p className="text-xs text-gray-300">
-            {language === 'ar' ? 'متاح الآن' : 'Online'}
-          </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <button
             onClick={() => setIsMinimized(!isMinimized)}
-            className="hover:bg-white/20 p-2 rounded transition"
+            className="hover:bg-white/10 p-1 rounded"
           >
-            {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
+            {isMinimized ? (
+              <Maximize2 className="w-4 h-4" />
+            ) : (
+              <Minimize2 className="w-4 h-4" />
+            )}
           </button>
           <button
             onClick={() => setIsOpen(false)}
-            className="hover:bg-white/20 p-2 rounded transition"
+            className="hover:bg-white/10 p-1 rounded"
           >
             <X className="w-4 h-4" />
           </button>
@@ -149,12 +151,20 @@ export default function AIChat() {
         <>
           {/* Messages */}
           <div className="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50">
-            {messages.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
-                <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">
-                  {language === 'ar' ? 'ابدأ محادثة' : 'Start a conversation'}
-                </p>
+            {messages.map((msg, index) => (
+              <div
+                key={`${msg.role}-${index}`}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm shadow-sm ${
+                    msg.role === "user"
+                      ? "bg-[#ff8c42] text-white rounded-tr-none"
+                      : "bg-white text-gray-800 border border-gray-100 rounded-tl-none"
+                  }`}
+                >
+                  {msg.content}
+                </div>
               </div>
             ) : (
               messages.map((message) => (
@@ -221,15 +231,18 @@ export default function AIChat() {
             <div className="flex gap-2">
               <Input
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={language === 'ar' ? 'اكتب رسالتك...' : 'Type your message...'}
-                disabled={isLoading}
-                className="flex-1"
+                onChange={e => setInput(e.target.value)}
+                placeholder={
+                  language === "ar"
+                    ? "اسأل عن أي مصنع..."
+                    : "Ask about any factory..."
+                }
+                className="flex-1 h-10 border-gray-200 focus:ring-[#1e3a5f]"
               />
               <Button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="bg-[#ff8c42] hover:bg-[#e67a35] text-white"
+                className="bg-[#1e3a5f] hover:bg-[#152944] h-10 w-10 p-0"
               >
                 <Send className="w-4 h-4" />
               </Button>

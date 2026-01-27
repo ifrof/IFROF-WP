@@ -5,7 +5,11 @@ import type { NextFunction, Request, Response } from "express";
  * Forces HTTPS in production environment
  */
 
-export const httpsRedirect = (req: Request, res: Response, next: NextFunction) => {
+export const httpsRedirect = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   // Skip in development
   if (process.env.NODE_ENV !== "production") {
     return next();
@@ -17,9 +21,10 @@ export const httpsRedirect = (req: Request, res: Response, next: NextFunction) =
   }
 
   // Check if request is already HTTPS
-  const isHttps = req.secure || 
-                  req.headers["x-forwarded-proto"] === "https" ||
-                  req.headers["x-forwarded-ssl"] === "on";
+  const isHttps =
+    req.secure ||
+    req.headers["x-forwarded-proto"] === "https" ||
+    req.headers["x-forwarded-ssl"] === "on";
 
   // Skip redirect for health check and metrics endpoints to avoid Railway healthcheck failures
   if (req.path === "/api/health" || req.path === "/api/metrics") {

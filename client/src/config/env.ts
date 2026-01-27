@@ -28,8 +28,12 @@ const normalizePortalUrl = (value: string | null): string | null => {
   }
 };
 
-export const createOAuthConfig = (env: OAuthEnv = import.meta.env as OAuthEnv): OAuthConfig => {
-  const portalUrl = normalizePortalUrl(normalizeEnvValue(env.VITE_OAUTH_PORTAL_URL));
+export const createOAuthConfig = (
+  env: OAuthEnv = import.meta.env as OAuthEnv
+): OAuthConfig => {
+  const portalUrl = normalizePortalUrl(
+    normalizeEnvValue(env.VITE_OAUTH_PORTAL_URL)
+  );
   const appId = normalizeEnvValue(env.VITE_APP_ID);
 
   return {

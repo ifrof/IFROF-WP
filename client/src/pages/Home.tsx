@@ -2,14 +2,14 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  ArrowRight, 
+import {
+  ArrowRight,
   ArrowLeft,
-  Shield, 
-  Zap, 
-  CheckCircle, 
-  Factory, 
-  Globe, 
+  Shield,
+  Zap,
+  CheckCircle,
+  Factory,
+  Globe,
   TrendingUp,
   Users,
   Package,
@@ -23,7 +23,8 @@ import {
   Truck,
   DollarSign,
   MessageCircle,
-  AlertTriangle
+  Menu,
+  X,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
@@ -42,21 +43,51 @@ export default function Home() {
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const Arrow = language === 'ar' ? ArrowLeft : ArrowRight;
+  const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
+
+  const homeSEO = {
+    title: "IFROF - Verified Chinese Manufacturers & Suppliers",
+    titleAr: "IFROF - مصانع وموردين صينيين موثقين",
+    description:
+      "Connect with verified Chinese manufacturers and suppliers. Find factories, products, and services with confidence.",
+    descriptionAr:
+      "تواصل مع مصانع وموردين صينيين موثقين. ابحث عن المصانع والمنتجات والخدمات بكل ثقة.",
+    keywords: [
+      "Chinese manufacturers",
+      "verified suppliers",
+      "factory verification",
+      "B2B marketplace",
+    ],
+    keywordsAr: [
+      "مصانع صينية",
+      "موردين موثقين",
+      "التحقق من المصانع",
+      "سوق B2B",
+    ],
+    ogImage: "https://ifrof.com/og-image.png",
+    canonical: "https://ifrof.com/",
+    structuredData: generateStructuredData("Organization", {}),
+  };
 
   return (
-    <div className="min-h-screen bg-white" dir={dir}>
-      {/* Navigation */}
-      <nav className={`sticky top-0 z-50 bg-white/95 backdrop-blur-sm transition-shadow ${scrolled ? 'shadow-lg' : 'shadow-sm'} border-b border-gray-100`}>
+    <div className="min-h-screen bg-background text-foreground" dir={dir}>
+      <MetaTags seo={homeSEO} />
+      <nav
+        className={`sticky top-0 z-50 bg-background/95 backdrop-blur-sm transition-shadow ${scrolled ? "shadow-lg" : "shadow-sm"} border-b`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#1e3a5f] to-[#ff8c42] rounded-xl flex items-center justify-center shadow-lg">
+              <div
+                className="w-10 h-10 bg-gradient-to-br from-[#1e3a5f] to-[#ff8c42] rounded-xl flex items-center justify-center shadow-lg"
+                role="img"
+                aria-label="IFROF Logo"
+              >
                 <span className="text-white font-bold text-lg">IF</span>
               </div>
               <div>
@@ -67,39 +98,58 @@ export default function Home() {
 
             {/* Navigation Links */}
             <div className="hidden md:flex items-center gap-6">
-              <a href="#how-it-works" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
-                {t('nav.howItWorks')}
-              </a>
-              <a href="#pricing" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
-                {t('nav.pricing')}
-              </a>
-              <Link href="/blog" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
-                {language === 'ar' ? 'المدونة' : 'Blog'}
+              <Link
+                href="/factory-investigator"
+                className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium"
+              >
+                {language === "ar"
+                  ? "Factory Investigator"
+                  : "Factory Investigator"}
               </Link>
-              <a href="#support" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
-                {t('nav.support')}
-              </a>
-              <Link href="/ai-search" className="text-gray-600 hover:text-[#1e3a5f] transition-colors text-sm font-medium">
-                {t('nav.smartAssistant')}
+              <Link
+                href="/blog"
+                className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium"
+              >
+                {language === "ar" ? "المدونة" : "Blog"}
+              </Link>
+              <Link
+                href="/contact"
+                className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium"
+              >
+                {language === "ar" ? "اتصل بنا" : "Contact"}
               </Link>
             </div>
 
-            {/* Right Side */}
-            <div className="flex items-center gap-3">
-              {/* Language Switcher */}
-              <button
-                onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors text-sm font-medium"
-              >
-                <Globe className="w-4 h-4" />
-                {language === 'ar' ? 'EN' : 'عربي'}
-              </button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <LanguageSwitcher />
+
+              {!isAuthenticated ? (
+                <Link href="/login">
+                  <Button variant="ghost" className="hidden sm:flex">
+                    {language === "ar" ? "دخول" : "Login"}
+                  </Button>
+                </Link>
+              ) : (
+                <Link
+                  href={
+                    user?.role === "admin"
+                      ? "/admin"
+                      : user?.role === "factory"
+                        ? "/my-factory"
+                        : "/buyer"
+                  }
+                >
+                  <Button variant="ghost" className="hidden sm:flex">
+                    {language === "ar" ? "لوحة التحكم" : "Dashboard"}
+                  </Button>
+                </Link>
+              )}
 
               {/* CTA Button */}
               <Link href="/import-request">
-                <Button className="bg-[#ff8c42] hover:bg-[#e67a35] text-white font-semibold px-6 shadow-lg shadow-orange-200">
-                  {t('nav.startImport')}
-                  <Arrow className="w-4 h-4 ms-2" />
+                <Button className="bg-[#ff8c42] hover:bg-[#e67a35] text-white font-semibold">
+                  {language === "ar" ? "ابدأ الاستيراد" : "Start Import"}
                 </Button>
               </Link>
             </div>
@@ -107,145 +157,42 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#1e3a5f] via-[#2a4a6f] to-[#1e3a5f] text-white">
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative">
-          <div className="text-center max-w-4xl mx-auto">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-8">
-              <BadgeCheck className="w-5 h-5 text-[#ff8c42]" />
-              <span className="text-sm font-medium">{t('hero.badge')}</span>
-            </div>
-
-            {/* Main Title */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              {t('hero.title')}
-              <span className="block text-[#ff8c42] mt-2">{t('hero.titleHighlight')}</span>
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-              {t('hero.subtitle')}
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <Link href="/import-request">
-                <Button size="lg" className="bg-[#ff8c42] hover:bg-[#e67a35] text-white font-bold px-8 py-6 text-lg shadow-xl shadow-orange-500/30 w-full sm:w-auto">
-                  {t('hero.cta')}
-                  <Arrow className="w-5 h-5 ms-2" />
-                </Button>
-              </Link>
-              <a href="#how-it-works">
-                <Button size="lg" variant="outline" className="border-2 border-white/30 text-white hover:bg-white/10 font-semibold px-8 py-6 text-lg w-full sm:w-auto bg-transparent">
-                  {t('hero.ctaSecondary')}
-                </Button>
-              </a>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-              {[
-                { value: '500+', label: t('hero.stats.manufacturers'), icon: Factory },
-                { value: '2,000+', label: t('hero.stats.buyers'), icon: Users },
-                { value: '10,000+', label: t('hero.stats.orders'), icon: Package },
-                { value: '30%', label: t('hero.stats.savings'), icon: TrendingUp },
-              ].map((stat, index) => (
-                <div key={index} className="text-center">
-                  <stat.icon className="w-8 h-8 text-[#ff8c42] mx-auto mb-2" />
-                  <div className="text-3xl md:text-4xl font-bold mb-1">{stat.value}</div>
-                  <div className="text-sm text-gray-400">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Clean Divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-      </section>
-
-      {/* Trust Badges */}
-      <section className="py-8 bg-gray-50 border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-            {[
-              { icon: Shield, label: t('trust.noMiddlemen') },
-              { icon: BadgeCheck, label: t('trust.verified') },
-              { icon: Bot, label: t('trust.aiPowered') },
-              { icon: Lock, label: t('trust.secure') },
-              { icon: MessageCircle, label: t('trust.support247') },
-            ].map((item, index) => (
-              <div key={index} className="flex items-center gap-2 text-gray-600">
-                <item.icon className="w-5 h-5 text-[#1e3a5f]" />
-                <span className="text-sm font-medium">{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Warning Banner - No Middlemen */}
-      <section className="py-6 bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center gap-4 text-center">
-            <AlertTriangle className="w-6 h-6 text-red-500 flex-shrink-0" />
-            <p className="text-red-700 font-medium">
-              {language === 'ar' 
-                ? '⚠️ نحن نقضي على الوسطاء! نتحقق من كل مصنع بالذكاء الاصطناعي لضمان أنه مصنع مباشر وليس تاجر أو شركة تجارية.'
-                : '⚠️ We eliminate middlemen! We verify every factory with AI to ensure it\'s a direct manufacturer, not a trader or trading company.'
-              }
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
-              {t('howItWorks.title')}
-            </h2>
-            <p className="text-gray-600 text-lg">{t('howItWorks.subtitle')}</p>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            {[
-              { step: '1', icon: Package, ...t('howItWorks.steps.step1') as any },
-              { step: '2', icon: Bot, ...t('howItWorks.steps.step2') as any },
-              { step: '3', icon: MessageCircle, ...t('howItWorks.steps.step3') as any },
-              { step: '4', icon: Truck, ...t('howItWorks.steps.step4') as any },
-            ].map((item, index) => (
-              <div key={index} className="relative">
-                <Card className="text-center p-6 h-full hover:shadow-lg transition-shadow">
-                  <CardContent className="pt-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-[#1e3a5f] to-[#2a4a6f] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                      <item.icon className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="absolute -top-3 -right-3 w-8 h-8 bg-[#ff8c42] rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
-                      {item.step}
-                    </div>
-                    <h3 className="font-bold text-lg text-[#1e3a5f] mb-2">{item.title}</h3>
-                    <p className="text-gray-600 text-sm">{item.desc}</p>
-                  </CardContent>
-                </Card>
-                {index < 3 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2">
-                    <Arrow className="w-8 h-8 text-gray-300" />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* CTA */}
-          <div className="text-center mt-12">
-            <Link href="/import-request">
-              <Button size="lg" className="bg-[#ff8c42] hover:bg-[#e67a35] text-white font-bold px-8 shadow-lg">
-                {t('hero.cta')}
-                <Arrow className="w-5 h-5 ms-2" />
+      <section className="relative bg-[#1e3a5f] text-white py-20 md:py-32 text-center">
+        <div className="max-w-4xl mx-auto px-4">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            {language === "ar"
+              ? "استورد مباشرة من المصنع"
+              : "Import Directly from Factories"}
+            <span className="block text-[#ff8c42] mt-2">
+              {language === "ar"
+                ? "بدون وسطاء - أفضل الأسعار والجودة"
+                : "No Middlemen - Best Prices & Quality"}
+            </span>
+          </h1>
+          <p className="text-lg md:text-xl text-gray-300 mb-10">
+            {language === "ar"
+              ? "لا وسيط يسحب 40% من أرباحك. نربطك مباشرة بالمصانع الصينية الحقيقية لضمان أقل سعر وأعلى جودة."
+              : "No 40% middleman cuts. We connect you directly with real Chinese factories for the lowest prices and highest quality."}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/ai-search">
+              <Button
+                size="lg"
+                className="bg-[#ff8c42] hover:bg-[#e67a35] text-white px-8 py-6 text-lg font-bold rounded-xl shadow-xl transition-all hover:scale-105 flex items-center gap-2"
+              >
+                {language === "ar"
+                  ? "ابحث عن المصنع الحقيقي"
+                  : "Find Real Factory"}
+                <Arrow className="w-5 h-5" />
+              </Button>
+            </Link>
+            <Link href="/marketplace">
+              <Button
+                size="lg"
+                variant="outline"
+                className="bg-white/10 hover:bg-white/20 border-white/20 text-white px-8 py-6 text-lg font-bold rounded-xl backdrop-blur-sm transition-all"
+              >
+                {language === "ar" ? "تصفح المنتجات" : "Browse Products"}
               </Button>
             </Link>
           </div>

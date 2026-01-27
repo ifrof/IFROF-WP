@@ -3,6 +3,7 @@
 ## Phase 1: Architecture Redesign
 
 ### Database Schema Optimization
+
 ```sql
 -- Optimize indexes for high-traffic queries
 CREATE INDEX idx_factories_verified ON factories(verified_at, status);
@@ -20,7 +21,7 @@ ALTER TABLE orders PARTITION BY RANGE (YEAR(created_at)) (
 
 -- Add materialized views for analytics
 CREATE VIEW factory_stats AS
-SELECT 
+SELECT
   f.id,
   f.name,
   COUNT(DISTINCT o.id) as total_orders,
@@ -33,42 +34,44 @@ GROUP BY f.id;
 ```
 
 ### API Architecture
+
 ```typescript
 // server/_core/api-gateway.ts
-import { createTRPCMsw } from 'trpc-msw';
-import { appRouter } from './routers';
+import { createTRPCMsw } from "trpc-msw";
+import { appRouter } from "./routers";
 
 export const apiGateway = {
   // Request validation
-  validateRequest: (req) => {
+  validateRequest: req => {
     // Rate limiting per user
     // Auth verification
     // Payload size check
     // Content-type validation
   },
-  
+
   // Response caching strategy
   cacheStrategy: {
-    'factories.list': 3600, // 1 hour
-    'products.search': 1800, // 30 min
-    'user.profile': 300, // 5 min
-    'orders.list': 0, // No cache (real-time)
+    "factories.list": 3600, // 1 hour
+    "products.search": 1800, // 30 min
+    "user.profile": 300, // 5 min
+    "orders.list": 0, // No cache (real-time)
   },
-  
+
   // Error handling
-  errorHandler: (error) => {
+  errorHandler: error => {
     // Log to monitoring
     // Return appropriate status code
     // Sanitize error message
-  }
+  },
 };
 ```
 
 ### Caching Strategy (Redis)
+
 ```typescript
 // server/services/cache.ts
-import Redis from 'ioredis';
-import { getSecrets } from '../config/secrets';
+import Redis from "ioredis";
+import { getSecrets } from "../config/secrets";
 
 const redis = new Redis(getSecrets().REDIS_URL);
 
@@ -77,7 +80,7 @@ export const cacheService = {
   async getFactory(id: string) {
     const cached = await redis.get(`factory:${id}`);
     if (cached) return JSON.parse(cached);
-    
+
     const factory = await db.query.factories.findFirst({ where: { id } });
     await redis.setex(`factory:${id}`, 3600, JSON.stringify(factory));
     return factory;
@@ -93,7 +96,7 @@ export const cacheService = {
   async invalidateFactory(id: string) {
     await redis.del(`factory:${id}`);
     await redis.del(`factories:list`);
-  }
+  },
 };
 ```
 
@@ -102,18 +105,19 @@ export const cacheService = {
 ## Phase 2: Payment System (Stripe)
 
 ### Subscription Management
+
 ```typescript
 // server/services/subscriptions.ts
 export const subscriptionService = {
   // Create subscription
   async createSubscription(userId: string, planId: string) {
     const user = await getUser(userId);
-    
+
     const subscription = await stripe.subscriptions.create({
       customer: user.stripeCustomerId,
       items: [{ price: planId }],
-      payment_behavior: 'default_incomplete',
-      expand: ['latest_invoice.payment_intent'],
+      payment_behavior: "default_incomplete",
+      expand: ["latest_invoice.payment_intent"],
     });
 
     await db.update(users).set({
@@ -128,13 +132,13 @@ export const subscriptionService = {
   // Handle webhook
   async handleWebhook(event: Stripe.Event) {
     switch (event.type) {
-      case 'customer.subscription.updated':
+      case "customer.subscription.updated":
         await handleSubscriptionUpdate(event.data.object);
         break;
-      case 'customer.subscription.deleted':
+      case "customer.subscription.deleted":
         await handleSubscriptionCancellation(event.data.object);
         break;
-      case 'invoice.payment_failed':
+      case "invoice.payment_failed":
         await handlePaymentFailure(event.data.object);
         break;
     }
@@ -144,10 +148,12 @@ export const subscriptionService = {
   async isSubscriptionActive(userId: string): Promise<boolean> {
     const user = await getUser(userId);
     if (!user.subscriptionId) return false;
-    
-    const subscription = await stripe.subscriptions.retrieve(user.subscriptionId);
-    return subscription.status === 'active';
-  }
+
+    const subscription = await stripe.subscriptions.retrieve(
+      user.subscriptionId
+    );
+    return subscription.status === "active";
+  },
 };
 ```
 
@@ -156,6 +162,7 @@ export const subscriptionService = {
 ## Phase 3: Shipping Integration
 
 ### Shipping Provider Integration
+
 ```typescript
 // server/services/shipping.ts
 export const shippingService = {
@@ -173,7 +180,7 @@ export const shippingService = {
   // Create shipment
   async createShipment(orderId: string, shippingMethod: string) {
     const order = await getOrder(orderId);
-    
+
     const shipment = await shippingProvider[shippingMethod].create({
       from: order.factory.address,
       to: order.buyer.address,
@@ -184,7 +191,7 @@ export const shippingService = {
     await db.update(orders).set({
       shippingId: shipment.id,
       trackingNumber: shipment.trackingNumber,
-      shippingStatus: 'created',
+      shippingStatus: "created",
     });
 
     return shipment;
@@ -194,7 +201,7 @@ export const shippingService = {
   async trackShipment(trackingNumber: string) {
     const shipment = await shippingProvider.track(trackingNumber);
     return shipment.status;
-  }
+  },
 };
 ```
 
@@ -203,31 +210,31 @@ export const shippingService = {
 ## Phase 4: Localization (AR/EN/ZH)
 
 ### i18n Configuration
+
 ```typescript
 // client/src/config/i18n.ts
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import enTranslations from '../locales/en.json';
-import arTranslations from '../locales/ar.json';
-import zhTranslations from '../locales/zh.json';
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import enTranslations from "../locales/en.json";
+import arTranslations from "../locales/ar.json";
+import zhTranslations from "../locales/zh.json";
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: { translation: enTranslations },
-      ar: { translation: arTranslations },
-      zh: { translation: zhTranslations },
-    },
-    lng: localStorage.getItem('language') || 'en',
-    fallbackLng: 'en',
-    interpolation: { escapeValue: false },
-  });
+i18n.use(initReactI18next).init({
+  resources: {
+    en: { translation: enTranslations },
+    ar: { translation: arTranslations },
+    zh: { translation: zhTranslations },
+  },
+  lng: localStorage.getItem("language") || "en",
+  fallbackLng: "en",
+  interpolation: { escapeValue: false },
+});
 
 export default i18n;
 ```
 
 ### RTL Support
+
 ```css
 /* client/src/styles/rtl.css */
 [dir="rtl"] {
@@ -255,74 +262,76 @@ export default i18n;
 ## Phase 5: Security Hardening
 
 ### OWASP Top 10 Protection
+
 ```typescript
 // server/middleware/owasp-protection.ts
-import helmet from 'helmet';
-import mongoSanitize from 'mongo-sanitize';
-import xss from 'xss-clean';
-import rateLimit from 'express-rate-limit';
+import helmet from "helmet";
+import mongoSanitize from "mongo-sanitize";
+import xss from "xss-clean";
+import rateLimit from "express-rate-limit";
 
 export const owaspProtection = [
   // A1: Injection
   mongoSanitize(),
-  
+
   // A3: Broken Authentication
   rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 5,
-    message: 'Too many login attempts',
+    message: "Too many login attempts",
   }),
-  
+
   // A5: Broken Access Control
   (req, res, next) => {
-    if (!req.user && req.path.startsWith('/api/protected')) {
-      return res.status(401).json({ error: 'Unauthorized' });
+    if (!req.user && req.path.startsWith("/api/protected")) {
+      return res.status(401).json({ error: "Unauthorized" });
     }
     next();
   },
-  
+
   // A7: XSS
   xss(),
   helmet(),
-  
+
   // A8: CSRF
   csrf(),
 ];
 ```
 
 ### Data Encryption
+
 ```typescript
 // server/utils/encryption.ts
-import crypto from 'crypto';
+import crypto from "crypto";
 
 export const encryption = {
   // Encrypt sensitive data
   encrypt(data: string, key: string): string {
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(key), iv);
-    
-    let encrypted = cipher.update(data, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    
+    const cipher = crypto.createCipheriv("aes-256-gcm", Buffer.from(key), iv);
+
+    let encrypted = cipher.update(data, "utf8", "hex");
+    encrypted += cipher.final("hex");
+
     const authTag = cipher.getAuthTag();
-    return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
+    return `${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted}`;
   },
 
   // Decrypt sensitive data
   decrypt(encrypted: string, key: string): string {
-    const [iv, authTag, encryptedData] = encrypted.split(':');
+    const [iv, authTag, encryptedData] = encrypted.split(":");
     const decipher = crypto.createDecipheriv(
-      'aes-256-gcm',
+      "aes-256-gcm",
       Buffer.from(key),
-      Buffer.from(iv, 'hex')
+      Buffer.from(iv, "hex")
     );
-    
-    decipher.setAuthTag(Buffer.from(authTag, 'hex'));
-    let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    
+
+    decipher.setAuthTag(Buffer.from(authTag, "hex"));
+    let decrypted = decipher.update(encryptedData, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+
     return decrypted;
-  }
+  },
 };
 ```
 
@@ -331,6 +340,7 @@ export const encryption = {
 ## Phase 6: Performance Optimization
 
 ### Image Optimization Pipeline
+
 ```bash
 #!/bin/bash
 # scripts/optimize-images.sh
@@ -355,6 +365,7 @@ jpegoptim --max=80 client/public/images/*.jpg
 ```
 
 ### Code Splitting
+
 ```typescript
 // client/src/App.tsx
 import { lazy, Suspense } from 'react';
@@ -383,10 +394,11 @@ export function Router() {
 ## Phase 7: Monitoring & Observability
 
 ### Sentry Integration
+
 ```typescript
 // server/config/sentry.ts
 import * as Sentry from "@sentry/node";
-import { getSecrets } from './secrets';
+import { getSecrets } from "./secrets";
 
 const secrets = getSecrets();
 
@@ -405,23 +417,23 @@ export default Sentry;
 ```
 
 ### Health Checks
+
 ```typescript
 // server/routers/health.ts
-export const healthRouter = createRouter()
-  .query('status', {
-    async resolve() {
-      const db = await getDb();
-      const redis = await getRedis();
-      
-      return {
-        status: 'ok',
-        database: db ? 'connected' : 'disconnected',
-        redis: redis ? 'connected' : 'disconnected',
-        timestamp: new Date(),
-        uptime: process.uptime(),
-      };
-    }
-  });
+export const healthRouter = createRouter().query("status", {
+  async resolve() {
+    const db = await getDb();
+    const redis = await getRedis();
+
+    return {
+      status: "ok",
+      database: db ? "connected" : "disconnected",
+      redis: redis ? "connected" : "disconnected",
+      timestamp: new Date(),
+      uptime: process.uptime(),
+    };
+  },
+});
 ```
 
 ---
@@ -429,6 +441,7 @@ export const healthRouter = createRouter()
 ## Phase 8: Testing & QA
 
 ### Automated Testing Suite
+
 ```bash
 #!/bin/bash
 # scripts/test-all.sh
@@ -479,6 +492,7 @@ echo "All tests completed!"
 ## Post-Launch Monitoring
 
 ### KPIs to Track
+
 - Page load time (target: < 2s)
 - Error rate (target: < 0.1%)
 - API response time (target: < 200ms)
@@ -487,20 +501,21 @@ echo "All tests completed!"
 - Payment success rate (target: > 99%)
 
 ### Alerting Rules
+
 ```yaml
 alerts:
   - name: HighErrorRate
     condition: error_rate > 1%
     action: page
-  
+
   - name: SlowAPI
     condition: api_response_time > 500ms
     action: page
-  
+
   - name: DatabaseDown
     condition: database_connection_failed
     action: critical_page
-  
+
   - name: PaymentFailure
     condition: payment_success_rate < 95%
     action: page
@@ -515,7 +530,7 @@ alerts:
 ✅ **Test Coverage:** 95%+  
 ✅ **Performance Score:** 95+  
 ✅ **Security Score:** A+  
-✅ **Accessibility Score:** 100  
+✅ **Accessibility Score:** 100
 
 **Status: PRODUCTION READY**
 

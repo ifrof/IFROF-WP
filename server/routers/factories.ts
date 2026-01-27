@@ -43,14 +43,24 @@ export const factoriesRouter = router({
     .query(async ({ input }) => {
       const factory = await db.getFactoryById(input.id);
       if (!factory) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Factory not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Factory not found",
+        });
       }
       return factory;
     }),
 
   // Search factories (public)
   search: publicProcedure
-    .input(z.object({ query: z.string() }))
+    .input(
+      z.object({
+        query: z.string().optional(),
+        location: z.string().optional(),
+        page: z.number().default(1),
+        limit: z.number().default(20),
+      })
+    )
     .query(async ({ input }) => {
       return db.searchFactories(input.query);
     }),
@@ -60,7 +70,10 @@ export const factoriesRouter = router({
     .input(factorySchema)
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can create factories" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only admins can create factories",
+        });
       }
 
       const result = await db.createFactory({
@@ -76,7 +89,10 @@ export const factoriesRouter = router({
     .input(z.object({ id: z.number(), ...factorySchema.shape }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can update factories" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only admins can update factories",
+        });
       }
 
       const { id, ...data } = input;
@@ -89,20 +105,116 @@ export const factoriesRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can delete factories" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only admins can delete factories",
+        });
       }
 
       // Note: In production, you'd want to soft-delete or handle related records
-      throw new TRPCError({ code: "NOT_IMPLEMENTED", message: "Delete not yet implemented" });
+      throw new TRPCError({
+        code: "NOT_IMPLEMENTED",
+        message: "Delete not yet implemented",
+      });
     }),
+
+  // Admin: Approve factory verification
+  approveVerification: protectedProcedure
+    .input(z.object({ id: z.number(), notes: z.string().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only admins can approve factories",
+        });
+      }
+
+      await db.updateFactory(input.id, {
+        verificationStatus: "verified",
+        verificationNotes: input.notes,
+        verifiedAt: new Date(),
+      });
+
+      return { success: true };
+    }),
+
+  // Admin: Reject factory verification
+  rejectVerification: protectedProcedure
+    .input(z.object({ id: z.number(), reason: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only admins can reject factories",
+        });
+      }
+
+      await db.updateFactory(input.id, {
+        verificationStatus: "rejected",
+        verificationNotes: input.reason,
+      });
+
+      return { success: true };
+    }),
+
+  // Admin: Get pending verifications
+  getPendingVerifications: protectedProcedure.query(async ({ ctx }) => {
+    if (ctx.user.role !== "admin") {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Only admins can view pending verifications",
+      });
+    }
+
+    return db.getFactoriesByStatus("pending");
+  }),
 });
 
 export const productsRouter = router({
+  // Get all products (public)
+  getAll: publicProcedure
+    .input(
+      z
+        .object({
+          limit: z.number().default(50),
+          offset: z.number().default(0),
+        })
+        .optional()
+    )
+    .query(async ({ input }) => {
+      const limit = input?.limit ?? 50;
+      const offset = input?.offset ?? 0;
+      const cacheKey = `products:all:${limit}:${offset}`;
+
+      return getCached(
+        cacheKey,
+        () => db.getAllProducts(limit, offset),
+        300 // 5 minutes
+      );
+    }),
+
   // Get products by factory (public)
   getByFactory: publicProcedure
     .input(z.object({ factoryId: z.number() }))
     .query(async ({ input }) => {
       return db.getProductsByFactory(input.factoryId);
+    }),
+
+  // Get related products (public)
+  getRelated: publicProcedure
+    .input(
+      z.object({
+        factoryId: z.number(),
+        excludeProductId: z.number(),
+        limit: z.number().default(4),
+      })
+    )
+    .query(async ({ input }) => {
+      return db.getRelatedProducts(
+        input.factoryId,
+        input.excludeProductId,
+        input.limit
+      );
     }),
 
   // Get single product (public)
@@ -111,12 +223,16 @@ export const productsRouter = router({
     .query(async ({ input }) => {
       const product = await db.getProductById(input.id);
       if (!product) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Product not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
       }
-      
+
       // Fetch factory info to satisfy client-side expectations
-      const factory = await db.getFactoryById(product.factoryId);
-      
+      const productData = product as any;
+      const factory = await db.getFactoryById(productData.factoryId);
+
       return {
         ...product,
         factory, // Add factory relation
@@ -126,7 +242,18 @@ export const productsRouter = router({
 
   // Search products (public)
   search: publicProcedure
-    .input(z.object({ query: z.string() }))
+    .input(
+      z.object({
+        query: z.string().optional(),
+        category: z.string().optional(),
+        minPrice: z.number().optional(),
+        maxPrice: z.number().optional(),
+        moq: z.number().optional(),
+        location: z.string().optional(),
+        page: z.number().default(1),
+        limit: z.number().default(20),
+      })
+    )
     .query(async ({ input }) => {
       return db.searchProducts(input.query);
     }),
@@ -136,7 +263,10 @@ export const productsRouter = router({
     .input(z.object({ factoryId: z.number(), ...productSchema.shape }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can create products" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only admins can create products",
+        });
       }
 
       const { factoryId, ...data } = input;
@@ -151,10 +281,19 @@ export const productsRouter = router({
 
   // Update product (admin only)
   update: protectedProcedure
-    .input(z.object({ id: z.number(), factoryId: z.number(), ...productSchema.shape }))
+    .input(
+      z.object({
+        id: z.number(),
+        factoryId: z.number(),
+        ...productSchema.shape,
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can update products" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only admins can update products",
+        });
       }
 
       const { id, ...data } = input;
@@ -170,9 +309,15 @@ export const productsRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== "admin") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can delete products" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only admins can delete products",
+        });
       }
 
-      throw new TRPCError({ code: "NOT_IMPLEMENTED", message: "Delete not yet implemented" });
+      throw new TRPCError({
+        code: "NOT_IMPLEMENTED",
+        message: "Delete not yet implemented",
+      });
     }),
 });

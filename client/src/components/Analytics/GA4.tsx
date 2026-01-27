@@ -1,13 +1,13 @@
-import { useEffect } from 'react';
-import { useLocation } from 'wouter';
+import { useEffect } from "react";
+import { useLocation } from "wouter";
 
-const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'; // Replace with real ID
+const GA_MEASUREMENT_ID = "G-XXXXXXXXXX"; // Replace with real ID
 
 export default function GA4() {
   const [location] = useLocation();
 
   useEffect(() => {
-    const script = document.createElement('script');
+    const script = document.createElement("script");
     script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
     script.async = true;
     document.head.appendChild(script);
@@ -16,14 +16,14 @@ export default function GA4() {
     function gtag(...args: any[]) {
       window.dataLayer.push(args);
     }
-    gtag('js', new Date());
-    gtag('config', GA_MEASUREMENT_ID);
+    gtag("js", new Date());
+    gtag("config", GA_MEASUREMENT_ID);
   }, []);
 
   useEffect(() => {
     if (window.gtag) {
-      window.gtag('config', GA_MEASUREMENT_ID, {
-        page_path: location
+      window.gtag("config", GA_MEASUREMENT_ID, {
+        page_path: location,
       });
     }
   }, [location]);

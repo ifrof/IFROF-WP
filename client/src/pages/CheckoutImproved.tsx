@@ -6,7 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { Loader2, CreditCard, MapPin, Package, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Loader2,
+  CreditCard,
+  MapPin,
+  Package,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -51,13 +58,17 @@ export default function CheckoutImproved() {
     country: "",
     phone: "",
   });
-  const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
+  const [shippingMethod, setShippingMethod] = useState<"standard" | "express">(
+    "standard"
+  );
   const [notes, setNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { data: checkoutSummary, isLoading } = trpc.checkout.getSummary.useQuery();
-  const createCheckoutSessionMutation = trpc.checkout.createCheckoutSession.useMutation();
+  const { data: checkoutSummary, isLoading } =
+    trpc.checkout.getSummary.useQuery();
+  const createCheckoutSessionMutation =
+    trpc.checkout.createCheckoutSession.useMutation();
 
   const validateShippingAddress = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -172,12 +183,16 @@ export default function CheckoutImproved() {
                 <div className="flex items-center gap-2">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                      currentStep === "shipping" || currentStep === "method" || currentStep === "payment"
+                      currentStep === "shipping" ||
+                      currentStep === "method" ||
+                      currentStep === "payment"
                         ? "bg-blue-600 text-white"
                         : "bg-gray-200 text-gray-600"
                     }`}
                   >
-                    {currentStep === "shipping" || currentStep === "method" || currentStep === "payment" ? (
+                    {currentStep === "shipping" ||
+                    currentStep === "method" ||
+                    currentStep === "payment" ? (
                       <CheckCircle2 className="w-5 h-5" />
                     ) : (
                       "1"
@@ -194,8 +209,8 @@ export default function CheckoutImproved() {
                       currentStep === "payment"
                         ? "bg-blue-600 text-white"
                         : currentStep === "method"
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-600"
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-200 text-gray-600"
                     }`}
                   >
                     {currentStep === "payment" ? (
@@ -214,7 +229,9 @@ export default function CheckoutImproved() {
                 <div className="flex items-center gap-2">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                      currentStep === "payment" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
+                      currentStep === "payment"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-600"
                     }`}
                   >
                     3
@@ -239,13 +256,18 @@ export default function CheckoutImproved() {
                     <Input
                       id="fullName"
                       value={shippingAddress.fullName}
-                      onChange={(e) =>
-                        setShippingAddress({ ...shippingAddress, fullName: e.target.value })
+                      onChange={e =>
+                        setShippingAddress({
+                          ...shippingAddress,
+                          fullName: e.target.value,
+                        })
                       }
                       className={errors.fullName ? "border-red-500" : ""}
                     />
                     {errors.fullName && (
-                      <p className="text-sm text-red-500 mt-1">{errors.fullName}</p>
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.fullName}
+                      </p>
                     )}
                   </div>
 
@@ -254,14 +276,19 @@ export default function CheckoutImproved() {
                     <Textarea
                       id="address"
                       value={shippingAddress.address}
-                      onChange={(e) =>
-                        setShippingAddress({ ...shippingAddress, address: e.target.value })
+                      onChange={e =>
+                        setShippingAddress({
+                          ...shippingAddress,
+                          address: e.target.value,
+                        })
                       }
                       className={errors.address ? "border-red-500" : ""}
                       rows={3}
                     />
                     {errors.address && (
-                      <p className="text-sm text-red-500 mt-1">{errors.address}</p>
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.address}
+                      </p>
                     )}
                   </div>
 
@@ -271,13 +298,18 @@ export default function CheckoutImproved() {
                       <Input
                         id="city"
                         value={shippingAddress.city}
-                        onChange={(e) =>
-                          setShippingAddress({ ...shippingAddress, city: e.target.value })
+                        onChange={e =>
+                          setShippingAddress({
+                            ...shippingAddress,
+                            city: e.target.value,
+                          })
                         }
                         className={errors.city ? "border-red-500" : ""}
                       />
                       {errors.city && (
-                        <p className="text-sm text-red-500 mt-1">{errors.city}</p>
+                        <p className="text-sm text-red-500 mt-1">
+                          {errors.city}
+                        </p>
                       )}
                     </div>
                     <div>
@@ -285,8 +317,11 @@ export default function CheckoutImproved() {
                       <Input
                         id="state"
                         value={shippingAddress.state}
-                        onChange={(e) =>
-                          setShippingAddress({ ...shippingAddress, state: e.target.value })
+                        onChange={e =>
+                          setShippingAddress({
+                            ...shippingAddress,
+                            state: e.target.value,
+                          })
                         }
                       />
                     </div>
@@ -298,8 +333,11 @@ export default function CheckoutImproved() {
                       <Input
                         id="zipCode"
                         value={shippingAddress.zipCode}
-                        onChange={(e) =>
-                          setShippingAddress({ ...shippingAddress, zipCode: e.target.value })
+                        onChange={e =>
+                          setShippingAddress({
+                            ...shippingAddress,
+                            zipCode: e.target.value,
+                          })
                         }
                       />
                     </div>
@@ -308,13 +346,18 @@ export default function CheckoutImproved() {
                       <Input
                         id="country"
                         value={shippingAddress.country}
-                        onChange={(e) =>
-                          setShippingAddress({ ...shippingAddress, country: e.target.value })
+                        onChange={e =>
+                          setShippingAddress({
+                            ...shippingAddress,
+                            country: e.target.value,
+                          })
                         }
                         className={errors.country ? "border-red-500" : ""}
                       />
                       {errors.country && (
-                        <p className="text-sm text-red-500 mt-1">{errors.country}</p>
+                        <p className="text-sm text-red-500 mt-1">
+                          {errors.country}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -325,13 +368,18 @@ export default function CheckoutImproved() {
                       id="phone"
                       type="tel"
                       value={shippingAddress.phone}
-                      onChange={(e) =>
-                        setShippingAddress({ ...shippingAddress, phone: e.target.value })
+                      onChange={e =>
+                        setShippingAddress({
+                          ...shippingAddress,
+                          phone: e.target.value,
+                        })
                       }
                       className={errors.phone ? "border-red-500" : ""}
                     />
                     {errors.phone && (
-                      <p className="text-sm text-red-500 mt-1">{errors.phone}</p>
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.phone}
+                      </p>
                     )}
                   </div>
 
@@ -364,11 +412,17 @@ export default function CheckoutImproved() {
                         name="shipping"
                         value="standard"
                         checked={shippingMethod === "standard"}
-                        onChange={(e) => setShippingMethod(e.target.value as "standard" | "express")}
+                        onChange={e =>
+                          setShippingMethod(
+                            e.target.value as "standard" | "express"
+                          )
+                        }
                         className="w-4 h-4"
                       />
                       <div className="ml-4 flex-1">
-                        <p className="font-medium">Standard Shipping (5-7 business days)</p>
+                        <p className="font-medium">
+                          Standard Shipping (5-7 business days)
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           Free shipping on orders over $100
                         </p>
@@ -384,17 +438,26 @@ export default function CheckoutImproved() {
                         name="shipping"
                         value="express"
                         checked={shippingMethod === "express"}
-                        onChange={(e) => setShippingMethod(e.target.value as "standard" | "express")}
+                        onChange={e =>
+                          setShippingMethod(
+                            e.target.value as "standard" | "express"
+                          )
+                        }
                         className="w-4 h-4"
                       />
                       <div className="ml-4 flex-1">
-                        <p className="font-medium">Express Shipping (2-3 business days)</p>
+                        <p className="font-medium">
+                          Express Shipping (2-3 business days)
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           Fast delivery for urgent orders
                         </p>
                       </div>
                       <p className="font-bold text-lg">
-                        ${(Math.round(checkoutSummary.shipping * 1.5) / 100).toFixed(2)}
+                        $
+                        {(
+                          Math.round(checkoutSummary.shipping * 1.5) / 100
+                        ).toFixed(2)}
                       </p>
                     </label>
                   </div>
@@ -405,13 +468,17 @@ export default function CheckoutImproved() {
                       id="notes"
                       placeholder="Add any special instructions or notes for your order..."
                       value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
+                      onChange={e => setNotes(e.target.value)}
                       rows={3}
                     />
                   </div>
 
                   <div className="flex gap-2 pt-4">
-                    <Button variant="outline" className="flex-1" onClick={handlePreviousStep}>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={handlePreviousStep}
+                    >
                       Back
                     </Button>
                     <Button
@@ -438,16 +505,20 @@ export default function CheckoutImproved() {
                   <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
                     <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-blue-900">Secure Payment</p>
+                      <p className="font-medium text-blue-900">
+                        Secure Payment
+                      </p>
                       <p className="text-sm text-blue-800">
-                        You will be redirected to Stripe to complete your payment securely.
+                        You will be redirected to Stripe to complete your
+                        payment securely.
                       </p>
                     </div>
                   </div>
 
                   <div className="border rounded-lg p-4 bg-gray-50">
                     <p className="text-sm text-muted-foreground mb-2">
-                      We accept all major credit cards and digital payment methods through Stripe.
+                      We accept all major credit cards and digital payment
+                      methods through Stripe.
                     </p>
                     <div className="flex gap-2">
                       <div className="w-12 h-8 bg-white border rounded flex items-center justify-center text-xs font-bold">
@@ -463,7 +534,11 @@ export default function CheckoutImproved() {
                   </div>
 
                   <div className="flex gap-2 pt-4">
-                    <Button variant="outline" className="flex-1" onClick={handlePreviousStep}>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={handlePreviousStep}
+                    >
                       Back
                     </Button>
                     <Button
@@ -502,7 +577,10 @@ export default function CheckoutImproved() {
                     const itemData = item.product || item.service;
                     const price = itemData?.basePrice || 0;
                     return (
-                      <div key={item.cartItem.id} className="flex justify-between text-sm">
+                      <div
+                        key={item.cartItem.id}
+                        className="flex justify-between text-sm"
+                      >
                         <span>
                           {itemData?.name} × {item.cartItem.quantity}
                         </span>

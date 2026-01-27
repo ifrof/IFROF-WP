@@ -1,17 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Loader2, CheckCircle2, XCircle, Home } from "lucide-react";
 
 export default function VerifyEmail() {
   const { token } = useParams<{ token: string }>();
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading"
+  );
   const [errorMessage, setErrorMessage] = useState<string>("");
-  
+
   // Simple language detection
-  const language = typeof window !== "undefined" && window.location.pathname.startsWith("/ar") ? "ar" : "en";
+  const language =
+    typeof window !== "undefined" && window.location.pathname.startsWith("/ar")
+      ? "ar"
+      : "en";
 
   const verifyMutation = trpc.auth.verifyEmail.useMutation({
     onSuccess: () => {
@@ -20,7 +32,7 @@ export default function VerifyEmail() {
     onError: (err: any) => {
       setStatus("error");
       setErrorMessage(err.message);
-    }
+    },
   });
 
   useEffect(() => {
@@ -33,9 +45,14 @@ export default function VerifyEmail() {
   }, [token]);
 
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}>
+    <div
+      className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}
+    >
       <div className="mb-8">
-        <Link to="/" className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium">
+        <Link
+          to="/"
+          className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium"
+        >
           <Home className={`h-5 w-5 ${language === "ar" ? "ml-2" : "mr-2"}`} />
           {language === "ar" ? "العودة للرئيسية" : "Back to Home"}
         </Link>
@@ -44,9 +61,15 @@ export default function VerifyEmail() {
       <Card className="w-full max-w-md text-center shadow-xl border-gray-200">
         <CardHeader>
           <div className="flex justify-center mb-4">
-            {status === "loading" && <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />}
-            {status === "success" && <CheckCircle2 className="h-12 w-12 text-green-600" />}
-            {status === "error" && <XCircle className="h-12 w-12 text-red-600" />}
+            {status === "loading" && (
+              <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
+            )}
+            {status === "success" && (
+              <CheckCircle2 className="h-12 w-12 text-green-600" />
+            )}
+            {status === "error" && (
+              <XCircle className="h-12 w-12 text-red-600" />
+            )}
           </div>
           <CardTitle className="text-2xl">
             {status === "loading" && "Verifying Email..."}
@@ -54,8 +77,10 @@ export default function VerifyEmail() {
             {status === "error" && "Verification Failed"}
           </CardTitle>
           <CardDescription>
-            {status === "loading" && "Please wait while we verify your email address."}
-            {status === "success" && "Your email has been successfully verified. You can now access all features."}
+            {status === "loading" &&
+              "Please wait while we verify your email address."}
+            {status === "success" &&
+              "Your email has been successfully verified. You can now access all features."}
             {status === "error" && errorMessage}
           </CardDescription>
         </CardHeader>
@@ -68,7 +93,8 @@ export default function VerifyEmail() {
           {status === "error" && (
             <div className="space-y-4">
               <p className="text-gray-600">
-                The link may be invalid or expired. Please try logging in to resend the verification email.
+                The link may be invalid or expired. Please try logging in to
+                resend the verification email.
               </p>
             </div>
           )}

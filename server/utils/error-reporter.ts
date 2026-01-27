@@ -8,7 +8,7 @@ export const reportErrorToAdmin = async (error: Error, context?: any) => {
   console.error(`[CRITICAL_ERROR] ${error.message}`, {
     stack: error.stack,
     context,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 
   // In a real implementation, we would insert into a 'system_errors' table

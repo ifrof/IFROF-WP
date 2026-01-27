@@ -20,10 +20,18 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Package, FileText, User, Home } from "lucide-react";
+import {
+  LayoutDashboard,
+  LogOut,
+  PanelLeft,
+  Package,
+  FileText,
+  User,
+  Home,
+} from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation, Link } from "wouter";
-import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
+import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const SIDEBAR_WIDTH_KEY = "buyer-sidebar-width";
@@ -48,13 +56,13 @@ export default function BuyerDashboardLayout({
   }, [sidebarWidth]);
 
   if (loading) {
-    return <DashboardLayoutSkeleton />
+    return <DashboardLayoutSkeleton />;
   }
 
-  if (!user || user.role !== 'buyer') {
+  if (!user || user.role !== "buyer") {
     // Redirect to login if not authenticated or not a buyer
     useEffect(() => {
-      if (!loading && (!user || user.role !== 'buyer')) {
+      if (!loading && (!user || user.role !== "buyer")) {
         setLocation("/login");
       }
     }, [user, loading, setLocation]);
@@ -95,9 +103,21 @@ function BuyerDashboardLayoutContent({
   const { t } = useLanguage();
 
   const menuItems = [
-    { icon: LayoutDashboard, label: t("dashboard.buyer.title"), path: "/buyer" },
-    { icon: FileText, label: t("dashboard.buyer.inquiries"), path: "/buyer/requests" },
-    { icon: Package, label: t("dashboard.buyer.orders"), path: "/buyer/orders" },
+    {
+      icon: LayoutDashboard,
+      label: t("dashboard.buyer.title"),
+      path: "/buyer",
+    },
+    {
+      icon: FileText,
+      label: t("dashboard.buyer.inquiries"),
+      path: "/buyer/requests",
+    },
+    {
+      icon: Package,
+      label: t("dashboard.buyer.orders"),
+      path: "/buyer/orders",
+    },
     { icon: User, label: t("profile.title"), path: "/buyer/profile" },
     { icon: Home, label: t("nav.home"), path: "/" },
   ];
@@ -211,7 +231,10 @@ function BuyerDashboardLayoutContent({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 p-1">
                 <DropdownMenuItem asChild>
-                  <Link href="/buyer/profile" className="cursor-pointer flex items-center">
+                  <Link
+                    href="/buyer/profile"
+                    className="cursor-pointer flex items-center"
+                  >
                     <User className="mr-2 h-4 w-4" />
                     <span>{t("profile.title")}</span>
                   </Link>
@@ -248,9 +271,7 @@ function BuyerDashboardLayoutContent({
             </div>
           </div>
         )}
-        <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
-          {children}
-        </main>
+        <main className="flex-1 p-6 max-w-7xl mx-auto w-full">{children}</main>
       </SidebarInset>
     </>
   );

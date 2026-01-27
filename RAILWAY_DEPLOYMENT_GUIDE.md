@@ -1,4 +1,5 @@
 ### Build Fails
+
 - Check build logs in Railway dashboard
 - Verify all environment variables are set
 - Ensure `DATABASE_URL` is correctly configured

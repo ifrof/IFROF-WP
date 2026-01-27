@@ -17,8 +17,8 @@ export function ThemeToggle() {
         language === "ar"
           ? "تبديل الوضع الليلي"
           : theme === "dark"
-          ? "Switch to light mode"
-          : "Switch to dark mode"
+            ? "Switch to light mode"
+            : "Switch to dark mode"
       }
     >
       {theme === "dark" ? (

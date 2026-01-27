@@ -41,13 +41,16 @@ export type Tool = {
   };
 };
 
-export type ToolChoicePrimitive = "none" | "auto" | "required";
-export type ToolChoiceByName = { name: string };
-export type ToolChoiceExplicit = {
-  type: "function";
-  function: {
-    name: string;
-  };
+export type ToolChoice =
+  | "none"
+  | "auto"
+  | { type: "function"; function: { name: string } };
+
+export type OutputSchema = any;
+
+export type ResponseFormat = {
+  type: "text" | "json_object" | "json_schema";
+  json_schema?: any;
 };
 
 export type ToolChoice =
@@ -309,7 +312,21 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   });
 
   if (normalizedResponseFormat) {
-    payload.response_format = normalizedResponseFormat;
+    if (
+      normalizedResponseFormat.type === "json_schema" &&
+      apiConfig.url.includes("groq.com")
+    ) {
+      payload.response_format = { type: "json_object" };
+      const schemaInstructions = `\n\nYou MUST respond with valid JSON that matches this exact schema:\n${JSON.stringify(normalizedResponseFormat.json_schema.schema, null, 2)}`;
+      const systemMsg = payload.messages as any[];
+      if (systemMsg.length > 0 && systemMsg[0].role === "system") {
+        systemMsg[0].content += schemaInstructions;
+      } else {
+        systemMsg.unshift({ role: "system", content: schemaInstructions });
+      }
+    } else {
+      payload.response_format = normalizedResponseFormat;
+    }
   }
 
   const response = await fetch(resolveApiUrl(), {
@@ -321,11 +338,59 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     body: JSON.stringify(payload),
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
+  try {
+    const response = await fetch(apiConfig.url, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${apiConfig.key}`,
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `[LLM] Error: ${response.status} ${response.statusText} – ${errorText}`
+      );
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`,
+      });
+    }
+
+    const result = (await response.json()) as InvokeResult;
+    const duration = Date.now() - startTime;
+    const usage = result.usage || {
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      total_tokens: 0,
+    };
+
+    console.log(
+      JSON.stringify({
+        level: "info",
+        message: "LLM_INVOKE_SUCCESS",
+        model: apiConfig.model,
+        latency_ms: duration,
+        input_tokens: usage.prompt_tokens,
+        output_tokens: usage.completion_tokens,
+        total_tokens: usage.total_tokens,
+      })
     );
+
+    return result;
+  } catch (error: any) {
+    if (error.name === "AbortError") {
+      throw new TRPCError({
+        code: "TIMEOUT",
+        message: `LLM request timed out after ${timeoutMs}ms.`,
+      });
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
   }
 
   return (await response.json()) as InvokeResult;

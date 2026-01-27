@@ -58,10 +58,34 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  // Add cache headers middleware
+  app.use(cacheHeaders);
+
+  app.use(
+    express.static(distPath, {
+      maxAge: "1y",
+      immutable: true,
+      etag: true,
+    })
+  );
 
   // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+  app.use("*", async (req, res) => {
+    try {
+      const indexPath = path.resolve(distPath, "index.html");
+      if (!fs.existsSync(indexPath)) {
+        return res.status(404).send("Build artifacts not found. Please run build first.");
+      }
+      let template = await fs.promises.readFile(indexPath, "utf-8");
+      const ssrContent = await generateStaticContent(req);
+      template = template.replace(
+        '<div id="root"></div>',
+        `<div id="root">${ssrContent}</div>`
+      );
+      res.status(200).set({ "Content-Type": "text/html" }).send(template);
+    } catch (e) {
+      console.error("Static serving error:", e);
+      res.status(500).send("Internal Server Error");
+    }
   });
 }

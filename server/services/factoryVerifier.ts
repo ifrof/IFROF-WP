@@ -64,7 +64,9 @@ function analyzeKeywords(content: string, keywords: string[]): number {
   if (!content) return 0;
 
   const lowerContent = content.toLowerCase();
-  const foundKeywords = keywords.filter((kw) => lowerContent.includes(kw.toLowerCase()));
+  const foundKeywords = keywords.filter(kw =>
+    lowerContent.includes(kw.toLowerCase())
+  );
 
   return Math.min(100, (foundKeywords.length / keywords.length) * 100);
 }
@@ -73,7 +75,9 @@ function analyzeCertificates(content: string, certificates: string[]): number {
   if (!content) return 0;
 
   const lowerContent = content.toLowerCase();
-  const foundCerts = certificates.filter((cert) => lowerContent.includes(cert.toLowerCase()));
+  const foundCerts = certificates.filter(cert =>
+    lowerContent.includes(cert.toLowerCase())
+  );
 
   return Math.min(100, (foundCerts.length / certificates.length) * 100);
 }
@@ -120,7 +124,11 @@ function analyzeStructure(content: string): number {
   }
 
   // Check for R&D
-  if (content.includes("R&D") || content.includes("research") || content.includes("development")) {
+  if (
+    content.includes("R&D") ||
+    content.includes("research") ||
+    content.includes("development")
+  ) {
     score += 15;
   }
 
@@ -138,7 +146,11 @@ function analyzeBusinessModel(content: string): number {
   }
 
   // Check for B2B focus
-  if (content.includes("B2B") || content.includes("wholesale") || content.includes("bulk")) {
+  if (
+    content.includes("B2B") ||
+    content.includes("wholesale") ||
+    content.includes("bulk")
+  ) {
     score += 25;
   }
 
@@ -165,12 +177,14 @@ function checkTraderRedFlags(content: string): string[] {
   const lowerContent = content.toLowerCase();
 
   // Check for trader keywords
-  const traderKeywordsFound = TRADER_KEYWORDS.filter((kw) =>
+  const traderKeywordsFound = TRADER_KEYWORDS.filter(kw =>
     lowerContent.includes(kw.toLowerCase())
   );
 
   if (traderKeywordsFound.length > 3) {
-    redFlags.push(`Found ${traderKeywordsFound.length} trader-related keywords`);
+    redFlags.push(
+      `Found ${traderKeywordsFound.length} trader-related keywords`
+    );
   }
 
   // Check for generic descriptions
@@ -259,7 +273,11 @@ export async function verifyManufacturer(
 
   // Calculate overall score with weights
   const overallScore =
-    keywordScore * 0.3 + certScore * 0.25 + structureScore * 0.2 + modelScore * 0.15 + yearsScore * 0.1;
+    keywordScore * 0.3 +
+    certScore * 0.25 +
+    structureScore * 0.2 +
+    modelScore * 0.15 +
+    yearsScore * 0.1;
 
   // Get red flags
   const redFlags = checkTraderRedFlags(websiteContent);
@@ -290,7 +308,9 @@ export async function verifyManufacturer(
   }
 
   if (redFlags.length > 0) {
-    recommendations.push("Verify company background and request factory photos");
+    recommendations.push(
+      "Verify company background and request factory photos"
+    );
   }
 
   return {
@@ -306,9 +326,13 @@ export async function batchVerifyManufacturers(
   companies: Array<{ name: string; content: string; yearsInBusiness?: number }>
 ): Promise<Array<{ name: string; result: VerificationResult }>> {
   return Promise.all(
-    companies.map(async (company) => ({
+    companies.map(async company => ({
       name: company.name,
-      result: await verifyManufacturer(company.name, company.content, company.yearsInBusiness),
+      result: await verifyManufacturer(
+        company.name,
+        company.content,
+        company.yearsInBusiness
+      ),
     }))
   );
 }

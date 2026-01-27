@@ -13,7 +13,10 @@ export interface JWTPayload {
   exp?: number;
 }
 
-export async function generateAccessToken(userId: string, role: "user" | "admin"): Promise<string> {
+export async function generateAccessToken(
+  userId: string,
+  role: "user" | "admin"
+): Promise<string> {
   return await new jose.SignJWT({ sub: userId, role })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -38,7 +41,9 @@ export async function verifyAccessToken(token: string): Promise<JWTPayload> {
   }
 }
 
-export async function verifyRefreshToken(token: string): Promise<{ sub: string }> {
+export async function verifyRefreshToken(
+  token: string
+): Promise<{ sub: string }> {
   try {
     const verified = await jose.jwtVerify(token, refreshSecret);
     return { sub: verified.payload.sub as string };
@@ -54,7 +59,7 @@ export async function rotateTokens(
     const payload = await verifyRefreshToken(refreshToken);
     const newAccessToken = await generateAccessToken(payload.sub, "user");
     const newRefreshToken = await generateRefreshToken(payload.sub);
-    
+
     return {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,

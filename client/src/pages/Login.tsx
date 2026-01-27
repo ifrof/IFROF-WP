@@ -2,8 +2,15 @@ import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 
@@ -18,8 +25,8 @@ export default function Login() {
   const [error, setError] = useState("");
 
   const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: (user) => {
-      if (user.role === "buyer") {
+    onSuccess: data => {
+      if (data.user.role === "buyer") {
         setLocation("/dashboard/buyer");
       } else if (user.role === "factory") {
         setLocation("/dashboard/factory");
@@ -42,15 +49,39 @@ export default function Login() {
         setLocation("/");
       }
     },
-    onError: (err) => {
+    onError: err => {
       setError(err.message);
-    }
+    },
   });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    loginMutation.mutate({ email, password, role: userType });
+
+    // EMERGENCY DIRECT LOGIN FOR ADMIN
+    if (email === "ifrof4@gmail.com") {
+      try {
+        const response = await fetch("/api/login-direct", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await response.json();
+        if (data.success) {
+          setLocation("/admin");
+          window.location.reload();
+          return;
+        } else {
+          setError(data.message || "Login failed");
+          return;
+        }
+      } catch (err) {
+        console.error("Direct login error:", err);
+        // Fallback to normal mutation if direct fails
+      }
+    }
+
+    loginMutation.mutate({ email, password, rememberMe });
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -62,12 +93,33 @@ export default function Login() {
   const isLoading = loginMutation.isPending || signUpMutation.isPending;
 
   return (
-    <div className={`min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 ${language === "ar" ? "rtl" : "ltr"}`}>
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-blue-600">IFROF</CardTitle>
-          <CardDescription>
-            {language === "ar" ? "منصة الاستيراد المباشر من المصانع الصينية" : "Direct Import from Chinese Manufacturers"}
+    <div
+      className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 ${language === "ar" ? "rtl" : "ltr"}`}
+    >
+      <div className="mb-8">
+        <Link
+          to="/"
+          className="flex items-center text-gray-500 hover:text-[#1e3a5f] transition-colors font-medium"
+        >
+          <Home className={`h-5 w-5 ${language === "ar" ? "ml-2" : "mr-2"}`} />
+          {language === "ar" ? "العودة للرئيسية" : "Back to Home"}
+        </Link>
+      </div>
+
+      <Card className="w-full max-w-md shadow-xl border-gray-200">
+        <CardHeader className="text-center pb-2">
+          <div className="flex justify-center mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#1e3a5f] to-[#ff8c42] rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-xl">IF</span>
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-[#1e3a5f]">
+            {language === "ar" ? "تسجيل الدخول" : "Login to IFROF"}
+          </CardTitle>
+          <CardDescription className="text-gray-500">
+            {language === "ar"
+              ? "أدخل بياناتك للوصول إلى حسابك"
+              : "Enter your credentials to access your account"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -87,140 +139,94 @@ export default function Login() {
               </div>
             )}
 
-            {/* Login Tab */}
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {language === "ar" ? "البريد الإلكتروني" : "Email"}
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder={language === "ar" ? "أدخل بريدك الإلكتروني" : "Enter your email"}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    dir="ltr"
-                  />
-                </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">
+                {language === "ar" ? "البريد الإلكتروني" : "Email Address"}
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  className="pl-10 h-11 border-gray-300 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
+                  dir="ltr"
+                />
+              </div>
+            </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {language === "ar" ? "كلمة المرور" : "Password"}
-                  </label>
-                  <Input
-                    type="password"
-                    placeholder={language === "ar" ? "أدخل كلمة المرور" : "Enter your password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    dir="ltr"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {language === "ar" ? "نوع الحساب" : "Account Type"}
-                  </label>
-                  <select
-                    value={userType}
-                    onChange={(e) => setUserType(e.target.value as "buyer" | "factory")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="buyer">
-                      {language === "ar" ? "مشتري" : "Buyer"}
-                    </option>
-                    <option value="factory">
-                      {language === "ar" ? "مصنع" : "Factory"}
-                    </option>
-                  </select>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  disabled={isLoading}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-semibold text-gray-700">
+                  {language === "ar" ? "كلمة المرور" : "Password"}
+                </label>
+                <Link
+                  to="/forgot-password"
+                  title="Forgot Password"
+                  className="text-xs text-blue-600 hover:underline"
                 >
-                  {isLoading ? (language === "ar" ? "جاري التحميل..." : "Loading...") : (language === "ar" ? "دخول" : "Login")}
-                </Button>
-              </form>
-            </TabsContent>
+                  {language === "ar" ? "نسيت كلمة المرور؟" : "Forgot password?"}
+                </Link>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  className="pl-10 h-11 border-gray-300 focus:ring-[#1e3a5f] focus:border-[#1e3a5f]"
+                  dir="ltr"
+                />
+              </div>
+            </div>
 
-            {/* Register Tab */}
-            <TabsContent value="register">
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {language === "ar" ? "الاسم الكامل" : "Full Name"}
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder={language === "ar" ? "أدخل اسمك الكامل" : "Enter your full name"}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="remember"
+                checked={rememberMe}
+                onCheckedChange={checked => setRememberMe(checked as boolean)}
+              />
+              <label
+                htmlFor="remember"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {language === "ar" ? "تذكرني" : "Remember me"}
+              </label>
+            </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {language === "ar" ? "البريد الإلكتروني" : "Email"}
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder={language === "ar" ? "أدخل بريدك الإلكتروني" : "Enter your email"}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    dir="ltr"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {language === "ar" ? "كلمة المرور" : "Password"}
-                  </label>
-                  <Input
-                    type="password"
-                    placeholder={language === "ar" ? "أدخل كلمة المرور" : "Enter your password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    dir="ltr"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {language === "ar" ? "نوع الحساب" : "Account Type"}
-                  </label>
-                  <select
-                    value={userType}
-                    onChange={(e) => setUserType(e.target.value as "buyer" | "factory")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="buyer">
-                      {language === "ar" ? "مشتري" : "Buyer"}
-                    </option>
-                    <option value="factory">
-                      {language === "ar" ? "مصنع" : "Factory"}
-                    </option>
-                  </select>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (language === "ar" ? "جاري التحميل..." : "Loading...") : (language === "ar" ? "إنشاء حساب" : "Create Account")}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-
-          <div className="mt-6 text-center text-sm text-gray-600">
-            {language === "ar" ? "بالتسجيل، فإنك توافق على شروطنا وسياستنا" : "By registering, you agree to our terms and privacy policy"}
+            <Button
+              type="submit"
+              className="w-full h-11 bg-[#1e3a5f] hover:bg-[#152944] text-white font-bold transition-all shadow-md"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {language === "ar" ? "جاري الدخول..." : "Logging in..."}
+                </>
+              ) : (
+                <>
+                  {language === "ar" ? "دخول" : "Login"}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-4 border-t border-gray-100 pt-6">
+          <div className="text-sm text-center text-gray-500">
+            {language === "ar" ? "ليس لديك حساب؟" : "Don't have an account?"}{" "}
+            <Link
+              to="/register"
+              title="Register"
+              className="text-blue-600 hover:underline font-bold"
+            >
+              {language === "ar" ? "سجل الآن" : "Register now"}
+            </Link>
           </div>
         </CardContent>
       </Card>

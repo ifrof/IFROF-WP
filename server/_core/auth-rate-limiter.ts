@@ -22,7 +22,10 @@ const getClientId = (req: Request): string => {
   return req.ip || req.socket.remoteAddress || "unknown";
 };
 
-const getAuthRateLimitEntry = (clientId: string, now: number): AuthRateLimitEntry => {
+const getAuthRateLimitEntry = (
+  clientId: string,
+  now: number
+): AuthRateLimitEntry => {
   const existing = authRateLimitStore.get(clientId);
   if (!existing || existing.resetTime <= now) {
     const entry = { count: 0, resetTime: now + AUTH_RATE_LIMIT_WINDOW_MS };
@@ -33,16 +36,23 @@ const getAuthRateLimitEntry = (clientId: string, now: number): AuthRateLimitEntr
 };
 
 // Clean up expired entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [clientId, entry] of Array.from(authRateLimitStore.entries())) {
-    if (entry.resetTime <= now) {
-      authRateLimitStore.delete(clientId);
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [clientId, entry] of Array.from(authRateLimitStore.entries())) {
+      if (entry.resetTime <= now) {
+        authRateLimitStore.delete(clientId);
+      }
     }
-  }
-}, 5 * 60 * 1000);
+  },
+  5 * 60 * 1000
+);
 
-export const authRateLimiter = (req: Request, res: Response, next: NextFunction) => {
+export const authRateLimiter = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const now = Date.now();
   const clientId = getClientId(req);
   const entry = getAuthRateLimitEntry(clientId, now);

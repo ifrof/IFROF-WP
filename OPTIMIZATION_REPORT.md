@@ -8,12 +8,12 @@ The platform's performance has been significantly enhanced through a multi-layer
 
 To address initial load times, we implemented **Code Splitting** across the entire application. By utilizing React's `lazy` and `Suspense` features, the initial bundle size was reduced by over 60%, as pages and heavy components like the AI Chat are only loaded when required. This is complemented by aggressive **Cache-Control** policies, where static assets are marked as immutable with a one-year expiration, effectively eliminating redundant downloads for returning users.
 
-| Optimization Category | Implementation Detail | Expected Impact |
-| :--- | :--- | :--- |
-| **Compression** | Brotli + Gzip (Pre-compressed) | LCP reduction by ~30% |
-| **Code Splitting** | Route-based Lazy Loading | FCP reduction by ~45% |
-| **Font Loading** | WOFF2 Preloading | Zero Layout Shift (CLS) |
-| **Caching** | Immutable Headers + Redis | Sub-100ms API Latency |
+| Optimization Category | Implementation Detail          | Expected Impact         |
+| :-------------------- | :----------------------------- | :---------------------- |
+| **Compression**       | Brotli + Gzip (Pre-compressed) | LCP reduction by ~30%   |
+| **Code Splitting**    | Route-based Lazy Loading       | FCP reduction by ~45%   |
+| **Font Loading**      | WOFF2 Preloading               | Zero Layout Shift (CLS) |
+| **Caching**           | Immutable Headers + Redis      | Sub-100ms API Latency   |
 
 ## Rendering Strategy and SEO
 
@@ -27,12 +27,12 @@ The multilingual capabilities were also hardened for global SEO. We implemented 
 
 Recognizing the shift toward AI-powered search, the platform was optimized for extraction by Large Language Models (LLMs). We refined the **Robots.txt** configuration to explicitly permit access to specialized AI crawlers such as GPTBot and PerplexityBot. The content itself was restructured using semantic HTML5 elements, providing a clear hierarchy that AI models can easily parse and cite as a reliable source.
 
-| AI Crawler | Status | Purpose |
-| :--- | :--- | :--- |
-| **GPTBot** | Allowed | ChatGPT Knowledge Base |
-| **PerplexityBot** | Allowed | Real-time AI Search |
-| **Google-Extended** | Allowed | Google AI Overviews |
-| **ClaudeBot** | Allowed | Anthropic Knowledge Base |
+| AI Crawler          | Status  | Purpose                  |
+| :------------------ | :------ | :----------------------- |
+| **GPTBot**          | Allowed | ChatGPT Knowledge Base   |
+| **PerplexityBot**   | Allowed | Real-time AI Search      |
+| **Google-Extended** | Allowed | Google AI Overviews      |
+| **ClaudeBot**       | Allowed | Anthropic Knowledge Base |
 
 ## Infrastructure and Production Hardening
 

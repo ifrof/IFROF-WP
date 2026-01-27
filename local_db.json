@@ -2,28 +2,15 @@
   "users": [
     {
       "id": 1,
-      "email": "admin_deda4d38@ifrof.com",
-      "password": "$2b$10$vJ4ydOzWUZS13pCnKYzjYO8NU8FC7XOfcbfsBt8z9xIAGqUmvfvSG",
+      "email": "ifrof4@gmail.com",
+      "password": "$2b$10$cHTRSC.oeQFyzJUMBaFfbO.VIlZ3/vtER7ehERLsZJ5BqKYX24afi",
       "role": "admin",
-      "name": "System Administrator",
-      "openId": "b8ff95134183cfa4b23587eb41ccd00b9177000e9820e73ba6532afba810734a",
+      "name": "Hady Essam",
+      "openId": "admin_prod_2026",
       "loginMethod": "email",
-      "emailVerified": 1,
-      "createdAt": "2026-01-24T08:50:49.060Z",
-      "updatedAt": "2026-01-24T08:50:49.060Z",
-      "lastSignedIn": "2026-01-24T08:50:49.060Z"
-    },
-    {
-      "id": 2,
-      "email": "admin_c043a46c@ifrof.com",
-      "password": "gClH/CT16/2IXqzUoir2KKXzxVGWBRZp",
-      "role": "admin",
-      "name": "Admin Owner",
-      "loginMethod": "email",
-      "emailVerified": 1,
-      "createdAt": "2026-01-27T00:00:00.000Z",
-      "updatedAt": "2026-01-27T00:00:00.000Z",
-      "lastSignedIn": "2026-01-27T00:00:00.000Z"
+      "createdAt": "2026-01-27T10:49:31.253Z",
+      "updatedAt": "2026-01-27T10:49:31.253Z",
+      "lastSignedIn": "2026-01-27T10:49:31.253Z"
     }
   ],
   "factories": [],
@@ -46,5 +33,7 @@
   "productPortfolio": [],
   "services": [],
   "reviews": [],
-  "cartItems": []
+  "cartItems": [],
+  "sessions": [],
+  "buyerProfiles": []
 }

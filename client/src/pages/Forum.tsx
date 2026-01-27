@@ -1,14 +1,27 @@
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Plus, MessageCircle, Eye, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Link } from "wouter";
 
 export default function Forum() {
@@ -22,7 +35,11 @@ export default function Forum() {
     tags: "",
   });
 
-  const { data: posts, isLoading: postsLoading, refetch } = trpc.forum.getPosts.useQuery({
+  const {
+    data: posts,
+    isLoading: postsLoading,
+    refetch,
+  } = trpc.forum.getPosts.useQuery({
     limit: 20,
     offset: 0,
   });
@@ -55,9 +72,10 @@ export default function Forum() {
     }
   };
 
-  const filteredPosts = posts?.filter((post: any) =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredPosts =
+    posts?.filter((post: any) =>
+      post.title.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,13 +83,15 @@ export default function Forum() {
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl font-bold mb-4">Community Forum</h1>
-          <p className="text-xl text-blue-100 mb-8">Ask questions, share knowledge, and get answers from the community</p>
+          <p className="text-xl text-blue-100 mb-8">
+            Ask questions, share knowledge, and get answers from the community
+          </p>
 
           <div className="flex gap-2 max-w-2xl">
             <Input
               placeholder="Search questions..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="bg-white text-black"
             />
             {user && (
@@ -85,7 +105,9 @@ export default function Forum() {
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>Ask a Question</DialogTitle>
-                    <DialogDescription>Share your question with the community</DialogDescription>
+                    <DialogDescription>
+                      Share your question with the community
+                    </DialogDescription>
                   </DialogHeader>
 
                   <form onSubmit={handleSubmit} className="space-y-4">
@@ -94,7 +116,9 @@ export default function Forum() {
                       <Input
                         id="title"
                         value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        onChange={e =>
+                          setFormData({ ...formData, title: e.target.value })
+                        }
                         placeholder="What is your question?"
                         required
                       />
@@ -105,7 +129,9 @@ export default function Forum() {
                       <Textarea
                         id="content"
                         value={formData.content}
-                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                        onChange={e =>
+                          setFormData({ ...formData, content: e.target.value })
+                        }
                         placeholder="Provide more details about your question..."
                         rows={4}
                         required
@@ -118,7 +144,12 @@ export default function Forum() {
                         <Input
                           id="category"
                           value={formData.category}
-                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                          onChange={e =>
+                            setFormData({
+                              ...formData,
+                              category: e.target.value,
+                            })
+                          }
                           placeholder="e.g., Products, Shipping, etc."
                         />
                       </div>
@@ -127,17 +158,26 @@ export default function Forum() {
                         <Input
                           id="tags"
                           value={formData.tags}
-                          onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                          onChange={e =>
+                            setFormData({ ...formData, tags: e.target.value })
+                          }
                           placeholder="e.g., manufacturing, quality"
                         />
                       </div>
                     </div>
 
                     <div className="flex justify-end gap-2 pt-4">
-                      <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsOpen(false)}
+                      >
                         Cancel
                       </Button>
-                      <Button type="submit" disabled={createPostMutation.isPending}>
+                      <Button
+                        type="submit"
+                        disabled={createPostMutation.isPending}
+                      >
                         {createPostMutation.isPending ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -171,7 +211,8 @@ export default function Forum() {
                       <div className="flex-1">
                         <CardTitle className="text-lg">{post.title}</CardTitle>
                         <CardDescription>
-                          Asked by {post.authorId} on {new Date(post.createdAt).toLocaleDateString()}
+                          Asked by {post.authorId} on{" "}
+                          {new Date(post.createdAt).toLocaleDateString()}
                         </CardDescription>
                       </div>
                       <div className="flex gap-4 text-sm text-muted-foreground">
@@ -187,7 +228,9 @@ export default function Forum() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{post.content}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {post.content}
+                    </p>
                     <div className="flex gap-2 mt-3">
                       {post.category && (
                         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
@@ -209,7 +252,9 @@ export default function Forum() {
           <Card>
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground">
-                {searchQuery ? "No questions found matching your search" : "No questions yet. Be the first to ask!"}
+                {searchQuery
+                  ? "No questions found matching your search"
+                  : "No questions yet. Be the first to ask!"}
               </p>
             </CardContent>
           </Card>

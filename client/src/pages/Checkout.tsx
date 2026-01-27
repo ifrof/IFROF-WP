@@ -57,10 +57,13 @@ export default function Checkout() {
 
   const calculateTotal = () => {
     if (!cartItems) return 0;
-    return (cartItems as CartItemData[]).reduce((total: number, item: CartItemData) => {
-      const price = item.product?.basePrice || item.service?.basePrice || 0;
-      return total + price * item.cartItem.quantity;
-    }, 0);
+    return (cartItems as CartItemData[]).reduce(
+      (total: number, item: CartItemData) => {
+        const price = item.product?.basePrice || item.service?.basePrice || 0;
+        return total + price * item.cartItem.quantity;
+      },
+      0
+    );
   };
 
   const handleCheckout = async () => {
@@ -85,23 +88,27 @@ export default function Checkout() {
 
     try {
       // Group items by factory
-      const factoryGroups = (cartItems as CartItemData[]).reduce((groups: Record<number, CartItemData[]>, item: CartItemData) => {
-        const factoryId = item.factory?.id;
-        if (factoryId) {
-          if (!groups[factoryId]) {
-            groups[factoryId] = [];
+      const factoryGroups = (cartItems as CartItemData[]).reduce(
+        (groups: Record<number, CartItemData[]>, item: CartItemData) => {
+          const factoryId = item.factory?.id;
+          if (factoryId) {
+            if (!groups[factoryId]) {
+              groups[factoryId] = [];
+            }
+            groups[factoryId].push(item);
           }
-          groups[factoryId].push(item);
-        }
-        return groups;
-      }, {});
+          return groups;
+        },
+        {}
+      );
 
       // Create orders for each factory
       for (const [factoryId, items] of Object.entries(factoryGroups)) {
-        const orderItems = items.map((item) => ({
+        const orderItems = items.map(item => ({
           productId: item.product?.id || item.service?.id || 0,
           quantity: item.cartItem.quantity,
-          price: (item.product?.basePrice || item.service?.basePrice || 0) / 100,
+          price:
+            (item.product?.basePrice || item.service?.basePrice || 0) / 100,
         }));
 
         // Create checkout session
@@ -119,7 +126,7 @@ export default function Checkout() {
 
       // Clear cart after successful checkout
       await clearCartMutation.mutateAsync();
-      
+
       toast.success(t("checkout.success"));
       setLocation("/orders");
     } catch (error: any) {
@@ -183,8 +190,11 @@ export default function Checkout() {
                   <Input
                     id="fullName"
                     value={shippingAddress.fullName}
-                    onChange={(e) =>
-                      setShippingAddress({ ...shippingAddress, fullName: e.target.value })
+                    onChange={e =>
+                      setShippingAddress({
+                        ...shippingAddress,
+                        fullName: e.target.value,
+                      })
                     }
                     required
                   />
@@ -195,8 +205,11 @@ export default function Checkout() {
                   <Textarea
                     id="address"
                     value={shippingAddress.address}
-                    onChange={(e) =>
-                      setShippingAddress({ ...shippingAddress, address: e.target.value })
+                    onChange={e =>
+                      setShippingAddress({
+                        ...shippingAddress,
+                        address: e.target.value,
+                      })
                     }
                     required
                   />
@@ -208,8 +221,11 @@ export default function Checkout() {
                     <Input
                       id="city"
                       value={shippingAddress.city}
-                      onChange={(e) =>
-                        setShippingAddress({ ...shippingAddress, city: e.target.value })
+                      onChange={e =>
+                        setShippingAddress({
+                          ...shippingAddress,
+                          city: e.target.value,
+                        })
                       }
                       required
                     />
@@ -219,8 +235,11 @@ export default function Checkout() {
                     <Input
                       id="state"
                       value={shippingAddress.state}
-                      onChange={(e) =>
-                        setShippingAddress({ ...shippingAddress, state: e.target.value })
+                      onChange={e =>
+                        setShippingAddress({
+                          ...shippingAddress,
+                          state: e.target.value,
+                        })
                       }
                     />
                   </div>
@@ -232,8 +251,11 @@ export default function Checkout() {
                     <Input
                       id="zipCode"
                       value={shippingAddress.zipCode}
-                      onChange={(e) =>
-                        setShippingAddress({ ...shippingAddress, zipCode: e.target.value })
+                      onChange={e =>
+                        setShippingAddress({
+                          ...shippingAddress,
+                          zipCode: e.target.value,
+                        })
                       }
                     />
                   </div>
@@ -242,8 +264,11 @@ export default function Checkout() {
                     <Input
                       id="country"
                       value={shippingAddress.country}
-                      onChange={(e) =>
-                        setShippingAddress({ ...shippingAddress, country: e.target.value })
+                      onChange={e =>
+                        setShippingAddress({
+                          ...shippingAddress,
+                          country: e.target.value,
+                        })
                       }
                       required
                     />
@@ -256,8 +281,11 @@ export default function Checkout() {
                     id="phone"
                     type="tel"
                     value={shippingAddress.phone}
-                    onChange={(e) =>
-                      setShippingAddress({ ...shippingAddress, phone: e.target.value })
+                    onChange={e =>
+                      setShippingAddress({
+                        ...shippingAddress,
+                        phone: e.target.value,
+                      })
                     }
                     required
                   />
@@ -274,7 +302,7 @@ export default function Checkout() {
                 <Textarea
                   placeholder={t("checkout.orderNotesPlaceholder")}
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={e => setNotes(e.target.value)}
                   rows={4}
                 />
               </CardContent>
@@ -290,11 +318,14 @@ export default function Checkout() {
               <CardContent className="space-y-4">
                 {/* Items */}
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {(cartItems as CartItemData[]).map((item) => {
+                  {(cartItems as CartItemData[]).map(item => {
                     const itemData = item.product || item.service;
                     const price = itemData?.basePrice || 0;
                     return (
-                      <div key={item.cartItem.id} className="flex justify-between text-sm">
+                      <div
+                        key={item.cartItem.id}
+                        className="flex justify-between text-sm"
+                      >
                         <span>
                           {itemData?.name} × {item.cartItem.quantity}
                         </span>
@@ -308,12 +339,20 @@ export default function Checkout() {
 
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("checkout.subtotal")}:</span>
-                    <span className="font-medium">${(calculateTotal() / 100).toFixed(2)}</span>
+                    <span className="text-muted-foreground">
+                      {t("checkout.subtotal")}:
+                    </span>
+                    <span className="font-medium">
+                      ${(calculateTotal() / 100).toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("checkout.shipping")}:</span>
-                    <span className="font-medium">{t("checkout.calculatedLater")}</span>
+                    <span className="text-muted-foreground">
+                      {t("checkout.shipping")}:
+                    </span>
+                    <span className="font-medium">
+                      {t("checkout.calculatedLater")}
+                    </span>
                   </div>
                   <div className="border-t pt-2">
                     <div className="flex justify-between text-lg">
